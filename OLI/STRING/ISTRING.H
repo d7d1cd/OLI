@@ -2,12 +2,12 @@
      _____ __    _____
     |     |  |  |_   _|  C++ Object Library for IBM i
     |  |  |  |__ _| |_   File:   STRING/istring.h
-    |_____|_____|_____|  Author: S.N. Chebotarev
+    |_____|_____|_____|  Author: Sergey Chebotarev
 
 */
 
-#ifndef OLI_STRING_ISTRING_H_
-#define OLI_STRING_ISTRING_H_
+#ifndef OLI_STRING_ISTRING_H
+#define OLI_STRING_ISTRING_H
 
 #include "CORE/olidef.h"
 #include <cstddef>                                                              // size_t
@@ -158,5 +158,5 @@ extern template class IStringBase<IString>;
 
 OLI_NAMESPACE_END //////////////////////////////////////////////////////////////
 
-#endif // OLI_STRING_ISTRING_H_
+#endif // OLI_STRING_ISTRING_H
 

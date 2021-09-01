@@ -2,7 +2,7 @@
      _____ __    _____
     |     |  |  |_   _|  C++ Object Library for IBM i
     |  |  |  |__ _| |_   File:   STRING/istring$.cpp
-    |_____|_____|_____|  Author: S.N. Chebotarev
+    |_____|_____|_____|  Author: Sergey Chebotarev
 
 */
 
@@ -24,7 +24,7 @@ ConstReverseIterator IStringBaseConst<Heir>::Rbegin() const
 
 
 
-// ИТЕРАТОРЫ: ОБРАТНЫЙ ИТЕРАТОР НА НАЧАЛО СТРОКИ
+// ИТЕРАТОРЫ: ОБРАТНЫЙ ИТЕРАТОР НА КОНЕЦ СТРОКИ
 template <typename Heir>
 ConstReverseIterator IStringBaseConst<Heir>::Rend() const
 {
