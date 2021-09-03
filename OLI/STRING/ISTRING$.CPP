@@ -18,6 +18,29 @@ OLI_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////
 //***** КОНСТАНТНАЯ БАЗА СТРОКИ ****************************************************************************************
 
 template <typename Heir>
+istring_base_const<Heir>::istring_base_const(size_type capacity)
+                        : m_capacity(capacity)
+{
+}
+
+
+template <typename Heir>
+typename istring_base_const<Heir>::const_iterator
+istring_base_const<Heir>::begin() const
+{
+  return data();
+}
+
+
+template <typename Heir>
+typename istring_base_const<Heir>::const_iterator
+istring_base_const<Heir>::end() const
+{
+  return data() + m_capacity;
+}
+
+
+template <typename Heir>
 typename istring_base_const<Heir>::const_reverse_iterator
 istring_base_const<Heir>::rbegin() const
 {
@@ -33,40 +56,33 @@ istring_base_const<Heir>::rend() const
 }
 
 
-//template <typename Heir>
-//size_t istring_base_const<Heir>::Capacity() const
-//{
-//  return p_End() - p_Begin();
-//}
-
-
-//template <typename Heir>
-//size_t istring_base_const<Heir>::Length() const
-//{
-//  size_t len = Capacity();
-//
-//  for (auto it = Rbegin(), rend = Rend(); it != rend; --len)
-//    if (*it++ != BLANK) break;
-//
-//  return len;
-//}
-
-
 template <typename Heir>
-typename istring_base_const<Heir>::const_iterator
-istring_base_const<Heir>::begin() const
+typename istring_base_const<Heir>::size_type
+istring_base_const<Heir>::capacity() const
 {
-  return static_cast<const Heir*>(this)->begin();
+  return m_capacity;
 }
 
 
 template <typename Heir>
-typename istring_base_const<Heir>::const_iterator
-istring_base_const<Heir>::end() const
+typename istring_base_const<Heir>::size_type
+istring_base_const<Heir>::length() const
 {
-  return static_cast<const Heir*>(this)->end();
+  auto len = m_capacity;
+
+  for (auto it = rbegin(), end = rend(); it != end; --len)
+    if (*it++ != BLANK) break;
+
+  return len;
 }
 
+
+template <typename Heir>
+typename istring_base_const<Heir>::const_pointer
+istring_base_const<Heir>::data() const
+{
+  return static_cast<const Heir*>(this)->data();
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -74,6 +90,37 @@ istring_base_const<Heir>::end() const
 
 
 //***** БАЗА СТРОКИ ****************************************************************************************************
+
+template <typename Heir>
+istring_base<Heir>::istring_base(size_type capacity)
+                  : istring_base_const<Heir>(capacity)
+{
+}
+
+
+template <typename Heir>
+Heir& istring_base<Heir>::operator =(const char* rhs)
+{
+  copy_from(rhs, std::strlen(rhs));
+  return *static_cast<Heir*>(this);
+}
+
+
+template <typename Heir>
+typename istring_base<Heir>::iterator
+istring_base<Heir>::begin()
+{
+  return data();
+}
+
+
+template <typename Heir>
+typename istring_base<Heir>::iterator
+istring_base<Heir>::end()
+{
+  return begin() + capacity();
+}
+
 
 template <typename Heir>
 typename istring_base<Heir>::reverse_iterator
@@ -91,34 +138,18 @@ istring_base<Heir>::rend()
 }
 
 
-//template <typename Heir>
-//Heir& istring_base<Heir>::operator =(const char* rhs)
-//{
-//  p_CopyFrom(rhs, std::strlen(rhs));
-//  return *static_cast<Heir*>(this);
-//}
-
-
 template <typename Heir>
-void istring_base<Heir>::Clear()
+void istring_base<Heir>::clear()
 {
   fill_with(begin(), this->BLANK);
 }
 
 
 template <typename Heir>
-typename istring_base<Heir>::iterator
-istring_base<Heir>::begin()
+typename istring_base<Heir>::pointer
+istring_base<Heir>::data()
 {
-  return static_cast<Heir*>(this)->begin();
-}
-
-
-template <typename Heir>
-typename istring_base<Heir>::iterator
-istring_base<Heir>::end()
-{
-  return static_cast<Heir*>(this)->end();
+  return static_cast<Heir*>(this)->data();
 }
 
 
@@ -129,13 +160,13 @@ void istring_base<Heir>::fill_with(iterator whence, value_type agg)
 }
 
 
-//template <typename Heir>
-//void istring_base<Heir>::p_CopyFrom(ConstIterator start, const size_t size)
-//{
-//  size_t less = std::min(size, this->Capacity());
-//  std::copy(start, start + less, p_Begin());
-//  p_FillWith(p_Begin() + less, this->BLANK);
-//}
+template <typename Heir>
+void istring_base<Heir>::copy_from(const_iterator start, const size_type size)
+{
+  size_type less = std::min(size, capacity());
+  std::copy(start, start + less, begin());
+  fill_with(begin() + less, this->BLANK);
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -144,11 +175,11 @@ void istring_base<Heir>::fill_with(iterator whence, value_type agg)
 
 //***** РЕАЛИЗАЦИЯ СТРОКИ **********************************************************************************************
 
-istring::istring(size_t capacity)                                                                                       // SPECIAL MEMBER FUNCTIONS
-       : m_data(new value_type[capacity]),
-         m_capacity(capacity)
+istring::istring(size_type capacity)
+       : istring_base<istring>(capacity),
+         m_data(new value_type[capacity])
 {
-  Clear();
+  clear();
 }
 
 
@@ -158,15 +189,16 @@ istring::~istring()
 }
 
 
+istring::pointer istring::data()
+{
+  return m_data;
+}
 
-istring::const_iterator istring::begin() const { return m_data; }
-istring::const_iterator istring::end()   const { return m_data + m_capacity; }
 
-istring::iterator istring::begin()       { return m_data; }
-istring::iterator istring::end()         { return m_data + m_capacity; }
-
-size_t istring::capacity() const        { return m_capacity; }
-
+istring::const_pointer istring::data() const
+{
+  return m_data;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
