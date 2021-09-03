@@ -10,7 +10,7 @@
 #define OLI_STRING_ISTRING_H
 
 #include "CORE/olidef.h"
-#include <cstddef>                                                                                                      // size_t
+#include <cstddef>                                                                                                      // std::size_t, std::ptrdiff_t
 #include <iterator>                                                                                                     // std::reverse_iterator
 
 OLI_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,6 +25,8 @@ class istring_base_const
 {
   public:                                                                                                               // MEMBER TYPES
   typedef char value_type;                                                                                              // Тип символа строки
+  typedef std::size_t size_type;                                                                                        // Размер
+  typedef std::ptrdiff_t difference_type;                                                                               //
   typedef const value_type* const_pointer;                                                                              // Указатель на константу
   typedef const_pointer const_iterator;                                                                                 // Итератор на константу
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;                                                 // Обратный итератор на константу
@@ -40,7 +42,6 @@ class istring_base_const
 
 
   public:                                                                                                               // CAPACITY
-//  size_t Capacity() const;                                                                                            // Емкость строки
 //  size_t Length() const;                                                                                              // Длина строки
 
 
@@ -94,7 +95,7 @@ class istring_base : public istring_base_const<Heir>
 class istring : public istring_base<istring>
 {
   public:                                                                                                               // SPECIAL MEMBER FUNCTIONS
-  explicit istring(const size_t capacity);                                                                              // Создание пустой строки
+  explicit istring(size_t capacity);                                                                                    // Создание пустой строки
   using istring_base<istring>::operator=;                                                                               // Операторы присваивания из базовго класса
   virtual ~istring();                                                                                                   // Деструктор
 
@@ -106,9 +107,13 @@ class istring : public istring_base<istring>
   iterator end();                                                                                                       // Итератор на конец строки
 
 
+  public:                                                                                                               // CAPACITY
+  size_t capacity() const;                                                                                              // Емкость строки
+
+
   private:                                                                                                              // DATA MEMBERS
   pointer m_data;                                                                                                       // Начало хранилища строки
-  size_t  m_capacity;                                                                                                   // Емкость строки
+  const size_t m_capacity;                                                                                              // Емкость строки
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

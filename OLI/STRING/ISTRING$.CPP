@@ -144,7 +144,7 @@ void istring_base<Heir>::fill_with(iterator whence, value_type agg)
 
 //***** РЕАЛИЗАЦИЯ СТРОКИ **********************************************************************************************
 
-istring::istring(const size_t capacity)                                                                                 // SPECIAL MEMBER FUNCTIONS
+istring::istring(size_t capacity)                                                                                       // SPECIAL MEMBER FUNCTIONS
        : m_data(new value_type[capacity]),
          m_capacity(capacity)
 {
@@ -164,6 +164,9 @@ istring::const_iterator istring::end()   const { return m_data + m_capacity; }
 
 istring::iterator istring::begin()       { return m_data; }
 istring::iterator istring::end()         { return m_data + m_capacity; }
+
+size_t istring::capacity() const        { return m_capacity; }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
