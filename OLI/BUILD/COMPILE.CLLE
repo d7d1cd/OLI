@@ -51,12 +51,13 @@ PGM PARM(&@SRCLIB &@DSTLIB)
 
 
   /* СБОРКА БИБЛИОТЕКИ ********************************************************/
-  CHGLIBL    LIBL(*NONE)
+  CHGLIBL    LIBL(QTEMP)
   SNDPGMMSG  MSG('BEGIN MONITORING') KEYVAR(&LOWKEY)
 
   CRTSRVPGM  SRVPGM(&DSTLIB/OLI) ARGOPT(*YES) +
-             EXPORT(*SRCFILE) SRCFILE(&SRCLIB/BUILD) SRCMBR(EXPORT) +
-             MODULE(QTEMP/ISTRING)
+             MODULE(ISTRING) +
+             EXPORT(*ALL)
+           /*EXPORT(*SRCFILE) SRCFILE(&SRCLIB/BUILD) SRCMBR(EXPORT) */
   MONMSG     MSGID(CPF0000) EXEC(GOTO BADBUILD)
 
 
