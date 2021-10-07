@@ -38,11 +38,11 @@
 #include "gtest/gtest.h"
 
 // The following lines pull in the real gtest *.cpp files.
-#include "gsource/gtest$.cpp"
-#include "gsource/death_tst$.cpp"
-#include "gsource/filepath$.cpp"
-#include "gsource/port$.cpp"
-#include "gsource/printers$.cpp"
-#include "gsource/test_part$.cpp"
-#include "gsource/typed_tst$.cpp"
+#include "gtest/gtest$.cpp"
+#include "gtest/death_tst$.cpp"
+#include "gtest/filepath$.cpp"
+#include "gtest/port$.cpp"
+#include "gtest/printers$.cpp"
+#include "gtest/test_part$.cpp"
+#include "gtest/typed_tst$.cpp"
 

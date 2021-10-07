@@ -131,7 +131,7 @@
 # include <sys/types.h>  // NOLINT
 #endif
 
-#include "gsource/intern_inl.h"
+#include "gtest/intern_inl.h"
 
 #if GTEST_OS_WINDOWS
 # define vsnprintf _vsnprintf

@@ -71,7 +71,7 @@
 #include "gtest/message.h"
 #include "internal/internal.h"
 #include "internal/string.h"
-#include "gsource/intern_inl.h"
+#include "gtest/intern_inl.h"
 
 namespace testing {
 namespace internal {

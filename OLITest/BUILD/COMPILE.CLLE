@@ -28,7 +28,7 @@ PGM PARM(&@SRCLIB &@SRCFILE &@PGMLIB &@FILLIB)
   /* ВНУТРЕННИЕ ПЕРЕМЕННЫЕ ****************************************************/
   DCL        VAR(&TAG)        TYPE(*LGL)           VALUE('0')
   DCL        VAR(&SRCLIB)     TYPE(*CHAR) LEN(10)  VALUE(CSNSRC)                /* Библиотека с файлом исходного кода */
-  DCL        VAR(&SRCFILE)    TYPE(*CHAR) LEN(10)  VALUE(GSOURCE)               /* Файл исходного кода */
+  DCL        VAR(&SRCFILE)    TYPE(*CHAR) LEN(10)  VALUE(GTEST)                 /* Файл исходного кода */
   DCL        VAR(&PGMLIB)     TYPE(*CHAR) LEN(10)  VALUE(CSNTST)                /* Библиотека для размещения собранных программ */
   DCL        VAR(&FILLIB)     TYPE(*CHAR) LEN(10)  VALUE(CSNTST)                /* Библиотека для размещения собранных файлов */
   DCL        VAR(&LOWKEY)     TYPE(*CHAR) LEN(4)
@@ -49,7 +49,7 @@ PGM PARM(&@SRCLIB &@SRCFILE &@PGMLIB &@FILLIB)
   /* КОМПИЛЯЦИЯ МОДУЛЕЙ *******************************************************/
   CHGLIBL    LIBL(&SRCLIB)                                                      /* Либл для компиляции модулей */
 
-  CRTCPPMOD  MODULE(QTEMP/GTEST) SRCFILE(&SRCLIB/&SRCFILE) SRCMBR(ALL$) +
+  CRTCPPMOD  MODULE(QTEMP/GTEST$) SRCFILE(&SRCLIB/&SRCFILE) SRCMBR(ALL$) +
              DBGVIEW(*ALL) OPTION(*EVENTF *SHOWUSR) LANGLVL(*EXTENDED0X) +
              PFROPT(*STRDONLY) CHECKOUT(*NONE) +
              DEFINE('')
@@ -68,7 +68,7 @@ PGM PARM(&@SRCLIB &@SRCFILE &@PGMLIB &@FILLIB)
   SNDPGMMSG  MSG('BEGIN MONITORING') KEYVAR(&LOWKEY)
 
   CRTPGM     PGM(&PGMLIB/TEST) +
-             MODULE(TEST GTEST)
+             MODULE(TEST GTEST$)
   MONMSG     MSGID(CPF0000) EXEC(GOTO BADBUILD)
 
 
