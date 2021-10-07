@@ -32,7 +32,7 @@
 // This header file declares classes and functions used internally by
 // Google Test.  They are subject to change without notice.
 //
-// This file is #included in gtest/internal/gtest-internal.h.
+// This file is #included in gtest/gtest/gtest-internal.h.
 // Do not include this header file separately!
 
 // GOOGLETEST_CM0001 DO NOT DELETE
@@ -40,7 +40,7 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_FILEPATH_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_FILEPATH_H_
 
-#include "internal/string.h"
+#include "gtest/string.h"
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)

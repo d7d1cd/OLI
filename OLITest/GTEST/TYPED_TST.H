@@ -170,8 +170,8 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
 
 #endif  // 0
 
-#include "internal/port.h"
-#include "internal/type_util.h"
+#include "gtest/port.h"
+#include "gtest/type_util.h"
 
 // Implements typed tests.
 

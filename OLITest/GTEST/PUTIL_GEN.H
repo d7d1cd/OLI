@@ -47,8 +47,8 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
 
-#include "internal/param_util.h"
-#include "internal/port.h"
+#include "gtest/param_util.h"
+#include "gtest/port.h"
 
 namespace testing {
 

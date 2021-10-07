@@ -45,7 +45,7 @@
 #include <string>
 #include <vector>
 
-#include "internal/port.h"
+#include "gtest/port.h"
 
 #if GTEST_CAN_STREAM_RESULTS_
 # include <arpa/inet.h>  // NOLINT

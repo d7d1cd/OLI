@@ -105,8 +105,8 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "internal/port.h"
-#include "internal/internal.h"
+#include "gtest/port.h"
+#include "gtest/internal.h"
 
 #if GTEST_HAS_STD_TUPLE_
 # include <tuple>

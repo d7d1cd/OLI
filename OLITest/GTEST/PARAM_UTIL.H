@@ -42,9 +42,9 @@
 #include <utility>
 #include <vector>
 
-#include "internal/internal.h"
-#include "internal/linked_ptr.h"
-#include "internal/port.h"
+#include "gtest/internal.h"
+#include "gtest/linked_ptr.h"
+#include "gtest/port.h"
 #include "gtest/printers.h"
 
 namespace testing {

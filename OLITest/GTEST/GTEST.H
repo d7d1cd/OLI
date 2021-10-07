@@ -56,8 +56,8 @@
 #include <ostream>
 #include <vector>
 
-#include "internal/internal.h"
-#include "internal/string.h"
+#include "gtest/internal.h"
+#include "gtest/string.h"
 #include "gtest/death_tst.h"
 #include "gtest/message.h"
 #include "gtest/param_test.h"

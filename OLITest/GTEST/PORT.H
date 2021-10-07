@@ -287,7 +287,7 @@
 #include <utility>
 #include <vector>  // NOLINT
 
-#include "internal/port_arch.h"
+#include "gtest/port_arch.h"
 
 #if !defined(GTEST_DEV_EMAIL_)
 # define GTEST_DEV_EMAIL_ "googletestframework@@googlegroups.com"
@@ -733,7 +733,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # endif  // GTEST_TUPLE_NAMESPACE_
 
 # if GTEST_USE_OWN_TR1_TUPLE
-#  include "internal/tuple.h"  // IWYU pragma: export  // NOLINT
+#  include "gtest/tuple.h"  // IWYU pragma: export  // NOLINT
 # elif GTEST_OS_SYMBIAN
 
 // On Symbian, BOOST_HAS_TR1_TUPLE causes Boost's TR1 tuple library to
@@ -979,7 +979,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // GTEST_API_ qualifies all symbols that must be exported. The definitions below
 // are guarded by #ifndef to give embedders a chance to define GTEST_API_ in
-// gtest/internal/custom/gtest-port.h
+// gtest/gtest/custom/gtest-port.h
 #ifndef GTEST_API_
 
 #ifdef _MSC_VER

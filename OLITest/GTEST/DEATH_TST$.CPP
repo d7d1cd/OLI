@@ -31,7 +31,7 @@
 // This file implements death tests.
 
 #include "gtest/death_tst.h"
-#include "internal/port.h"
+#include "gtest/port.h"
 
 #if GTEST_HAS_DEATH_TEST
 
@@ -71,7 +71,7 @@
 #endif  // GTEST_HAS_DEATH_TEST
 
 #include "gtest/message.h"
-#include "internal/string.h"
+#include "gtest/string.h"
 #include "gtest/intern_inl.h"
 
 namespace testing {
@@ -80,8 +80,8 @@ namespace testing {
 
 // The default death test style.
 //
-// This is defined in internal/gtest-port.h as "fast", but can be overridden by
-// a definition in internal/custom/gtest-port.h. The recommended value, which is
+// This is defined in gtest/gtest-port.h as "fast", but can be overridden by
+// a definition in gtest/custom/gtest-port.h. The recommended value, which is
 // used internally at Google, is "threadsafe".
 static const char kDefaultDeathTestStyle[] = GTEST_DEFAULT_DEATH_TEST_STYLE;
 

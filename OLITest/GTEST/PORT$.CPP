@@ -28,7 +28,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "internal/port.h"
+#include "gtest/port.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -69,8 +69,8 @@
 
 #include "gtest/spi.h"
 #include "gtest/message.h"
-#include "internal/internal.h"
-#include "internal/string.h"
+#include "gtest/internal.h"
+#include "gtest/string.h"
 #include "gtest/intern_inl.h"
 
 namespace testing {

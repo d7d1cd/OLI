@@ -47,7 +47,7 @@
 #include <cwchar>
 #include <ostream>  // NOLINT
 #include <string>
-#include "internal/port.h"
+#include "gtest/port.h"
 #include "gtest/intern_inl.h"
 
 namespace testing {

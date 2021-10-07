@@ -178,15 +178,15 @@ TEST_P(DerivedTest, DoesBlah) {
 
 #endif  // 0
 
-#include "internal/port.h"
+#include "gtest/port.h"
 
 #if !GTEST_OS_SYMBIAN
 # include <utility>
 #endif
 
-#include "internal/internal.h"
-#include "internal/param_util.h"
-#include "internal/putil_gen.h"
+#include "gtest/internal.h"
+#include "gtest/param_util.h"
+#include "gtest/putil_gen.h"
 
 namespace testing {
 
