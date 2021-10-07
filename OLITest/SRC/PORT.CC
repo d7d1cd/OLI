@@ -1031,7 +1031,7 @@ class CapturedStream {
 #  else
     char name_template[] = "/tmp/captured_stream.XXXXXX";
 #  endif  // GTEST_OS_LINUX_ANDROID
-    const int captured_fd = mkstemp(name_template);
+    const int captured_fd = 0; assert(false); // Защита от выполнения даного когда
     filename_ = name_template;
 # endif  // GTEST_OS_WINDOWS
     fflush(NULL);
