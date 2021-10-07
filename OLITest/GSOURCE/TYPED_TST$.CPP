@@ -28,7 +28,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "gtest/typed_test.h"
+#include "gtest/typed_tst.h"
 
 #include "gtest/gtest.h"
 

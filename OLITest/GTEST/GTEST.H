@@ -58,13 +58,13 @@
 
 #include "internal/internal.h"
 #include "internal/string.h"
-#include "gtest/death_test.h"
+#include "gtest/death_tst.h"
 #include "gtest/message.h"
 #include "gtest/param_test.h"
 #include "gtest/printers.h"
 #include "gtest/prod.h"
 #include "gtest/test_part.h"
-#include "gtest/typed_test.h"
+#include "gtest/typed_tst.h"
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)

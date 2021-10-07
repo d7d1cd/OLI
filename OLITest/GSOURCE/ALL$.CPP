@@ -1,4 +1,4 @@
-// Copyright 2015, Google Inc.
+// Copyright 2008, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,23 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Injection point for custom user configurations. See README for details
-//
-// ** Custom implementation starts here **
 
-#ifndef GTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_PORT_H_
-#define GTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_PORT_H_
+//
+// Google C++ Testing and Mocking Framework (Google Test)
+//
+// Sometimes it's desirable to build Google Test by compiling a single file.
+// This file serves this purpose.
 
-#endif  // GTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_PORT_H_
+// This line ensures that gtest.h can be compiled on its own, even
+// when it's fused.
+#include "gtest/gtest.h"
+
+// The following lines pull in the real gtest *.cpp files.
+#include "gsource/gtest$.cpp"
+#include "gsource/death_tst$.cpp"
+#include "gsource/filepath$.cpp"
+#include "gsource/port$.cpp"
+#include "gsource/printers$.cpp"
+#include "gsource/test_part$.cpp"
+#include "gsource/typed_tst$.cpp"
 

@@ -30,9 +30,8 @@
 //
 // This file implements death tests.
 
-#include "gtest/death_test.h"
+#include "gtest/death_tst.h"
 #include "internal/port.h"
-#include "custom/gtest.h"
 
 #if GTEST_HAS_DEATH_TEST
 
@@ -73,7 +72,7 @@
 
 #include "gtest/message.h"
 #include "internal/string.h"
-#include "src/intern_inl.h"
+#include "gsource/intern_inl.h"
 
 namespace testing {
 

@@ -48,7 +48,7 @@
 #include <ostream>  // NOLINT
 #include <string>
 #include "internal/port.h"
-#include "src/intern_inl.h"
+#include "gsource/intern_inl.h"
 
 namespace testing {
 
