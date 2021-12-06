@@ -1,1 +1,1 @@
-# Object library for IBM i
+# Object libraries for IBM i

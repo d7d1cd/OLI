@@ -1,36 +1,25 @@
 /******************************************************************************/
 /*                                                                            */
-/*  СБОРЩИК ОБЪЕКТОВ                                                          */
-/*                                                                            */
-/*  ОПИСАНИЕ                                                                  */
-/*  Запуск сборщика рекомендуется выполнять в пакетном задании, так как он    */
-/*  строит свой список библиотек                                              */
-/*                                                                            */
-/*  ПАРАМЕТРЫ                                                                 */
-/*  @SRCLIB  - библиотека, где расположен файл исходного кода;                */
-/*  @SRCFILE - имя файла исходного кода;                                      */
-/*  @PGMLIB  - библиотека, куда будут помещены собранные программы;           */
-/*  @FILLIB  - библиотека, куда будут помещены собранные файлы.               */
-/*                                                                            */
+/*  @SRCLIB  - библиотека, где расположены файлы исходного кода;              */
+/*  @DSTLIB  - библиотека, куда будут помещены собранные объекты.             */
 /*                                                                            */
 /******************************************************************************/
 
-PGM PARM(&@SRCLIB &@SRCFILE &@PGMLIB &@FILLIB)
+PGM PARM(&@SRCLIB &@DSTLIB)
 
   /* ВХОДНЫЕ ПАРАМЕТРЫ ********************************************************/
   DCL        VAR(&@SRCLIB)    TYPE(*CHAR) LEN(10)
-  DCL        VAR(&@SRCFILE)   TYPE(*CHAR) LEN(10)
-  DCL        VAR(&@PGMLIB)    TYPE(*CHAR) LEN(10)
-  DCL        VAR(&@FILLIB)    TYPE(*CHAR) LEN(10)
+  DCL        VAR(&@DSTLIB)    TYPE(*CHAR) LEN(10)
 
 
 
   /* ВНУТРЕННИЕ ПЕРЕМЕННЫЕ ****************************************************/
   DCL        VAR(&TAG)        TYPE(*LGL)           VALUE('0')
   DCL        VAR(&SRCLIB)     TYPE(*CHAR) LEN(10)  VALUE(CSNSRC)                /* Библиотека с файлом исходного кода */
-  DCL        VAR(&SRCFILE)    TYPE(*CHAR) LEN(10)  VALUE(GTEST)                 /* Файл исходного кода */
-  DCL        VAR(&PGMLIB)     TYPE(*CHAR) LEN(10)  VALUE(CSNTST)                /* Библиотека для размещения собранных программ */
-  DCL        VAR(&FILLIB)     TYPE(*CHAR) LEN(10)  VALUE(CSNTST)                /* Библиотека для размещения собранных файлов */
+  DCL        VAR(&DSTLIB)     TYPE(*CHAR) LEN(10)  VALUE(OLI)                   /* Библиотека для размещения собранных объектов */
+  DCL        VAR(&TMPLIB)     TYPE(*CHAR) LEN(10)  VALUE(QTEMP)                 /* Временная библиотека */
+  DCL        VAR(&DBGMOD)     TYPE(*CHAR) LEN(10)  VALUE(*NONE)                 /* Режим отладки */
+  DCL        VAR(&OPTMOD)     TYPE(*INT)  LEN(2)                                /* Уровень оптимизации */
   DCL        VAR(&LOWKEY)     TYPE(*CHAR) LEN(4)
   DCL        VAR(&MSGKEY)     TYPE(*CHAR) LEN(4)
   DCL        VAR(&HIKEY)      TYPE(*CHAR) LEN(4)
@@ -46,29 +35,67 @@ PGM PARM(&@SRCLIB &@SRCFILE &@PGMLIB &@FILLIB)
 
 
 
+  /* ОЧИСТКА ******************************************************************/
+  DLTSRVPGM  SRVPGM(&DSTLIB/GTEST)
+  MONMSG     MSGID(CPF0000)
+
+
+
+
   /* КОМПИЛЯЦИЯ МОДУЛЕЙ *******************************************************/
-  CHGLIBL    LIBL(&SRCLIB)                                                      /* Либл для компиляции модулей */
+  CHGLIBL    LIBL(&SRCLIB)
 
-  CRTCPPMOD  MODULE(QTEMP/GTEST$) SRCFILE(&SRCLIB/&SRCFILE) SRCMBR(ALL$) +
-             DBGVIEW(*ALL) OPTION(*EVENTF *SHOWUSR) LANGLVL(*EXTENDED0X) +
-             PFROPT(*STRDONLY) CHECKOUT(*NONE) +
-             DEFINE('')
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000) EXEC(GOTO BADMOD)
+  CRTCPPMOD  MODULE(&TMPLIB/GTEST) SRCFILE(&SRCLIB/GTEST) SRCMBR(GTEST$) +
+             DBGVIEW(&DBGMOD) OPTIMIZE(&OPTMOD) +
+             OPTION(*EVENTF) PFROPT(*STRDONLY) LANGLVL(*EXTENDED0X) +
+             CHECKOUT(*COND *PARM *REACH *UNUSED)
+  MONMSG     MSGID(CPF0000) EXEC(GOTO BADMOD)
 
-  CRTCPPMOD  MODULE(QTEMP/TEST) SRCFILE(&SRCLIB/TEST) SRCMBR(TEST) +
-             DBGVIEW(*ALL) OPTION(*EVENTF *SHOWUSR) LANGLVL(*EXTENDED0X) +
-             PFROPT(*STRDONLY) CHECKOUT(*COND *PARM *REACH *UNUSED)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000) EXEC(GOTO BADMOD)
+  CRTCPPMOD  MODULE(&TMPLIB/DEATH_TST) SRCFILE(&SRCLIB/GTEST) SRCMBR(DEATH_TST$) +
+             DBGVIEW(&DBGMOD) OPTIMIZE(&OPTMOD) +
+             OPTION(*EVENTF) PFROPT(*STRDONLY) LANGLVL(*EXTENDED0X) +
+             CHECKOUT(*COND *PARM *REACH *UNUSED)
+  MONMSG     MSGID(CPF0000) EXEC(GOTO BADMOD)
+
+  CRTCPPMOD  MODULE(&TMPLIB/FILEPATH) SRCFILE(&SRCLIB/GTEST) SRCMBR(FILEPATH$) +
+             DBGVIEW(&DBGMOD) OPTIMIZE(&OPTMOD) +
+             OPTION(*EVENTF) PFROPT(*STRDONLY) LANGLVL(*EXTENDED0X) +
+             CHECKOUT(*COND *PARM *REACH *UNUSED)
+  MONMSG     MSGID(CPF0000) EXEC(GOTO BADMOD)
+
+  CRTCPPMOD  MODULE(&TMPLIB/PORT) SRCFILE(&SRCLIB/GTEST) SRCMBR(PORT$) +
+             DBGVIEW(&DBGMOD) OPTIMIZE(&OPTMOD) +
+             OPTION(*EVENTF) PFROPT(*STRDONLY) LANGLVL(*EXTENDED0X) +
+             CHECKOUT(*COND *PARM *REACH *UNUSED)
+  MONMSG     MSGID(CPF0000) EXEC(GOTO BADMOD)
+
+  CRTCPPMOD  MODULE(&TMPLIB/PRINTERS) SRCFILE(&SRCLIB/GTEST) SRCMBR(PRINTERS$) +
+             DBGVIEW(&DBGMOD) OPTIMIZE(&OPTMOD) +
+             OPTION(*EVENTF) PFROPT(*STRDONLY) LANGLVL(*EXTENDED0X) +
+             CHECKOUT(*COND *PARM *REACH *UNUSED)
+  MONMSG     MSGID(CPF0000) EXEC(GOTO BADMOD)
+
+  CRTCPPMOD  MODULE(&TMPLIB/TEST_PART) SRCFILE(&SRCLIB/GTEST) SRCMBR(TEST_PART$) +
+             DBGVIEW(&DBGMOD) OPTIMIZE(&OPTMOD) +
+             OPTION(*EVENTF) PFROPT(*STRDONLY) LANGLVL(*EXTENDED0X) +
+             CHECKOUT(*COND *PARM *REACH *UNUSED)
+  MONMSG     MSGID(CPF0000) EXEC(GOTO BADMOD)
+
+  CRTCPPMOD  MODULE(&TMPLIB/TYPED_TST) SRCFILE(&SRCLIB/GTEST) SRCMBR(TYPED_TST$) +
+             DBGVIEW(&DBGMOD) OPTIMIZE(&OPTMOD) +
+             OPTION(*EVENTF) PFROPT(*STRDONLY) LANGLVL(*EXTENDED0X) +
+             CHECKOUT(*COND *PARM *REACH *UNUSED)
+  MONMSG     MSGID(CPF0000) EXEC(GOTO BADMOD)
 
 
 
 
   /* СБОРКА ПРОГРАММ **********************************************************/
-  CHGLIBL    LIBL(QTEMP)
+  CHGLIBL    LIBL(&TMPLIB)
   SNDPGMMSG  MSG('BEGIN MONITORING') KEYVAR(&LOWKEY)
 
-  CRTPGM     PGM(&PGMLIB/TEST) +
-             MODULE(TEST GTEST$)
+  CRTSRVPGM  SRVPGM(&DSTLIB/GTEST) EXPORT(*ALL) +
+             MODULE(GTEST DEATH_TST FILEPATH PORT PRINTERS TEST_PART TYPED_TST)
   MONMSG     MSGID(CPF0000) EXEC(GOTO BADBUILD)
 
 
@@ -79,23 +106,6 @@ PGM PARM(&@SRCLIB &@SRCFILE &@PGMLIB &@FILLIB)
   SNDPGMMSG  MSG('BEGIN MONITORING') KEYVAR(&LOWKEY)
   SNDPGMMSG  MSGID(CPA2401) MSGF(QCPFMSG) MSGTYPE(*INFO) +
              MSGDTA('Done successful!')
-  GOTO       FINALLY
-
-  BADFILE:                                                                      /* Не удалось выполнить компиляцию файла */
-  SNDPGMMSG  MSG('BEGIN MONITORING') KEYVAR(&LOWKEY)
-  SNDPGMMSG  MSGID(CPA2401) MSGF(QCPFMSG) MSGTYPE(*DIAG) +
-             MSGDTA('File compilation failed...')
-  GOTO       FINALLY
-
-  BADSQLPRE:                                                                    /* Не удалось выполнить SQL препроцессинг */
-  SNDPGMMSG  MSG('BEGIN MONITORING') KEYVAR(&LOWKEY)
-  SNDPGMMSG  MSGID(CPA2401) MSGF(QCPFMSG) MSGTYPE(*DIAG) +
-             MSGDTA('SQL preprocessing failed...')
-  GOTO       FINALLY
-
-  BADRES:                                                                       /* Не удалось выполнить компиляцию ресурсов */
-  SNDPGMMSG  MSGID(CPA2401) MSGF(QCPFMSG) MSGTYPE(*DIAG) +
-             MSGDTA('Resource compilation failed...')
   GOTO       FINALLY
 
   BADMOD:                                                                       /* Не удалось выполнить компиляцию модуля */
@@ -120,8 +130,8 @@ PGM PARM(&@SRCLIB &@SRCFILE &@PGMLIB &@FILLIB)
   RMVMSG     MSGKEY(&HIKEY)
   CHGVAR     VAR(%BIN(&MSGKEY 1 4)) VALUE(%BIN(&LOWKEY 1 4) + 1)
 
-  DLTF       FILE(QTEMP/LOGMSG)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
+  DLTF       FILE(&TMPLIB/LOGMSG)
+  MONMSG     MSGID(CPF0000)
   CRTPF      FILE(QTEMP/LOGMSG) RCDLEN(300) MAXMBRS(*NOMAX)
 
   RUNSQL     SQL('insert into QTEMP/LOGMSG values +
@@ -169,23 +179,22 @@ PGM PARM(&@SRCLIB &@SRCFILE &@PGMLIB &@FILLIB)
              FROMMBR(*ALL) TOMBR(*FROMMBR) MBROPT(*ADD) CRTFILE(*YES) +
              FMTOPT(*NOCHK)
 
-  CPYF       FROMFILE(&PGMLIB/EVFEVENT) TOFILE(&SRCLIB/EVFEVENT) +
+  CPYF       FROMFILE(&DSTLIB/EVFEVENT) TOFILE(&SRCLIB/EVFEVENT) +
              FROMMBR(*ALL) TOMBR(*FROMMBR) MBROPT(*ADD) FMTOPT(*NOCHK)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
-  DLTF       FILE(&PGMLIB/EVFEVENT)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
+  MONMSG     MSGID(CPF0000)
+  DLTF       FILE(&DSTLIB/EVFEVENT)
+  MONMSG     MSGID(CPF0000)
 
-  CPYF       FROMFILE(&FILLIB/EVFEVENT) TOFILE(&SRCLIB/EVFEVENT) +
+  CPYF       FROMFILE(&TMPLIB/EVFEVENT) TOFILE(&SRCLIB/EVFEVENT) +
              FROMMBR(*ALL) TOMBR(*FROMMBR) MBROPT(*ADD) FMTOPT(*NOCHK)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
-  DLTF       FILE(&FILLIB/EVFEVENT)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
+  MONMSG     MSGID(CPF0000)
+  DLTF       FILE(&TMPLIB/EVFEVENT)
+  MONMSG     MSGID(CPF0000)
 
-  CPYF       FROMFILE(QTEMP/EVFEVENT) TOFILE(&SRCLIB/EVFEVENT) +
-             FROMMBR(*ALL) TOMBR(*FROMMBR) MBROPT(*ADD) FMTOPT(*NOCHK)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
-  DLTF       FILE(QTEMP/EVFEVENT)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
+  IF (&DBGMOD = *NONE) DO
+    DLTF       FILE(&SRCLIB/EVFEVENT)
+    MONMSG     MSGID(CPF0000)
+  ENDDO
 
 
 
@@ -197,32 +206,26 @@ PGM PARM(&@SRCLIB &@SRCFILE &@PGMLIB &@FILLIB)
   IF (*NOT &TAG) CHGVAR VAR(&SRCLIB) VALUE(&@SRCLIB)
   CHGVAR     VAR(&TAG) VALUE('0')
 
-  CHKOBJ     OBJ(&SRCLIB/&@SRCFILE) OBJTYPE(*FILE)
+  CHKOBJ     OBJ(QSYS/&@DSTLIB) OBJTYPE(*LIB)
   MONMSG     MSGID(CPF0000) EXEC(CHGVAR VAR(&TAG) VALUE('1'))
-  IF (*NOT &TAG) CHGVAR VAR(&SRCFILE) VALUE(&@SRCFILE)
-  CHGVAR     VAR(&TAG) VALUE('0')
-
-  CHKOBJ     OBJ(QSYS/&@PGMLIB) OBJTYPE(*LIB)
-  MONMSG     MSGID(CPF0000) EXEC(CHGVAR VAR(&TAG) VALUE('1'))
-  IF (*NOT &TAG) CHGVAR VAR(&PGMLIB) VALUE(&@PGMLIB)
-  CHGVAR     VAR(&TAG) VALUE('0')
-
-  CHKOBJ     OBJ(QSYS/&@FILLIB) OBJTYPE(*LIB)
-  MONMSG     MSGID(CPF0000) EXEC(CHGVAR VAR(&TAG) VALUE('1'))
-  IF (*NOT &TAG) CHGVAR VAR(&FILLIB) VALUE(&@FILLIB)
+  IF (*NOT &TAG) CHGVAR VAR(&DSTLIB) VALUE(&@DSTLIB)
   CHGVAR     VAR(&TAG) VALUE('0')
 
   DLTF       FILE(&SRCLIB/EVFEVENT)                                             /* Удаление файла ошибок */
   MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
 
-  DLTF       FILE(&PGMLIB/EVFEVENT)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
+  DLTF       FILE(&DSTLIB/EVFEVENT)
+  MONMSG     MSGID(CPF0000)
 
-  DLTF       FILE(&FILLIB/EVFEVENT)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
+  DLTF       FILE(&TMPLIB/EVFEVENT)
+  MONMSG     MSGID(CPF0000)
 
-  DLTF       FILE(QTEMP/EVFEVENT)
-  MONMSG     MSGID(CPF0000 MCH0000 RPG0000)
+  IF (&DBGMOD = *ALL) DO
+    CHGVAR VAR(&OPTMOD) VALUE(10)
+    ENDDO
+  ELSE DO
+    CHGVAR VAR(&OPTMOD) VALUE(40)
+  ENDDO
 
   CHGLIBL    LIBL(*NONE) CURLIB(*CRTDFT)                                        /* Очистка либла */
 
