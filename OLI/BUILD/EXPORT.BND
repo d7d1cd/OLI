@@ -1,0 +1,18 @@
+STRPGMEXP PGMLVL(*CURRENT) LVLCHK(*YES) SIGNATURE('OLI')
+
+
+/* oli::Db2String *************************************************************/
+EXPORT SYMBOL("Begin__Q3_3oli2v17IStringCFv")                                   /* IString::Begin() const */
+EXPORT SYMBOL("End__Q3_3oli2v17IStringCFv")                                     /* IString::End() const */
+EXPORT SYMBOL("Begin__Q3_3oli2v17IStringFv")                                    /* IString::Begin() */
+EXPORT SYMBOL("End__Q3_3oli2v17IStringFv")                                      /* IString::End() */
+
+
+
+/* oli::Db2StringBase<Db2String> **********************************************/
+EXPORT SYMBOL("Clear__Q3_3oli2v111IStringBaseXTQ3_3oli2v17IString_Fv")          /* IStringBase<IString>::Clear() */
+EXPORT SYMBOL("__as__Q3_3oli2v111IStringBaseXTQ3_3oli2v17IString_FPCc")         /* IStringBase<IString>::operator=(const char*) */
+
+
+ENDPGMEXP
+
