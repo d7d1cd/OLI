@@ -2,168 +2,217 @@
      _____ __    _____
     |     |  |  |_   _|  C++ Object Library for IBM i
     |  |  |  |__ _| |_   File:   STRING/istring$.cpp
-    |_____|_____|_____|  Author: S.N. Chebotarev
+    |_____|_____|_____|  Author: Sergey Chebotarev
 
 */
 
 #include "STRING/istring.h"
-#include <algorithm>                                                            // std::fill
+#include <algorithm>                                                                                                    // std::fill
 
-OLI_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////
+OLI_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
-//***** КОНСТАНТНАЯ БАЗА СТРОКИ ************************************************
 
-// ИТЕРАТОРЫ: ОБРАТНЫЙ ИТЕРАТОР НА НАЧАЛО СТРОКИ
+
+//***** КОНСТАНТНАЯ БАЗА СТРОКИ ****************************************************************************************
+
 template <typename Heir>
-ConstReverseIterator IStringBaseConst<Heir>::Rbegin() const
+istring_base_const<Heir>::istring_base_const(size_type capacity)
+                        : m_capacity(capacity)
 {
-  return ConstReverseIterator(p_End());
 }
 
 
-
-// ИТЕРАТОРЫ: ОБРАТНЫЙ ИТЕРАТОР НА НАЧАЛО СТРОКИ
 template <typename Heir>
-ConstReverseIterator IStringBaseConst<Heir>::Rend() const
+typename istring_base_const<Heir>::const_iterator
+istring_base_const<Heir>::begin() const
 {
-  return ConstReverseIterator(p_Begin());
+  return data();
 }
 
 
-
-// СВОЙСТВА: ЕМКОСТЬ СТРОКИ
 template <typename Heir>
-size_t IStringBaseConst<Heir>::Capacity() const
+typename istring_base_const<Heir>::const_iterator
+istring_base_const<Heir>::end() const
 {
-  return p_End() - p_Begin();
+  return data() + m_capacity;
 }
 
 
-
-// СВОЙСТВА: ДЛИНА СТРОКИ
 template <typename Heir>
-size_t IStringBaseConst<Heir>::Length() const
+typename istring_base_const<Heir>::const_reverse_iterator
+istring_base_const<Heir>::rbegin() const
 {
-  size_t len = Capacity();
+  return const_reverse_iterator(end());
+}
 
-  for (auto it = Rbegin(), rend = Rend(); it != rend; --len)
+
+template <typename Heir>
+typename istring_base_const<Heir>::const_reverse_iterator
+istring_base_const<Heir>::rend() const
+{
+  return const_reverse_iterator(begin());
+}
+
+
+template <typename Heir>
+typename istring_base_const<Heir>::size_type
+istring_base_const<Heir>::capacity() const
+{
+  return m_capacity;
+}
+
+
+template <typename Heir>
+typename istring_base_const<Heir>::size_type
+istring_base_const<Heir>::length() const
+{
+  auto len = m_capacity;
+
+  for (auto it = rbegin(), end = rend(); it != end; --len)
     if (*it++ != BLANK) break;
 
   return len;
 }
 
 
-
-// СЕРВИС: НАЧАЛО КОНСТАНТНОЙ СТРОКИ
 template <typename Heir>
-ConstIterator IStringBaseConst<Heir>::p_Begin() const
+typename istring_base_const<Heir>::const_pointer
+istring_base_const<Heir>::data() const
 {
-  return static_cast<const Heir*>(this)->Begin();
+  return static_cast<const Heir*>(this)->data();
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+//***** БАЗА СТРОКИ ****************************************************************************************************
+
+template <typename Heir>
+istring_base<Heir>::istring_base(size_type capacity)
+                  : istring_base_const<Heir>(capacity)
+{
 }
 
 
-
-// СЕРВИС: КОНЕЦ КОНСТАНТНОЙ СТРОКИ
 template <typename Heir>
-ConstIterator IStringBaseConst<Heir>::p_End() const
+Heir& istring_base<Heir>::operator =(const char* rhs)
 {
-  return static_cast<const Heir*>(this)->End();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-//***** БАЗА СТРОКИ ************************************************************
-
-// ИТЕРАТОРЫ: ОБРАТНЫЙ ИТЕРАТОР НА НАЧАЛО СТРОКИ
-template <typename Heir>
-ReverseIterator IStringBase<Heir>::Rbegin()
-{
-  return ReverseIterator(p_End());
-}
-
-
-
-// ИТЕРАТОРЫ: ОБРАТНЫЙ ИТЕРАТОР НА НАЧАЛО СТРОКИ
-template <typename Heir>
-ReverseIterator IStringBase<Heir>::Rend()
-{
-  return ReverseIterator(p_Begin());
-}
-
-
-
-// ОПЕРАТОРЫ: ПРИСВАИВАНИЕ ИЗ СТРОКИ В СТИЛЕ С
-template <typename Heir>
-Heir& IStringBase<Heir>::operator =(const char* rhs)
-{
-  p_CopyFrom(rhs, std::strlen(rhs));
+  copy_from(rhs, std::strlen(rhs));
   return *static_cast<Heir*>(this);
 }
 
 
-
-// МОДИФИКАТОРЫ: ОЧИСТКА СТРОКИ
 template <typename Heir>
-void IStringBase<Heir>::Clear()
+typename istring_base<Heir>::iterator
+istring_base<Heir>::begin()
 {
-  p_FillWith(p_Begin(), this->BLANK);
+  return data();
 }
 
 
-
-// СЕРВИС: НАЧАЛО СТРОКИ
 template <typename Heir>
-Iterator IStringBase<Heir>::p_Begin()
+typename istring_base<Heir>::iterator
+istring_base<Heir>::end()
 {
-  return static_cast<Heir*>(this)->Begin();
+  return begin() + capacity();
 }
 
 
-
-// СЕРВИС: КОНЕЦ СТРОКИ
 template <typename Heir>
-Iterator IStringBase<Heir>::p_End()
+typename istring_base<Heir>::reverse_iterator
+istring_base<Heir>::rbegin()
 {
-  return static_cast<Heir*>(this)->End();
+  return reverse_iterator(end());
 }
 
 
-
-// СЕРВИС: ЗАПОЛНЕНИЕ СТРОКИ
 template <typename Heir>
-void IStringBase<Heir>::p_FillWith(Iterator whence, Char agg)
+typename istring_base<Heir>::reverse_iterator
+istring_base<Heir>::rend()
 {
-  std::fill(whence, p_End(), agg);
+  return reverse_iterator(begin());
 }
 
 
-
-// СЕРВИС: КОПИРОВАНИЕ В СТРОКУ
 template <typename Heir>
-void IStringBase<Heir>::p_CopyFrom(ConstIterator start, const size_t size)
+void istring_base<Heir>::clear()
 {
-  size_t less = std::min(size, this->Capacity());
-  std::copy(start, start + less, p_Begin());
-  p_FillWith(p_Begin() + less, this->BLANK);
+  fill_with(begin(), this->BLANK);
 }
-////////////////////////////////////////////////////////////////////////////////
+
+
+template <typename Heir>
+typename istring_base<Heir>::pointer
+istring_base<Heir>::data()
+{
+  return static_cast<Heir*>(this)->data();
+}
+
+
+template <typename Heir>
+void istring_base<Heir>::fill_with(iterator whence, value_type agg)
+{
+  std::fill(whence, end(), agg);
+}
+
+
+template <typename Heir>
+void istring_base<Heir>::copy_from(const_iterator start, const size_type size)
+{
+  size_type less = std::min(size, capacity());
+  std::copy(start, start + less, begin());
+  fill_with(begin() + less, this->BLANK);
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
 
-//***** ЯВНОЕ ИНСТАНЦИРОВАНИЕ **************************************************
-template class IStringBaseConst<IString>;
-template class IStringBase<IString>;
-////////////////////////////////////////////////////////////////////////////////
+//***** РЕАЛИЗАЦИЯ СТРОКИ **********************************************************************************************
+
+istring::istring(size_type capacity)
+       : istring_base<istring>(capacity),
+         m_data(new value_type[capacity])
+{
+  clear();
+}
+
+
+istring::~istring()
+{
+  delete [] m_data;
+}
+
+
+istring::pointer istring::data()
+{
+  return m_data;
+}
+
+
+istring::const_pointer istring::data() const
+{
+  return m_data;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
-OLI_NAMESPACE_END //////////////////////////////////////////////////////////////
+
+
+//***** ЯВНОЕ ИНСТАНЦИРОВАНИЕ ******************************************************************************************
+template class istring_base_const<istring>;
+template class istring_base<istring>;
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+OLI_NAMESPACE_END //////////////////////////////////////////////////////////////////////////////////////////////////////
 
