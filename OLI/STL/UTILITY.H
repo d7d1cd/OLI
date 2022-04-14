@@ -9,7 +9,7 @@
 #ifndef OLI_STL_UTILITY_H_
 #define OLI_STL_UTILITY_H_
 
-#include "STL/typetraits.h"
+#include "STL/type_trait.h"
 
 STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -41,13 +41,13 @@ typename remove_reference<T>::type&& move(T&& t)
 //
 
 template <typename T>
-T&& forward(typename remove_reference<T>::type& Arg)
+constexpr T&& forward(typename remove_reference<T>::type& Arg)
 {
   return static_cast<T&&>(Arg);
 }
 
 template <typename T>
-T&& forward(typename remove_reference<T>::type&& Arg)
+constexpr T&& forward(typename remove_reference<T>::type&& Arg)
 {
   return static_cast<T&&>(Arg);
 }

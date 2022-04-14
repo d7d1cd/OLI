@@ -25,8 +25,6 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
 
-#define __IBMCPP_TR1__ 1
-
 #include <cctype>
 #include <cstring>
 #include <exception>
@@ -2706,8 +2704,6 @@ Options::group_help(const std::string& group) const
 
 } // namespace cxxopts
 
-
-#undef __IBMCPP_TR1__
 
 #endif //CXXOPTS_HPP_INCLUDED
 

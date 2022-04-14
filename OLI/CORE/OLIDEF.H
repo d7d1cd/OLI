@@ -1,6 +1,6 @@
 /*
      _____ __    _____
-    |     |  |  |_   _|  C++ Object Library for IBM i
+    |     |  |  |_   _|  C++ Object Libraries for IBM i
     |  |  |  |__ _| |_   File:   CORE/olidef.h
     |_____|_____|_____|  Author: Sergey Chebotarev
 
@@ -22,7 +22,7 @@
 #define STL_NAMESPACE_END }
 
 
-#define __IBMCPP_TR1__ 1                                                                                                // Включение возможностей C++ technical report 1
+#define __IBMCPP_TR1__ 1
 
 
 #endif // OLI_CORE_OLIDEF_H
