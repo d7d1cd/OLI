@@ -374,7 +374,7 @@ namespace cxxopts
   {
     public:
     explicit OptionException(std::string  message)
-    : m_message(std::move(message))
+    : m_message(stl::move(message))
     {
     }
 
@@ -532,13 +532,13 @@ namespace cxxopts
   template <typename T>
   void throw_or_mimic(const std::string& text)
   {
-    static_assert(std::is_base_of<std::exception, T>::value,
+    static_assert(std::tr1::is_base_of<std::exception, T>::value,
                   "throw_or_mimic only works on std::exception and "
                   "deriving classes");
 
 #ifndef CXXOPTS_NO_EXCEPTIONS
     // If CXXOPTS_NO_EXCEPTIONS is not defined, just throw
-    throw T{text};
+    throw T(text);
 #else
     // Otherwise manually instantiate the exception, print what() to stderr,
     // and exit
@@ -554,15 +554,17 @@ namespace cxxopts
     {
       struct IntegerDesc
       {
-        std::string negative = "";
-        std::string base     = "";
-        std::string value    = "";
+        std::string negative;
+        std::string base;
+        std::string value;
       };
-      struct ArguDesc {
-        std::string arg_name  = "";
-        bool        grouping  = false;
-        bool        set_value = false;
-        std::string value     = "";
+      struct ArguDesc
+      {
+        ArguDesc() : grouping(false), set_value(false) {}
+        std::string arg_name;
+        bool        grouping;
+        bool        set_value;
+        std::string value;
       };
 #ifdef CXXOPTS_NO_REGEX
       inline IntegerDesc SplitInteger(const std::string &text)
@@ -709,24 +711,24 @@ namespace cxxopts
       namespace
       {
 
-        std::basic_regex<char> integer_pattern
+        std::tr1::basic_regex<char> integer_pattern
           ("(-)?(0x)?([0-9a-zA-Z]+)|((0x)?0)");
-        std::basic_regex<char> truthy_pattern
+        std::tr1::basic_regex<char> truthy_pattern
           ("(t|T)(rue)?|1");
-        std::basic_regex<char> falsy_pattern
+        std::tr1::basic_regex<char> falsy_pattern
           ("(f|F)(alse)?|0");
 
-        std::basic_regex<char> option_matcher
+        std::tr1::basic_regex<char> option_matcher
           ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]]+)");
-        std::basic_regex<char> option_specifier
+        std::tr1::basic_regex<char> option_specifier
           ("(([[:alnum:]]),)?[ ]*([[:alnum:]][-_[:alnum:]]*)?");
 
       } // namespace
 
       inline IntegerDesc SplitInteger(const std::string &text)
       {
-        std::smatch match;
-        std::regex_match(text, match, integer_pattern);
+        std::tr1::smatch match;
+        std::tr1::regex_match(text, match, integer_pattern);
 
         if (match.length() == 0)
         {
@@ -750,22 +752,22 @@ namespace cxxopts
 
       inline bool IsTrueText(const std::string &text)
       {
-        std::smatch result;
-        std::regex_match(text, result, truthy_pattern);
+        std::tr1::smatch result;
+        std::tr1::regex_match(text, result, truthy_pattern);
         return !result.empty();
       }
 
       inline bool IsFalseText(const std::string &text)
       {
-        std::smatch result;
-        std::regex_match(text, result, falsy_pattern);
+        std::tr1::smatch result;
+        std::tr1::regex_match(text, result, falsy_pattern);
         return !result.empty();
       }
 
       inline std::pair<std::string, std::string> SplitSwitchDef(const std::string &text)
       {
-        std::match_results<const char*> result;
-        std::regex_match(text.c_str(), result, option_specifier);
+        std::tr1::match_results<const char*> result;
+        std::tr1::regex_match(text.c_str(), result, option_specifier);
         if (result.empty())
         {
           throw_or_mimic<invalid_option_format_error>(text);
@@ -779,8 +781,8 @@ namespace cxxopts
 
       inline ArguDesc ParseArgument(const char *arg, bool &matched)
       {
-        std::match_results<const char*> result;
-        std::regex_match(arg, result, option_matcher);
+        std::tr1::match_results<const char*> result;
+        std::tr1::regex_match(arg, result, option_matcher);
         matched = !result.empty();
 
         ArguDesc argu_desc;
@@ -849,7 +851,7 @@ namespace cxxopts
 
     template <typename R, typename T>
     void
-    checked_negate(R& r, T&& t, const std::string&, std::true_type)
+    checked_negate(R& r, T&& t, const std::string&, std::tr1::true_type)
     {
       // if we got to here, then `t` is a positive number that fits into
       // `R`. So to avoid MSVC C4146, we first cast it to `R`.
@@ -859,7 +861,7 @@ namespace cxxopts
 
     template <typename R, typename T>
     void
-    checked_negate(R&, T&&, const std::string& text, std::false_type)
+    checked_negate(R&, T&&, const std::string& text, std::tr1::false_type)
     {
       throw_or_mimic<argument_incorrect_type>(text);
     }
@@ -870,7 +872,7 @@ namespace cxxopts
     {
       parser_tool::IntegerDesc int_desc = parser_tool::SplitInteger(text);
 
-      using US = typename std::make_unsigned<T>::type;
+      typedef typename std::make_unsigned<T>::type US;
       constexpr bool is_signed = std::numeric_limits<T>::is_signed;
 
       const bool          negative    = int_desc.negative.length() > 0;
