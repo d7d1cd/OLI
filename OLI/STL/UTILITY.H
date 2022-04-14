@@ -20,12 +20,11 @@ STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////
 
 //***** std::move ******************************************************************************************************
 //
-// Since C++11
 // Реализовано по причине отсутствия в std IBM i
 //
 
 template <typename T>
-typename remove_reference<T>::type&& move(T&& t)
+constexpr typename remove_reference<T>::type&& move(T&& t)
 {
   return static_cast<typename remove_reference<T>::type&&>(t);
 }
@@ -37,7 +36,6 @@ typename remove_reference<T>::type&& move(T&& t)
 
 //***** std::forward ***************************************************************************************************
 //
-// Since C++11
 // Реализовано по причине отсутствия в std IBM i
 //
 
