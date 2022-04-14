@@ -1,8 +1,12 @@
+
+#include "cxxopts"
+
+
 #include "GTEST/gtest.h"
 
 TEST(CXXOPTS, simple_test)
 {
-  EXPECT_EQ(0, 0);
+  cxxopts::Options options("test", "A brief description");
 }
 
 #ifdef DEBUG
