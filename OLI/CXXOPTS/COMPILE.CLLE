@@ -23,7 +23,7 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   DCL        VAR(&DSTLIB)     TYPE(*CHAR) LEN(10)  VALUE(CSNTST)                /* Библиотека для размещения собранных объектов по умолчанию */
   DCL        VAR(&BUILDM)     TYPE(*CHAR) LEN(10)  VALUE(DEBUG)                 /* Режим сборки по умолчанию */
 
-  DCL        VAR(&SRCFIL)     TYPE(*CHAR) LEN(10)  VALUE(GTEST)                 /* Имя файла с исходным кодом */
+  DCL        VAR(&SRCFIL)     TYPE(*CHAR) LEN(10)  VALUE(CXXOPTS)               /* Имя файла с исходным кодом */
 
   DCL        VAR(&TMPLIB)     TYPE(*CHAR) LEN(10)  VALUE(QTEMP)                 /* Временная библиотека */
   DCL        VAR(&DBGVIEW)    TYPE(*CHAR) LEN(10)  VALUE(*ALL)                  /* Режим отладки */
@@ -60,11 +60,8 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
 
 
   /* КОМПИЛЯЦИЯ МОДУЛЯ БИБЛИОТЕКИ OLI *****************************************/
-  CRTCPPMOD  MODULE(&DSTLIB/&UNITOLI) SRCFILE(&SRCLIB/&SRCFIL) +
-             DBGVIEW(&DBGVIEW) OPTIMIZE(&OPTIMIZE) DEFINE(&DEFINE) +
-             LANGLVL(*EXTENDED0X) PFROPT(*STRDONLY) +
-             OPTION(*EVENTF) CHECKOUT(*COND *PARM *REACH *UNUSED)
-  MONMSG     MSGID(CPF0000) EXEC(GOTO BADMOD)
+  /* Эта библиотека состоит только из заголовочного файла и не имеет          */
+  /* компилируемого модуля.                                                   */
 
 
 
@@ -79,12 +76,20 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
 
 
 
+  /* КОМПИЛЯЦИЯ ЗАВИСИМОСТЕЙ ПРОГРАММЫ ЮНИТ-ТЕСТА *****************************/
+  IF (&BUILDM *EQ RELEASE) GOTO GOOD                                            /* Если сборка релиза, то программу юнит-теста собирать не нужно */
+
+  CRTBNDCL   PGM(&TMPLIB/COMPILE) SRCFILE(&SRCLIB/GTEST)
+  CALL       PGM(&TMPLIB/COMPILE) PARM(&SRCLIB &TMPLIB RELEASE)
+
+
+
+
   /* СБОРКА ПРОГРАММЫ ЮНИТ-ТЕСТА **********************************************/
-  IF (&BUILDM *EQ RELEASE) GOTO GOOD                                            /* Если сборка релиза, то тестовую программу собирать не нужно */
   SNDPGMMSG  MSG('BEGIN MONITORING') KEYVAR(&LOWKEY)
 
   CRTPGM     PGM(&DSTLIB/&UNITPGM) +
-             MODULE(&TMPLIB/&UNITMOD &DSTLIB/&UNITOLI)
+             MODULE(&TMPLIB/&UNITMOD &TMPLIB/GTEST$)
   MONMSG     MSGID(CPF0000) EXEC(GOTO BADBUILD)
 
 
