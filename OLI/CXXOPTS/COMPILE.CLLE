@@ -32,6 +32,7 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   DCL        VAR(&UNITOLI)    TYPE(*CHAR) LEN(10)                               /* Имя модуля библиотеки OLI */
   DCL        VAR(&UNITMOD)    TYPE(*CHAR) LEN(10)                               /* Имя модуля юнит-теста */
   DCL        VAR(&UNITPGM)    TYPE(*CHAR) LEN(10)                               /* Имя программы юнит-теста */
+  DCL        VAR(&DEPMOD)     TYPE(*CHAR) LEN(10)                               /* Имя модуля зависимости */
   DCL        VAR(&TAG)        TYPE(*LGL)
   DCL        VAR(&LOWKEY)     TYPE(*CHAR) LEN(4)
   DCL        VAR(&MSGKEY)     TYPE(*CHAR) LEN(4)
@@ -60,7 +61,7 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
 
 
   /* КОМПИЛЯЦИЯ МОДУЛЯ БИБЛИОТЕКИ OLI *****************************************/
-  /* Эта библиотека состоит только из заголовочного файла и не имеет          */
+  /* Эта библиотека состоит только из заголовочных файлов и не имеет          */
   /* компилируемого модуля.                                                   */
 
 
@@ -79,8 +80,8 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   /* КОМПИЛЯЦИЯ ЗАВИСИМОСТЕЙ ПРОГРАММЫ ЮНИТ-ТЕСТА *****************************/
   IF (&BUILDM *EQ RELEASE) GOTO GOOD                                            /* Если сборка релиза, то программу юнит-теста собирать не нужно */
 
-  CRTBNDCL   PGM(&TMPLIB/COMPILE) SRCFILE(&SRCLIB/GTEST)
-  CALL       PGM(&TMPLIB/COMPILE) PARM(&SRCLIB &TMPLIB RELEASE)
+  CHGVAR     VAR(&DEPMOD) VALUE(GTEST)                                          /* Google test нужен для тестирования */
+  CALLSUBR   CREATEDEP
 
 
 
@@ -89,7 +90,7 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   SNDPGMMSG  MSG('BEGIN MONITORING') KEYVAR(&LOWKEY)
 
   CRTPGM     PGM(&DSTLIB/&UNITPGM) +
-             MODULE(&TMPLIB/&UNITMOD &TMPLIB/GTEST$)
+             MODULE(&TMPLIB/&UNITMOD &DSTLIB/GTEST$)
   MONMSG     MSGID(CPF0000) EXEC(GOTO BADBUILD)
 
 
@@ -238,6 +239,15 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   ENDSUBR                                                                       /* SUBR INITIALIZE */
 
 
+
+
+  /* ПОДПРОЦЕДУРА СОЗДАНИЯ МОДУЛЯ ЗАВИСИМОСТИ *********************************/
+  SUBR CREATEDEP
+
+  CRTBNDCL   PGM(QTEMP/COMPILE) SRCFILE(&SRCLIB/&DEPMOD)
+  CALL       PGM(QTEMP/COMPILE) PARM(&SRCLIB &DSTLIB RELEASE)
+
+  ENDSUBR
 
 ENDPGM
 

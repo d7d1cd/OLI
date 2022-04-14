@@ -25,6 +25,7 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
 
+#include "STL/utility.h"
 #include <cctype>
 #include <cstring>
 #include <exception>
@@ -37,7 +38,6 @@ THE SOFTWARE.
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 #include <algorithm>
 #include <cstdint>
@@ -254,7 +254,7 @@ namespace cxxopts
   T
   toLocalString(T&& t)
   {
-    return std::forward<T>(t);
+    return stl::forward<T>(t);
   }
 
   inline
@@ -289,7 +289,7 @@ namespace cxxopts
   std::string
   toUTF8String(T&& t)
   {
-    return std::forward<T>(t);
+    return stl::forward<T>(t);
   }
 
   inline
@@ -324,14 +324,14 @@ namespace cxxopts
 #pragma GCC diagnostic ignored "-Weffc++"
 // This will be ignored under other compilers like LLVM clang.
 #endif
-  class Value : public std::enable_shared_from_this<Value>
+  class Value : public std::tr1::enable_shared_from_this<Value>
   {
     public:
 
     virtual ~Value() = default;
 
     virtual
-    std::shared_ptr<Value>
+    std::tr1::shared_ptr<Value>
     clone() const = 0;
 
     virtual void
@@ -355,13 +355,13 @@ namespace cxxopts
     virtual std::string
     get_implicit_value() const = 0;
 
-    virtual std::shared_ptr<Value>
+    virtual std::tr1::shared_ptr<Value>
     default_value(const std::string& value) = 0;
 
-    virtual std::shared_ptr<Value>
+    virtual std::tr1::shared_ptr<Value>
     implicit_value(const std::string& value) = 0;
 
-    virtual std::shared_ptr<Value>
+    virtual std::tr1::shared_ptr<Value>
     no_implicit_value() = 0;
 
     virtual bool
@@ -380,7 +380,7 @@ namespace cxxopts
 
     CXXOPTS_NODISCARD
     const char*
-    what() const noexcept override
+    what() const throw()
     {
       return m_message.c_str();
     }
