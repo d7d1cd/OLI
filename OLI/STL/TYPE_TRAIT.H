@@ -10,7 +10,6 @@
 #define OLI_STL_TYPE_TRAITS_H_
 
 #include "CORE/olidef.h"
-
 #include <type_traits>
 
 STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,7 +20,6 @@ STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////
 
 //***** std::remove_reference ******************************************************************************************
 //
-// Since C++11
 // Реализовано по причине отсутствия в std IBM i удаления правой ссылки
 //
 
@@ -41,15 +39,30 @@ struct remove_reference<T&&> { typedef T type; };
 
 //***** std::enable_if *************************************************************************************************
 //
-// Since C++11
 // Реализовано по причине отсутствия в std IBM i
 //
 
-template<bool B, typename T = void>
+template <bool B, typename T = void>
 struct enable_if {};
 
-template<typename T>
+template <typename T>
 struct enable_if<true, T> { typedef T type; };
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+//***** std::conditional ***********************************************************************************************
+//
+// Реализовано по причине отсутствия в std IBM i
+//
+
+template <bool, typename T1, typename T2>
+struct conditional { typedef T2 type; };
+
+template <typename T1, typename T2>
+struct conditional<true, T1, T2> { typedef T1 type; };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

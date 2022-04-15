@@ -159,6 +159,19 @@ TEST(STL, move)
 
 
 //**********************************************************************************************************************
+namespace conditional {
+
+TEST(STL, conditional)
+{
+  static_assert(std::tr1::is_same<stl::conditional<true, int, double>::type, int>::value, "");
+  static_assert(std::tr1::is_same<stl::conditional<false, int, double>::type, double>::value, "");
+}
+} // namespace conditional {
+
+
+
+
+//**********************************************************************************************************************
 #ifdef DEBUG
 int main(int argc, char** argv)
 {
