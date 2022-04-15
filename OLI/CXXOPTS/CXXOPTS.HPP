@@ -872,7 +872,7 @@ namespace cxxopts
     {
       parser_tool::IntegerDesc int_desc = parser_tool::SplitInteger(text);
 
-      typedef typename std::make_unsigned<T>::type US;
+      typedef typename stl::make_unsigned<T>::type US;
       constexpr bool is_signed = std::numeric_limits<T>::is_signed;
 
       const bool          negative    = int_desc.negative.length() > 0;
@@ -881,7 +881,7 @@ namespace cxxopts
 
       US result = 0;
 
-      for (char ch : value_match)
+      for (auto ch = value_match.begin(), end = value_match.end(); ch != end; ++ch)
       {
         US digit = 0;
 
@@ -915,7 +915,7 @@ namespace cxxopts
 
       if (negative)
       {
-        checked_negate<T>(value, result, text, std::integral_constant<bool, is_signed>());
+        checked_negate<T>(value, result, text, std::tr1::integral_constant<bool, is_signed>());
       }
       else
       {
