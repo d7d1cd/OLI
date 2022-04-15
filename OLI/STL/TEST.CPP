@@ -172,6 +172,80 @@ TEST(STL, conditional)
 
 
 //**********************************************************************************************************************
+namespace make_signed {
+
+TEST(STL, make_signed)
+{
+  typedef stl::make_signed<signed int>::type                  int1;
+  typedef stl::make_signed<unsigned int>::type                int2;
+  typedef stl::make_signed<volatile signed int>::type         volatile_int1;
+  typedef stl::make_signed<volatile unsigned int>::type       volatile_int2;
+  typedef stl::make_signed<const signed int>::type            const_int1;
+  typedef stl::make_signed<const unsigned int>::type          const_int2;
+  typedef stl::make_signed<const volatile signed int>::type   const_volatile_int1;
+  typedef stl::make_signed<const volatile unsigned int>::type const_volatile_int2;
+
+  static_assert(std::tr1::is_same<int1, signed int>::value, "");
+  static_assert(std::tr1::is_same<int2, signed int>::value, "");
+  static_assert(std::tr1::is_same<volatile_int1, volatile signed int>::value, "");
+  static_assert(std::tr1::is_same<volatile_int2, volatile signed int>::value, "");
+  static_assert(std::tr1::is_same<const_int1, const signed int>::value, "");
+  static_assert(std::tr1::is_same<const_int2, const signed int>::value, "");
+  static_assert(std::tr1::is_same<const_volatile_int1, const volatile signed int>::value, "");
+  static_assert(std::tr1::is_same<const_volatile_int2, const volatile signed int>::value, "");
+
+  static_assert(std::tr1::is_same<stl::make_signed<signed char>::type, signed char>::value, "");
+  static_assert(std::tr1::is_same<stl::make_signed<unsigned char>::type, signed char>::value, "");
+  static_assert(std::tr1::is_same<stl::make_signed<signed short>::type, signed short>::value, "");
+  static_assert(std::tr1::is_same<stl::make_signed<unsigned short>::type, signed short>::value, "");
+  static_assert(std::tr1::is_same<stl::make_signed<signed long>::type, signed long>::value, "");
+  static_assert(std::tr1::is_same<stl::make_signed<unsigned long>::type, signed long>::value, "");
+  static_assert(std::tr1::is_same<stl::make_signed<signed long long>::type, signed long long>::value, "");
+  static_assert(std::tr1::is_same<stl::make_signed<unsigned long long>::type, signed long long>::value, "");
+}
+} // namespace make_signed {
+
+
+
+
+//**********************************************************************************************************************
+namespace make_unsigned {
+
+TEST(STL, make_unsigned)
+{
+  typedef stl::make_unsigned<signed int>::type                  int1;
+  typedef stl::make_unsigned<unsigned int>::type                int2;
+  typedef stl::make_unsigned<volatile signed int>::type         volatile_int1;
+  typedef stl::make_unsigned<volatile unsigned int>::type       volatile_int2;
+  typedef stl::make_unsigned<const signed int>::type            const_int1;
+  typedef stl::make_unsigned<const unsigned int>::type          const_int2;
+  typedef stl::make_unsigned<const volatile signed int>::type   const_volatile_int1;
+  typedef stl::make_unsigned<const volatile unsigned int>::type const_volatile_int2;
+
+  static_assert(std::tr1::is_same<int1, unsigned int>::value, "");
+  static_assert(std::tr1::is_same<int2, unsigned int>::value, "");
+  static_assert(std::tr1::is_same<volatile_int1, volatile unsigned int>::value, "");
+  static_assert(std::tr1::is_same<volatile_int2, volatile unsigned int>::value, "");
+  static_assert(std::tr1::is_same<const_int1, const unsigned int>::value, "");
+  static_assert(std::tr1::is_same<const_int2, const unsigned int>::value, "");
+  static_assert(std::tr1::is_same<const_volatile_int1, const volatile unsigned int>::value, "");
+  static_assert(std::tr1::is_same<const_volatile_int2, const volatile unsigned int>::value, "");
+
+  static_assert(std::tr1::is_same<stl::make_unsigned<signed char>::type, unsigned char>::value, "");
+  static_assert(std::tr1::is_same<stl::make_unsigned<unsigned char>::type, unsigned char>::value, "");
+  static_assert(std::tr1::is_same<stl::make_unsigned<signed short>::type, unsigned short>::value, "");
+  static_assert(std::tr1::is_same<stl::make_unsigned<unsigned short>::type, unsigned short>::value, "");
+  static_assert(std::tr1::is_same<stl::make_unsigned<signed long>::type, unsigned long>::value, "");
+  static_assert(std::tr1::is_same<stl::make_unsigned<unsigned long>::type, unsigned long>::value, "");
+  static_assert(std::tr1::is_same<stl::make_unsigned<signed long long>::type, unsigned long long>::value, "");
+  static_assert(std::tr1::is_same<stl::make_unsigned<unsigned long long>::type, unsigned long long>::value, "");
+}
+} // namespace make_unsigned {
+
+
+
+
+//**********************************************************************************************************************
 #ifdef DEBUG
 int main(int argc, char** argv)
 {
