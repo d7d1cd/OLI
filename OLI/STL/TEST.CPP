@@ -1,6 +1,7 @@
 #include "type_trait"
 #include "utility"
 #include "GTEST/gtest.h"
+#include <cctype>
 
 
 //**********************************************************************************************************************
@@ -8,17 +9,38 @@ namespace remove_reference {
 
 TEST(STL, remove_reference)
 {
-  bool v; // Почему без этой переменной не работает объяснено тут https://t.me/supapro/1077025
+  static_assert(std::tr1::is_same<int, int>::value, "");
+  static_assert(!std::tr1::is_same<int, int&>::value, "");
+  static_assert(!std::tr1::is_same<int, int&&>::value, "");
 
-  ASSERT_TRUE((v = std::tr1::is_same<int, int>::value));
-  ASSERT_FALSE((v = std::tr1::is_same<int, int&>::value));
-  ASSERT_FALSE((v = std::tr1::is_same<int, int&&>::value));
-
-  ASSERT_TRUE((v = std::tr1::is_same<int, stl::remove_reference<int>::type>::value));
-  ASSERT_TRUE((v = std::tr1::is_same<int, stl::remove_reference<int&>::type>::value));
-  ASSERT_TRUE((v = std::tr1::is_same<int, stl::remove_reference<int&&>::type>::value));
+  static_assert(std::tr1::is_same<int, stl::remove_reference<int>::type>::value, "");
+  static_assert(std::tr1::is_same<int, stl::remove_reference<int&>::type>::value, "");
+  static_assert(std::tr1::is_same<int, stl::remove_reference<int&&>::type>::value, "");
 }
 } // namespace remove_reference {
+
+
+
+
+//**********************************************************************************************************************
+namespace enable_if {
+
+template <typename T>
+typename stl::enable_if<std::tr1::is_same<T, int>::value, T>::type
+foo(T t) { return t + 1; }
+
+template <typename T>
+typename stl::enable_if<std::tr1::is_same<T, char>::value, T>::type
+foo(T t) { return std::tolower(t); }
+
+TEST(STL, enable_if)
+{
+  static_assert(std::tr1::is_same<int, stl::enable_if<true, int>::type>::value, "");
+
+  ASSERT_EQ(foo(7), 8);
+  ASSERT_EQ(foo('A'), 'a');
+}
+} // namespace enable_if {
 
 
 
