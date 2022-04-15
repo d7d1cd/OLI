@@ -934,7 +934,7 @@ namespace cxxopts
     }
 
     template <typename T,
-             typename std::enable_if<std::is_integral<T>::value>::type* = nullptr
+             typename stl::enable_if<std::tr1::is_integral<T>::value>::type* = nullptr
              >
     void parse_value(const std::string& text, T& value)
     {
@@ -971,7 +971,7 @@ namespace cxxopts
     // that have not been overloaded explicitly.  It has to be placed in the
     // source code before all other more specialized templates.
     template <typename T,
-             typename std::enable_if<!std::is_integral<T>::value>::type* = nullptr
+             typename stl::enable_if<!std::tr1::is_integral<T>::value>::type* = nullptr
              >
     void
     parse_value(const std::string& text, T& value) {
@@ -985,7 +985,7 @@ namespace cxxopts
       if (text.empty()) {
         T v;
         parse_value(text, v);
-        value.emplace_back(std::move(v));
+        value.emplace_back(stl::move(v));
         return;
       }
       std::stringstream in(text);
@@ -993,7 +993,7 @@ namespace cxxopts
       while(!in.eof() && std::getline(in, token, CXXOPTS_VECTOR_DELIMITER)) {
         T v;
         parse_value(token, v);
-        value.emplace_back(std::move(v));
+        value.emplace_back(stl::move(v));
       }
     }
 
@@ -1034,12 +1034,14 @@ namespace cxxopts
     template <typename T>
     class abstract_value : public Value
     {
-      using Self = abstract_value<T>;
+      typedef abstract_value<T> Self;
 
       public:
       abstract_value()
-      : m_result(std::make_shared<T>())
+      : m_result(std::tr1::make_shared<T>())
       , m_store(m_result.get())
+      , m_default(false)
+      , m_implicit(false)
       {
       }
 
@@ -1048,7 +1050,7 @@ namespace cxxopts
       {
       }
 
-      ~abstract_value() override = default;
+      ~abstract_value() = default;
 
       abstract_value& operator=(const abstract_value&) = default;
 
@@ -1071,74 +1073,74 @@ namespace cxxopts
       }
 
       void
-      parse(const std::string& text) const override
+      parse(const std::string& text) const
       {
         parse_value(text, *m_store);
       }
 
       bool
-      is_container() const override
+      is_container() const
       {
         return type_is_container<T>::value;
       }
 
       void
-      parse() const override
+      parse() const
       {
         parse_value(m_default_value, *m_store);
       }
 
       bool
-      has_default() const override
+      has_default() const
       {
         return m_default;
       }
 
       bool
-      has_implicit() const override
+      has_implicit() const
       {
         return m_implicit;
       }
 
-      std::shared_ptr<Value>
-      default_value(const std::string& value) override
+      std::tr1::shared_ptr<Value>
+      default_value(const std::string& value)
       {
         m_default = true;
         m_default_value = value;
         return shared_from_this();
       }
 
-      std::shared_ptr<Value>
-      implicit_value(const std::string& value) override
+      std::tr1::shared_ptr<Value>
+      implicit_value(const std::string& value)
       {
         m_implicit = true;
         m_implicit_value = value;
         return shared_from_this();
       }
 
-      std::shared_ptr<Value>
-      no_implicit_value() override
+      std::tr1::shared_ptr<Value>
+      no_implicit_value()
       {
         m_implicit = false;
         return shared_from_this();
       }
 
       std::string
-      get_default_value() const override
+      get_default_value() const
       {
         return m_default_value;
       }
 
       std::string
-      get_implicit_value() const override
+      get_implicit_value() const
       {
         return m_implicit_value;
       }
 
       bool
-      is_boolean() const override
+      is_boolean() const
       {
-        return std::is_same<T, bool>::value;
+        return std::tr1::is_same<T, bool>::value;
       }
 
       const T&
@@ -1152,14 +1154,14 @@ namespace cxxopts
       }
 
       protected:
-      std::shared_ptr<T> m_result{};
-      T* m_store{};
+      std::tr1::shared_ptr<T> m_result;
+      T* m_store;
 
-      bool m_default = false;
-      bool m_implicit = false;
+      bool m_default;
+      bool m_implicit;
 
-      std::string m_default_value{};
-      std::string m_implicit_value{};
+      std::string m_default_value;
+      std::string m_implicit_value;
     };
 
     template <typename T>
@@ -1170,7 +1172,7 @@ namespace cxxopts
 
       CXXOPTS_NODISCARD
       std::shared_ptr<Value>
-      clone() const override
+      clone() const
       {
         return std::make_shared<standard_value<T>>(*this);
       }
@@ -1180,7 +1182,7 @@ namespace cxxopts
     class standard_value<bool> : public abstract_value<bool>
     {
       public:
-      ~standard_value() override = default;
+      ~standard_value() = default;
 
       standard_value()
       {
@@ -1193,8 +1195,8 @@ namespace cxxopts
         set_default_and_implicit();
       }
 
-      std::shared_ptr<Value>
-      clone() const override
+      std::tr1::shared_ptr<Value>
+      clone() const
       {
         return std::make_shared<standard_value<bool>>(*this);
       }
@@ -1213,17 +1215,17 @@ namespace cxxopts
   } // namespace values
 
   template <typename T>
-  std::shared_ptr<Value>
+  std::tr1::shared_ptr<Value>
   value()
   {
-    return std::make_shared<values::standard_value<T>>();
+    return std::tr1::make_shared<values::standard_value<T>>();
   }
 
   template <typename T>
-  std::shared_ptr<Value>
+  std::tr1::shared_ptr<Value>
   value(T& t)
   {
-    return std::make_shared<values::standard_value<T>>(&t);
+    return std::tr1::make_shared<values::standard_value<T>>(&t);
   }
 
   class OptionAdder;
@@ -1236,7 +1238,7 @@ namespace cxxopts
       std::string short_,
       std::string long_,
       String desc,
-      std::shared_ptr<const Value> val
+      std::tr1::shared_ptr<const Value> val
     )
     : m_short(std::move(short_))
     , m_long(std::move(long_))
@@ -1322,8 +1324,8 @@ namespace cxxopts
 
   struct HelpGroupDetails
   {
-    std::string name{};
-    std::string description{};
+    std::string name;
+    std::string description;
     std::vector<HelpOptionDetails> options{};
   };
 
@@ -1333,7 +1335,7 @@ namespace cxxopts
     void
     parse
     (
-      const std::shared_ptr<const OptionDetails>& details,
+      const std::tr1::shared_ptr<const OptionDetails>& details,
       const std::string& text
     )
     {
@@ -1344,7 +1346,7 @@ namespace cxxopts
     }
 
     void
-    parse_default(const std::shared_ptr<const OptionDetails>& details)
+    parse_default(const std::tr1::shared_ptr<const OptionDetails>& details)
     {
       ensure_value(details);
       m_default = true;
@@ -1353,7 +1355,7 @@ namespace cxxopts
     }
 
     void
-    parse_no_value(const std::shared_ptr<const OptionDetails>& details)
+    parse_no_value(const std::tr1::shared_ptr<const OptionDetails>& details)
     {
       m_long_name = &details->long_name();
     }
@@ -1421,8 +1423,8 @@ namespace cxxopts
   {
     public:
     KeyValue(std::string key_, std::string value_)
-    : m_key(std::move(key_))
-    , m_value(std::move(value_))
+    : m_key(stl::move(key_))
+    , m_value(stl::move(value_))
     {
     }
 
@@ -1635,7 +1637,7 @@ namespace cxxopts
     (
       std::string opts,
       std::string desc,
-      std::shared_ptr<const Value>  value = ::cxxopts::value<bool>(),
+      std::tr1::shared_ptr<const Value>  value = ::cxxopts::value<bool>(),
       std::string arg_help = ""
     )
     : opts_(std::move(opts))
