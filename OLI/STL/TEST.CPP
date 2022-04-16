@@ -1,5 +1,6 @@
 #include "type_trait"
 #include "utility"
+#include "memory"
 #include "GTEST/gtest.h"
 #include <cctype>
 
@@ -263,6 +264,41 @@ TEST(STL, make_unsigned)
   static_assert(std::tr1::is_same<stl::make_unsigned<unsigned long long>::type, unsigned long long>::value, "");
 }
 } // namespace make_unsigned {
+
+
+
+
+//**********************************************************************************************************************
+namespace make_shared {
+
+struct C
+{
+  C() : c('A'), i(7) {}
+  C(char c) : c(c), i(8) {}
+  C(char c, int i) : c(c), i(i) {}
+  char c;
+  int i;
+};
+
+TEST(STL, make_shared)
+{
+  auto sp1 = stl::make_shared<C>();
+  ASSERT_EQ(sp1->c, 'A');
+  ASSERT_EQ(sp1->i, 7);
+
+  auto sp2 = stl::make_shared<C>('B');
+  ASSERT_EQ(sp2->c, 'B');
+  ASSERT_EQ(sp2->i, 8);
+
+  auto sp3 = stl::make_shared<C>('C', 9);
+  ASSERT_EQ(sp3->c, 'C');
+  ASSERT_EQ(sp3->i, 9);
+
+  static_assert(std::tr1::is_same<decltype(sp1), std::tr1::shared_ptr<C>>::value, "");
+  static_assert(std::tr1::is_same<decltype(sp2), std::tr1::shared_ptr<C>>::value, "");
+  static_assert(std::tr1::is_same<decltype(sp3), std::tr1::shared_ptr<C>>::value, "");
+}
+} // namespace make_shared {
 
 
 

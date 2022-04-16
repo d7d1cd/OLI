@@ -1,16 +1,16 @@
 /*
      _____ _____ __
     |   __|_   _|  |     Standard library implementation for IBM i
-    |__   | | | |  |__   File:   STL/cstddef.h
+    |__   | | | |  |__   File:   STL/memory.h
     |_____| |_| |_____|  Author: Sergey Chebotarev
 
 */
 
-#ifndef OLI_STL_CSTDDEF_H
-#define OLI_STL_CSTDDEF_H
+#ifndef OLI_STL_MEMORY_H
+#define OLI_STL_MEMORY_H
 
-#include "CORE/olidef.h"
-#include <cstddef>
+#include "STL/utility.h"
+#include <memory>
 
 STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,13 +18,16 @@ STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////
 
 
 
-//***** std::nullptr_t *************************************************************************************************
+//***** std::make_shared ***********************************************************************************************
 //
-// Since C++11
 // Реализовано по причине отсутствия в std IBM i
 //
 
-typedef decltype(nullptr) nullptr_t;
+template <typename T, class... Types>
+std::tr1::shared_ptr<T> make_shared(Types&&... args)
+{
+  return std::tr1::shared_ptr<T>(new T(stl::forward<Types>(args)...));
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -33,5 +36,5 @@ typedef decltype(nullptr) nullptr_t;
 
 STL_NAMESPACE_END //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // OLI_STL_CSTDDEF_H
+#endif // OLI_STL_MEMORY_H
 

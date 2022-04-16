@@ -6,8 +6,8 @@
 
 */
 
-#ifndef OLI_STL_TYPE_TRAITS_H_
-#define OLI_STL_TYPE_TRAITS_H_
+#ifndef OLI_STL_TYPE_TRAITS_H
+#define OLI_STL_TYPE_TRAITS_H
 
 #include "CORE/olidef.h"
 #include <type_traits>
@@ -154,5 +154,5 @@ struct make_unsigned {
 
 STL_NAMESPACE_END //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // OLI_STL_TYPE_TRAITS_H_
+#endif // OLI_STL_TYPE_TRAITS_H
 

@@ -6,8 +6,8 @@
 
 */
 
-#ifndef OLI_STL_UTILITY_H_
-#define OLI_STL_UTILITY_H_
+#ifndef OLI_STL_UTILITY_H
+#define OLI_STL_UTILITY_H
 
 #include "STL/type_trait.h"
 #include <utility>
@@ -58,5 +58,5 @@ constexpr T&& forward(typename remove_reference<T>::type&& Arg)
 
 STL_NAMESPACE_END //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // OLI_STL_UTILITY_H_
+#endif // OLI_STL_UTILITY_H
 
