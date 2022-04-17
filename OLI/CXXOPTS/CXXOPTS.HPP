@@ -26,6 +26,7 @@ THE SOFTWARE.
 #define CXXOPTS_HPP_INCLUDED
 
 #include "STL/utility.h"
+#include "STL/memory.h"
 #include <cctype>
 #include <cstring>
 #include <exception>
@@ -33,7 +34,6 @@ THE SOFTWARE.
 #include <limits>
 #include <list>
 #include <map>
-#include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -1038,7 +1038,7 @@ namespace cxxopts
 
       public:
       abstract_value()
-      : m_result(std::tr1::make_shared<T>())
+      : m_result(stl::make_shared<T>())
       , m_store(m_result.get())
       , m_default(false)
       , m_implicit(false)
@@ -1058,7 +1058,7 @@ namespace cxxopts
       {
         if (rhs.m_result)
         {
-          m_result = std::make_shared<T>();
+          m_result = stl::make_shared<T>();
           m_store = m_result.get();
         }
         else
@@ -1190,7 +1190,7 @@ namespace cxxopts
       }
 
       explicit standard_value(bool* b)
-      : abstract_value(b)
+      : abstract_value<bool>(b)
       {
         set_default_and_implicit();
       }
@@ -1198,7 +1198,7 @@ namespace cxxopts
       std::tr1::shared_ptr<Value>
       clone() const
       {
-        return std::make_shared<standard_value<bool>>(*this);
+        return stl::make_shared<standard_value<bool>>(*this);
       }
 
       private:
@@ -1218,14 +1218,14 @@ namespace cxxopts
   std::tr1::shared_ptr<Value>
   value()
   {
-    return std::tr1::make_shared<values::standard_value<T>>();
+    return stl::make_shared<values::standard_value<T>>();
   }
 
   template <typename T>
   std::tr1::shared_ptr<Value>
   value(T& t)
   {
-    return std::tr1::make_shared<values::standard_value<T>>(&t);
+    return stl::make_shared<values::standard_value<T>>(&t);
   }
 
   class OptionAdder;
@@ -1240,13 +1240,13 @@ namespace cxxopts
       String desc,
       std::tr1::shared_ptr<const Value> val
     )
-    : m_short(std::move(short_))
-    , m_long(std::move(long_))
-    , m_desc(std::move(desc))
-    , m_value(std::move(val))
+    : m_short(stl::move(short_))
+    , m_long(stl::move(long_))
+    , m_desc(stl::move(desc))
+    , m_value(stl::move(val))
     , m_count(0)
     {
-      m_hash = std::hash<std::string>{}(m_long + m_short);
+      m_hash = std::tr1::hash<std::string>()(m_long + m_short);
     }
 
     OptionDetails(const OptionDetails& rhs)
@@ -1256,7 +1256,7 @@ namespace cxxopts
     {
     }
 
-    OptionDetails(OptionDetails&& rhs) = default;
+    // OptionDetails(OptionDetails&& rhs) = default;
 
     CXXOPTS_NODISCARD
     const String&
@@ -1272,7 +1272,7 @@ namespace cxxopts
     }
 
     CXXOPTS_NODISCARD
-    std::shared_ptr<Value>
+    std::tr1::shared_ptr<Value>
     make_storage() const
     {
       return m_value->clone();
@@ -1299,13 +1299,13 @@ namespace cxxopts
     }
 
     private:
-    std::string m_short{};
-    std::string m_long{};
-    String m_desc{};
-    std::shared_ptr<const Value> m_value{};
+    std::string m_short;
+    std::string m_long;
+    String m_desc;
+    std::tr1::shared_ptr<const Value> m_value;
     int m_count;
 
-    size_t m_hash{};
+    size_t m_hash;
   };
 
   struct HelpOptionDetails
@@ -1326,12 +1326,14 @@ namespace cxxopts
   {
     std::string name;
     std::string description;
-    std::vector<HelpOptionDetails> options{};
+    std::vector<HelpOptionDetails> options;
   };
 
   class OptionValue
   {
     public:
+    OptionValue() : m_long_name(nullptr), m_count(0), m_default(false) {}
+
     void
     parse
     (
@@ -1367,7 +1369,7 @@ namespace cxxopts
 
     CXXOPTS_NODISCARD
     size_t
-    count() const noexcept
+    count() const
     {
       return m_count;
     }
@@ -1379,7 +1381,7 @@ namespace cxxopts
     // TODO: maybe default options should count towards the number of arguments
     CXXOPTS_NODISCARD
     bool
-    has_default() const noexcept
+    has_default() const
     {
       return m_default;
     }
@@ -1402,7 +1404,7 @@ namespace cxxopts
 
     private:
     void
-    ensure_value(const std::shared_ptr<const OptionDetails>& details)
+    ensure_value(const std::tr1::shared_ptr<const OptionDetails>& details)
     {
       if (m_value == nullptr)
       {
@@ -1411,12 +1413,12 @@ namespace cxxopts
     }
 
 
-    const std::string* m_long_name = nullptr;
+    const std::string* m_long_name;
     // Holding this pointer is safe, since OptionValue's only exist in key-value pairs,
     // where the key has the string we point to.
-    std::shared_ptr<Value> m_value{};
-    size_t m_count = 0;
-    bool m_default = false;
+    std::tr1::shared_ptr<Value> m_value;
+    size_t m_count;
+    bool m_default;
   };
 
   class KeyValue
@@ -1456,8 +1458,8 @@ namespace cxxopts
     std::string m_value;
   };
 
-  using ParsedHashMap = std::unordered_map<size_t, OptionValue>;
-  using NameHashMap = std::unordered_map<std::string, size_t>;
+  typedef std::tr1::unordered_map<size_t, OptionValue> ParsedHashMap;
+  typedef std::tr1::unordered_map<std::string, size_t> NameHashMap;
 
   class ParseResult
   {
@@ -1465,11 +1467,11 @@ namespace cxxopts
     class Iterator
     {
       public:
-      using iterator_category = std::forward_iterator_tag;
-      using value_type = KeyValue;
-      using difference_type = void;
-      using pointer = const KeyValue*;
-      using reference = const KeyValue&;
+      typedef std::forward_iterator_tag iterator_category;
+      typedef KeyValue value_type;
+      typedef void difference_type;
+      typedef const KeyValue* pointer;
+      typedef const KeyValue& reference;
 
       Iterator() = default;
       Iterator(const Iterator&) = default;
@@ -1528,11 +1530,11 @@ namespace cxxopts
 
     ParseResult(NameHashMap&& keys, ParsedHashMap&& values, std::vector<KeyValue> sequential,
             std::vector<KeyValue> default_opts, std::vector<std::string>&& unmatched_args)
-    : m_keys(std::move(keys))
-    , m_values(std::move(values))
-    , m_sequential(std::move(sequential))
-    , m_defaults(std::move(default_opts))
-    , m_unmatched(std::move(unmatched_args))
+    : m_keys(stl::move(keys))
+    , m_values(stl::move(values))
+    , m_sequential(stl::move(sequential))
+    , m_defaults(stl::move(default_opts))
+    , m_unmatched(stl::move(unmatched_args))
     {
     }
 
@@ -1624,11 +1626,11 @@ namespace cxxopts
     }
 
     private:
-    NameHashMap m_keys{};
-    ParsedHashMap m_values{};
-    std::vector<KeyValue> m_sequential{};
-    std::vector<KeyValue> m_defaults{};
-    std::vector<std::string> m_unmatched{};
+    NameHashMap m_keys;
+    ParsedHashMap m_values;
+    std::vector<KeyValue> m_sequential;
+    std::vector<KeyValue> m_defaults;
+    std::vector<std::string> m_unmatched;
   };
 
   struct Option
@@ -1640,22 +1642,22 @@ namespace cxxopts
       std::tr1::shared_ptr<const Value>  value = ::cxxopts::value<bool>(),
       std::string arg_help = ""
     )
-    : opts_(std::move(opts))
-    , desc_(std::move(desc))
-    , value_(std::move(value))
-    , arg_help_(std::move(arg_help))
+    : opts_(stl::move(opts))
+    , desc_(stl::move(desc))
+    , value_(stl::move(value))
+    , arg_help_(stl::move(arg_help))
     {
     }
 
     std::string opts_;
     std::string desc_;
-    std::shared_ptr<const Value> value_;
+    std::tr1::shared_ptr<const Value> value_;
     std::string arg_help_;
   };
 
-  using OptionMap = std::unordered_map<std::string, std::shared_ptr<OptionDetails>>;
-  using PositionalList = std::vector<std::string>;
-  using PositionalListIterator = PositionalList::const_iterator;
+  typedef std::tr1::unordered_map<std::string, std::tr1::shared_ptr<OptionDetails>> OptionMap;
+  typedef std::vector<std::string> PositionalList;
+  typedef PositionalList::const_iterator PositionalListIterator;
 
   class OptionParser
   {
@@ -1679,7 +1681,7 @@ namespace cxxopts
       int argc,
       const char* const* argv,
       int& current,
-      const std::shared_ptr<OptionDetails>& value,
+      const std::tr1::shared_ptr<OptionDetails>& value,
       const std::string& name
     );
 
@@ -1689,16 +1691,16 @@ namespace cxxopts
     void
     parse_option
     (
-      const std::shared_ptr<OptionDetails>& value,
+      const std::tr1::shared_ptr<OptionDetails>& value,
       const std::string& name,
       const std::string& arg = ""
     );
 
     void
-    parse_default(const std::shared_ptr<OptionDetails>& details);
+    parse_default(const std::tr1::shared_ptr<OptionDetails>& details);
 
     void
-    parse_no_value(const std::shared_ptr<OptionDetails>& details);
+    parse_no_value(const std::tr1::shared_ptr<OptionDetails>& details);
 
     private:
 
@@ -1879,7 +1881,7 @@ namespace cxxopts
     public:
 
     OptionAdder(Options& options, std::string group)
-    : m_options(options), m_group(std::move(group))
+    : m_options(options), m_group(stl::move(group))
     {
     }
 
@@ -1888,7 +1890,7 @@ namespace cxxopts
     (
       const std::string& opts,
       const std::string& desc,
-      const std::shared_ptr<const Value>& value
+      const std::tr1::shared_ptr<const Value>& value
         = ::cxxopts::value<bool>(),
       std::string arg_help = ""
     );
@@ -2108,7 +2110,7 @@ OptionAdder::operator()
 (
   const std::string& opts,
   const std::string& desc,
-  const std::shared_ptr<const Value>& value,
+  const std::tr1::shared_ptr<const Value>& value,
   std::string arg_help
 )
 {
