@@ -25,6 +25,14 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
 
+// Из-за ошибки в реализации стандартной библиотеки, использование
+// std::unordered_set и std::unordered_map невозможно.
+// Чтобы обойти это можно использовать std::set и std::map соответственно.
+// Однако, чтобы иметь возможность быстро вернуться к оригинальному коду
+// вводится макрос. Если он определен, используется unordered версия
+// контейнеров. Если не определен, используется std::map, std::set.
+// #define CAN_USE_STD_UNORDERED_SET_MAP
+
 #include "STL/utility.h"
 #include "STL/memory.h"
 #include <cctype>
@@ -36,8 +44,15 @@ THE SOFTWARE.
 #include <map>
 #include <sstream>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
+
+#ifdef CAN_USE_STD_UNORDERED_SET_MAP
+  #include <unordered_map>
+  #include <unordered_set>
+#else
+  #include <map>
+  #include <set>
+#endif
+
 #include <vector>
 #include <algorithm>
 #include <cstdint>
@@ -1458,8 +1473,13 @@ namespace cxxopts
     std::string m_value;
   };
 
+  #ifdef CAN_USE_STD_UNORDERED_SET_MAP
   typedef std::tr1::unordered_map<size_t, OptionValue> ParsedHashMap;
   typedef std::tr1::unordered_map<std::string, size_t> NameHashMap;
+  #else
+  typedef std::map<size_t, OptionValue> ParsedHashMap;
+  typedef std::map<std::string, size_t> NameHashMap;
+  #endif
 
   class ParseResult
   {
@@ -1655,7 +1675,12 @@ namespace cxxopts
     std::string arg_help_;
   };
 
+  #ifdef CAN_USE_STD_UNORDERED_SET_MAP
   typedef std::tr1::unordered_map<std::string, std::tr1::shared_ptr<OptionDetails>> OptionMap;
+  #else
+  typedef std::map<std::string, std::tr1::shared_ptr<OptionDetails>> OptionMap;
+  #endif
+
   typedef std::vector<std::string> PositionalList;
   typedef PositionalList::const_iterator PositionalListIterator;
 
@@ -1870,7 +1895,12 @@ namespace cxxopts
 
     std::shared_ptr<OptionMap> m_options;
     std::vector<std::string> m_positional{};
-    std::unordered_set<std::string> m_positional_set{};
+
+    #ifdef CAN_USE_STD_UNORDERED_SET_MAP
+    std::unordered_set<std::string> m_positional_set;
+    #else
+    std::set<std::string> m_positional_set;
+    #endif
 
     //mapping from groups to help options
     std::map<std::string, HelpGroupDetails> m_help{};
@@ -2710,6 +2740,9 @@ Options::group_help(const std::string& group) const
 
 } // namespace cxxopts
 
+#ifdef CAN_USE_STD_UNORDERED_SET_MAP
+  #undef CAN_USE_STD_UNORDERED_SET_MAP
+#endif
 
 #endif //CXXOPTS_HPP_INCLUDED
 
