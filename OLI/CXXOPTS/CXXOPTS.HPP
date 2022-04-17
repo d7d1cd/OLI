@@ -1186,7 +1186,7 @@ namespace cxxopts
       using abstract_value<T>::abstract_value;
 
       CXXOPTS_NODISCARD
-      std::shared_ptr<Value>
+      std::tr1::shared_ptr<Value>
       clone() const
       {
         return std::make_shared<standard_value<T>>(*this);
@@ -1634,13 +1634,13 @@ namespace cxxopts
     arguments_string() const
     {
       std::string result;
-      for(const auto& kv: m_sequential)
+      for(auto kv = m_sequential.begin(); kv != m_sequential.end(); ++kv)
       {
-        result += kv.key() + " = " + kv.value() + "\n";
+        result += kv->key() + " = " + kv->value() + "\n";
       }
-      for(const auto& kv: m_defaults)
+      for(auto kv = m_defaults.begin(); kv != m_defaults.end(); ++kv)
       {
-        result += kv.key() + " = " + kv.value() + " " + "(default)" + "\n";
+        result += kv->key() + " = " + kv->value() + " " + "(default)" + "\n";
       }
       return result;
     }
@@ -1734,12 +1734,12 @@ namespace cxxopts
     const OptionMap& m_options;
     const PositionalList& m_positional;
 
-    std::vector<KeyValue> m_sequential{};
-    std::vector<KeyValue> m_defaults{};
+    std::vector<KeyValue> m_sequential;
+    std::vector<KeyValue> m_defaults;
     bool m_allow_unrecognised;
 
-    ParsedHashMap m_parsed{};
-    NameHashMap m_keys{};
+    ParsedHashMap m_parsed;
+    NameHashMap m_keys;
   };
 
   class Options
@@ -1828,7 +1828,7 @@ namespace cxxopts
       const std::string& s,
       const std::string& l,
       std::string desc,
-      const std::shared_ptr<const Value>& value,
+      const std::tr1::shared_ptr<const Value>& value,
       std::string arg_help
     );
 
@@ -1868,7 +1868,7 @@ namespace cxxopts
     add_one_option
     (
       const std::string& option,
-      const std::shared_ptr<OptionDetails>& details
+      const std::tr1::shared_ptr<OptionDetails>& details
     );
 
     String
@@ -1893,7 +1893,7 @@ namespace cxxopts
     size_t m_width;
     bool m_tab_expansion;
 
-    std::shared_ptr<OptionMap> m_options;
+    std::tr1::shared_ptr<OptionMap> m_options;
     std::vector<std::string> m_positional{};
 
     #ifdef CAN_USE_STD_UNORDERED_SET_MAP
@@ -2184,7 +2184,7 @@ OptionAdder::operator()
 
 inline
 void
-OptionParser::parse_default(const std::shared_ptr<OptionDetails>& details)
+OptionParser::parse_default(const std::tr1::shared_ptr<OptionDetails>& details)
 {
   // TODO: remove the duplicate code here
   auto& store = m_parsed[details->hash()];
@@ -2194,7 +2194,7 @@ OptionParser::parse_default(const std::shared_ptr<OptionDetails>& details)
 
 inline
 void
-OptionParser::parse_no_value(const std::shared_ptr<OptionDetails>& details)
+OptionParser::parse_no_value(const std::tr1::shared_ptr<OptionDetails>& details)
 {
   auto& store = m_parsed[details->hash()];
   store.parse_no_value(details);
@@ -2204,7 +2204,7 @@ inline
 void
 OptionParser::parse_option
 (
-  const std::shared_ptr<OptionDetails>& value,
+  const std::tr1::shared_ptr<OptionDetails>& value,
   const std::string& /*name*/,
   const std::string& arg
 )
@@ -2223,7 +2223,7 @@ OptionParser::checked_parse_arg
   int argc,
   const char* const* argv,
   int& current,
-  const std::shared_ptr<OptionDetails>& value,
+  const std::tr1::shared_ptr<OptionDetails>& value,
   const std::string& name
 )
 {
@@ -2525,7 +2525,7 @@ Options::add_option
   const std::string& s,
   const std::string& l,
   std::string desc,
-  const std::shared_ptr<const Value>& value,
+  const std::tr1::shared_ptr<const Value>& value,
   std::string arg_help
 )
 {
@@ -2558,7 +2558,7 @@ void
 Options::add_one_option
 (
   const std::string& option,
-  const std::shared_ptr<OptionDetails>& details
+  const std::tr1::shared_ptr<OptionDetails>& details
 )
 {
   auto in = m_options->emplace(option, details);
