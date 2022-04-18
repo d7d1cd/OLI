@@ -1,6 +1,7 @@
 #include "type_trait"
 #include "utility"
 #include "memory"
+#include "map"
 #include "GTEST/gtest.h"
 #include <cctype>
 
@@ -299,6 +300,111 @@ TEST(STL, make_shared)
   static_assert(std::tr1::is_same<decltype(sp3), std::tr1::shared_ptr<C>>::value, "");
 }
 } // namespace make_shared {
+
+
+
+
+//**********************************************************************************************************************
+// https://godbolt.org/z/YKGxe1j97
+//
+namespace map {
+
+int defctor = 0;
+int intctor = 0;
+int copy = 0;
+int move = 0;
+int destroy = 0;
+
+void init() { defctor = intctor = copy = move = destroy = 0; }
+
+struct type
+{
+  int i;
+  type()                : i(0)     { ++defctor; }
+  type(int i)           : i(i)     { ++intctor; }
+  type(const type& src) : i(src.i) { ++copy; }
+  type(type&& src)      : i(src.i) { ++move; }
+  ~type()                          { ++destroy; }
+};
+
+TEST(STL, map)
+{
+  { // Демонстрация ошибки в std::map
+    std::map<int, type> map;
+
+    init();
+    map[0] = type();
+    ASSERT_EQ(defctor, 2);
+    ASSERT_EQ(intctor, 0);
+    ASSERT_EQ(copy, 2);
+    ASSERT_EQ(move, 0);
+    ASSERT_EQ(destroy, 3);
+
+    init();
+    int i = map[0].i;
+    ASSERT_EQ(defctor, 1);             // Зачем здесь вызывается конструктор по умолчанию???
+    ASSERT_EQ(intctor, 0);
+    ASSERT_EQ(copy, 1);
+    ASSERT_EQ(move, 0);
+    ASSERT_EQ(destroy, 2);
+    ASSERT_EQ(i, 0);
+
+    init();
+    map[0] = type(777);
+    ASSERT_EQ(defctor, 1);             // Зачем здесь вызывается конструктор по умолчанию???
+    ASSERT_EQ(intctor, 1);
+    ASSERT_EQ(copy, 1);
+    ASSERT_EQ(move, 0);
+    ASSERT_EQ(destroy, 3);
+    ASSERT_EQ(map[0].i, 777);
+
+    init();
+  }
+  ASSERT_EQ(defctor, 0);
+  ASSERT_EQ(intctor, 0);
+  ASSERT_EQ(copy, 0);
+  ASSERT_EQ(move, 0);
+  ASSERT_EQ(destroy, 1);
+
+
+  { // Тестирование stl::map
+    stl::map<int, type> map;
+
+    init();
+    map[0] = type();                   // При добавлении элемента поведение аналогично стандартной реализации
+    ASSERT_EQ(defctor, 2);
+    ASSERT_EQ(intctor, 0);
+    ASSERT_EQ(copy, 2);
+    ASSERT_EQ(move, 0);
+    ASSERT_EQ(destroy, 3);
+
+    init();
+    int i = map[0].i;                  // Поиск элемента по ключу
+    ASSERT_EQ(defctor, 0);             // Не вызывается конструктор по умолчанию
+    ASSERT_EQ(intctor, 0);
+    ASSERT_EQ(copy, 0);                // Не вызывается конструктор копии
+    ASSERT_EQ(move, 0);
+    ASSERT_EQ(destroy, 0);             // Не вызывается ни один деструктор
+    ASSERT_EQ(i, 0);
+
+    init();
+    map[0] = type(777);                // Замена элемента по ключу
+    ASSERT_EQ(defctor, 0);             // Не вызывается конструктор по умолчанию
+    ASSERT_EQ(intctor, 1);
+    ASSERT_EQ(copy, 0);                // Не вызывается конструктор копии
+    ASSERT_EQ(move, 0);
+    ASSERT_EQ(destroy, 1);             // Деструктор вызывается только для заменяемого элемента
+    ASSERT_EQ(map[0].i, 777);
+
+    init();
+  }
+  ASSERT_EQ(defctor, 0);
+  ASSERT_EQ(intctor, 0);
+  ASSERT_EQ(copy, 0);
+  ASSERT_EQ(move, 0);
+  ASSERT_EQ(destroy, 1);
+}
+} // namespace map {
 
 
 
