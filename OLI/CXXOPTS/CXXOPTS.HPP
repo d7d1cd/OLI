@@ -35,24 +35,23 @@ THE SOFTWARE.
 
 #include "STL/utility.h"
 #include "STL/memory.h"
+#include "STL/map.hpp"
+
+#ifdef CAN_USE_STD_UNORDERED_SET_MAP
+  #include <unordered_map>
+  #include <unordered_set>
+#else
+  #include <set>
+#endif
+
 #include <cctype>
 #include <cstring>
 #include <exception>
 #include <iostream>
 #include <limits>
 #include <list>
-#include <map>
 #include <sstream>
 #include <string>
-
-#ifdef CAN_USE_STD_UNORDERED_SET_MAP
-  #include <unordered_map>
-  #include <unordered_set>
-#else
-  #include <map>
-  #include <set>
-#endif
-
 #include <vector>
 #include <algorithm>
 #include <cstdint>
@@ -2010,7 +2009,7 @@ namespace cxxopts
       {
         String desc2;
         auto size = size_t{ 0 };
-        for (auto c = std::begin(desc); c != std::end(desc); ++c)
+        for (auto c = stl::begin(desc); c != stl::end(desc); ++c)
         {
           if (*c == '\n')
           {
@@ -2034,26 +2033,26 @@ namespace cxxopts
 
       desc += " ";
 
-      auto current = std::begin(desc);
+      auto current = stl::begin(desc);
       auto previous = current;
       auto startLine = current;
       auto lastSpace = current;
 
-      auto size = size_t{};
+      size_t size = 0;
 
       bool appendNewLine;
       bool onlyWhiteSpace = true;
 
-      while (current != std::end(desc))
+      while (current != stl::end(desc))
       {
         appendNewLine = false;
 
-        if (std::isblank(*previous))
+        if (std::tr1::isblank(*previous))
         {
           lastSpace = current;
         }
 
-        if (!std::isblank(*current))
+        if (!std::tr1::isblank(*current))
         {
           onlyWhiteSpace = false;
         }
