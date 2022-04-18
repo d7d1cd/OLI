@@ -4,6 +4,8 @@
 #include "map"
 #include "GTEST/gtest.h"
 #include <cctype>
+#include <vector>
+
 
 
 //**********************************************************************************************************************
@@ -405,6 +407,48 @@ TEST(STL, map)
   ASSERT_EQ(destroy, 1);
 }
 } // namespace map {
+
+
+
+
+//**********************************************************************************************************************
+namespace begin {
+
+TEST(STL, begin)
+{
+  constexpr S = 5;
+  int arr[S] = {};
+  const char carr[S] = {};
+  std::vector<int> vec(S, 0);
+  const std::vector<char> cvec(S, 0);
+
+  ASSERT_EQ(stl::begin(arr), &arr[0]);
+  ASSERT_EQ(stl::begin(carr), &carr[0]);
+  ASSERT_EQ(stl::begin(vec), vec.begin());
+  ASSERT_EQ(stl::begin(cvec), cvec.begin());
+}
+} // namespace begin {
+
+
+
+
+//**********************************************************************************************************************
+namespace end {
+
+TEST(STL, end)
+{
+  constexpr S = 5;
+  int arr[S] = {};
+  const char carr[S] = {};
+  std::vector<int> vec(S, 0);
+  const std::vector<char> cvec(S, 0);
+
+  ASSERT_EQ(stl::end(arr), &arr[0] + S);
+  ASSERT_EQ(stl::end(carr), &carr[0] + S);
+  ASSERT_EQ(stl::end(vec), vec.end());
+  ASSERT_EQ(stl::end(cvec), cvec.end());
+}
+} // namespace end {
 
 
 

@@ -9,7 +9,7 @@
 #ifndef OLI_STL_MAP_H
 #define OLI_STL_MAP_H
 
-//#include "STL/type_trait.h"
+#include "STL/xiter.hpp"
 #include <map>
 
 STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////
