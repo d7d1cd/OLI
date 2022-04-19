@@ -1806,9 +1806,9 @@ namespace cxxopts
     OptionAdder
     add_options(std::string group = "");
 
-    void
-    add_options(const std::string& group,
-                std::initializer_list<Option> options);
+//    void
+//    add_options(const std::string& group,
+//                std::initializer_list<Option> options);
 
     void
     add_option
@@ -1835,8 +1835,8 @@ namespace cxxopts
     void
     parse_positional(std::vector<std::string> options);
 
-    void
-    parse_positional(std::initializer_list<std::string> options);
+//    void
+//    parse_positional(std::initializer_list<std::string> options);
 
     template <typename Iterator>
     void
@@ -2108,20 +2108,17 @@ namespace cxxopts
     }
   } // namespace
 
-inline
-void
-Options::add_options
-(
-  const std::string &group,
-  std::initializer_list<Option> options
-)
-{
- OptionAdder option_adder(*this, group);
- for (const auto &option: options)
- {
-   option_adder(option.opts_, option.desc_, option.value_, option.arg_help_);
- }
-}
+//inline
+//void
+//Options::add_options(const std::string &group,
+//                     std::initializer_list<Option> options)
+//{
+// OptionAdder option_adder(*this, group);
+// for (const auto &option: options)
+// {
+//   option_adder(option.opts_, option.desc_, option.value_, option.arg_help_);
+// }
+//}
 
 inline
 OptionAdder
@@ -2291,12 +2288,12 @@ Options::parse_positional(std::vector<std::string> options)
   m_positional_set.insert(m_positional.begin(), m_positional.end());
 }
 
-inline
-void
-Options::parse_positional(std::initializer_list<std::string> options)
-{
-  parse_positional(std::vector<std::string>(options));
-}
+//inline
+//void
+//Options::parse_positional(std::initializer_list<std::string> options)
+//{
+//  parse_positional(std::vector<std::string>(options));
+//}
 
 inline
 ParseResult
