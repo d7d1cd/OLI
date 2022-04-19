@@ -4,7 +4,7 @@
 
 TEST(CXXOPTS, simple_test)
 {
-  cxxopts::Options options("test", "A brief description");
+//  cxxopts::Options options("test", "A brief description");
 }
 
 

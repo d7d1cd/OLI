@@ -1807,11 +1807,8 @@ namespace cxxopts
     add_options(std::string group = "");
 
     void
-    add_options
-    (
-      const std::string& group,
-      std::initializer_list<Option> options
-    );
+    add_options(const std::string& group,
+                std::initializer_list<Option> options);
 
     void
     add_option
@@ -2135,16 +2132,14 @@ Options::add_options(std::string group)
 
 inline
 OptionAdder&
-OptionAdder::operator()
-(
-  const std::string& opts,
-  const std::string& desc,
-  const std::tr1::shared_ptr<const Value>& value,
-  std::string arg_help
-)
+OptionAdder::operator()(const std::string& opts,
+                        const std::string& desc,
+                        const std::tr1::shared_ptr<const Value>& value,
+                        std::string arg_help)
 {
-  std::string short_sw, long_sw;
-  std::tie(short_sw, long_sw) = values::parser_tool::SplitSwitchDef(opts);
+  auto split_opts = values::parser_tool::SplitSwitchDef(opts);
+  auto short_sw = split_opts.first;
+  auto long_sw = split_opts.second;
 
   if (!short_sw.length() && !long_sw.length())
   {
@@ -2155,28 +2150,22 @@ OptionAdder::operator()
     throw_or_mimic<invalid_option_format_error>(opts);
   }
 
-  auto option_names = []
-  (
-    const std::string &short_,
-    const std::string &long_
-  )
-  {
-    if (long_.length() == 1)
-    {
-      return std::make_tuple(long_, short_);
+  struct {
+    std::pair<const std::string&, const std::string&>
+    operator()(const std::string& s, const std::string& l) {
+      if (l.length() == 1) return std::make_pair(l, s);
+      return std::make_pair(s, l);
     }
-    return std::make_tuple(short_, long_);
-  }(short_sw, long_sw);
+  } lambda;
 
-  m_options.add_option
-  (
-    m_group,
-    std::get<0>(option_names),
-    std::get<1>(option_names),
-    desc,
-    value,
-    std::move(arg_help)
-  );
+  auto option_names = lambda(short_sw, long_sw);
+
+  m_options.add_option(m_group,
+                       option_names.first,
+                       option_names.second,
+                       desc,
+                       value,
+                       stl::move(arg_help));
 
   return *this;
 }
@@ -2188,7 +2177,8 @@ OptionParser::parse_default(const std::tr1::shared_ptr<OptionDetails>& details)
   // TODO: remove the duplicate code here
   auto& store = m_parsed[details->hash()];
   store.parse_default(details);
-  m_defaults.emplace_back(details->long_name(), details->value().get_default_value());
+  m_defaults.push_back(KeyValue(details->long_name(),
+                                details->value().get_default_value()));
 }
 
 inline
@@ -2201,18 +2191,15 @@ OptionParser::parse_no_value(const std::tr1::shared_ptr<OptionDetails>& details)
 
 inline
 void
-OptionParser::parse_option
-(
-  const std::tr1::shared_ptr<OptionDetails>& value,
-  const std::string& /*name*/,
-  const std::string& arg
-)
+OptionParser::parse_option(const std::tr1::shared_ptr<OptionDetails>& value,
+                           const std::string& /*name*/,
+                           const std::string& arg)
 {
   auto hash = value->hash();
   auto& result = m_parsed[hash];
   result.parse(value, arg);
 
-  m_sequential.emplace_back(value->long_name(), arg);
+  m_sequential.push_back(KeyValue(value->long_name(), arg));
 }
 
 inline
@@ -2494,14 +2481,14 @@ inline
 void
 OptionParser::finalise_aliases()
 {
-  for (auto& option: m_options)
+  for (auto option = m_options.begin(); option != m_options.end(); ++option)
   {
-    auto& detail = *option.second;
+    auto& detail = *option->second;
     auto hash = detail.hash();
     m_keys[detail.short_name()] = hash;
     m_keys[detail.long_name()] = hash;
 
-    m_parsed.emplace(hash, OptionValue());
+    m_parsed.insert(std::make_pair(hash, OptionValue()));
   }
 }
 
