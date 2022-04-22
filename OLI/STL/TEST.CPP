@@ -309,7 +309,7 @@ TEST(STL, make_shared)
 //**********************************************************************************************************************
 // https://godbolt.org/z/YKGxe1j97
 //
-namespace map {
+namespace map_operator_square_brackets {
 
 int defctor = 0;
 int intctor = 0;
@@ -329,7 +329,7 @@ struct type
   ~type()                          { ++destroy; }
 };
 
-TEST(STL, map)
+TEST(STL, map_operator_square_brackets)
 {
   { // Демонстрация ошибки в std::map
     std::map<int, type> map;
@@ -406,7 +406,54 @@ TEST(STL, map)
   ASSERT_EQ(move, 0);
   ASSERT_EQ(destroy, 1);
 }
-} // namespace map {
+} // namespace map_operator_square_brackets {
+
+
+
+
+//**********************************************************************************************************************
+namespace map_at {
+
+TEST(STL, map_at)
+{
+  stl::map<int, int> m;
+  m.insert(std::make_pair(1, 1));
+  m.insert(std::make_pair(2, 2));
+  ASSERT_EQ(m.at(1), 1);
+  ASSERT_EQ(m.at(2), 2);
+  m.at(2) = 3;
+  ASSERT_EQ(m.at(2), 3);
+
+
+  try {
+    m.at(3);
+    FAIL() << "Expected std::out_of_range";
+  }
+  catch (std::out_of_range const & err) {
+    EXPECT_EQ(err.what(), std::string("invalid map<K, T> key"));
+  }
+  catch (...) {
+    FAIL() << "Expected std::out_of_range";
+  }
+
+
+  const stl::map<int, int> cm(m);
+  ASSERT_EQ(cm.at(1), 1);
+  ASSERT_EQ(cm.at(2), 3);
+
+  try {
+    cm.at(3);
+    FAIL() << "Expected std::out_of_range";
+  }
+  catch (std::out_of_range const & err) {
+    EXPECT_EQ(err.what(), std::string("invalid map<K, T> key"));
+  }
+  catch (...) {
+    FAIL() << "Expected std::out_of_range";
+  }
+}
+} // namespace map_at {
+
 
 
 
