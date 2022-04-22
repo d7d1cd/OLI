@@ -1746,29 +1746,29 @@ namespace cxxopts
     public:
 
     explicit Options(std::string program, std::string help_string = "")
-    : m_program(std::move(program))
-    , m_help_string(toLocalString(std::move(help_string)))
+    : m_program(stl::move(program))
+    , m_help_string(toLocalString(stl::move(help_string)))
     , m_custom_help("[OPTION...]")
     , m_positional_help("positional parameters")
     , m_show_positional(false)
     , m_allow_unrecognised(false)
     , m_width(76)
     , m_tab_expansion(false)
-    , m_options(std::make_shared<OptionMap>())
+    , m_options(stl::make_shared<OptionMap>())
     {
     }
 
     Options&
     positional_help(std::string help_text)
     {
-      m_positional_help = std::move(help_text);
+      m_positional_help = stl::move(help_text);
       return *this;
     }
 
     Options&
     custom_help(std::string help_text)
     {
-      m_custom_help = std::move(help_text);
+      m_custom_help = stl::move(help_text);
       return *this;
     }
 
@@ -1841,7 +1841,7 @@ namespace cxxopts
     template <typename Iterator>
     void
     parse_positional(Iterator begin, Iterator end) {
-      parse_positional(std::vector<std::string>{begin, end});
+      parse_positional(std::vector<std::string>(begin, end));
     }
 
     std::string
@@ -1880,17 +1880,17 @@ namespace cxxopts
     void
     generate_all_groups_help(String& result) const;
 
-    std::string m_program{};
-    String m_help_string{};
-    std::string m_custom_help{};
-    std::string m_positional_help{};
+    std::string m_program;
+    String m_help_string;
+    std::string m_custom_help;
+    std::string m_positional_help;
     bool m_show_positional;
     bool m_allow_unrecognised;
     size_t m_width;
     bool m_tab_expansion;
 
     std::tr1::shared_ptr<OptionMap> m_options;
-    std::vector<std::string> m_positional{};
+    std::vector<std::string> m_positional;
 
     #ifdef CAN_USE_STD_UNORDERED_SET_MAP
     std::unordered_set<std::string> m_positional_set;
@@ -1899,7 +1899,7 @@ namespace cxxopts
     #endif
 
     //mapping from groups to help options
-    std::map<std::string, HelpGroupDetails> m_help{};
+    std::map<std::string, HelpGroupDetails> m_help;
   };
 
   class OptionAdder
@@ -2124,7 +2124,7 @@ inline
 OptionAdder
 Options::add_options(std::string group)
 {
-  return OptionAdder(*this, std::move(group));
+  return OptionAdder(*this, stl::move(group));
 }
 
 inline
@@ -2276,14 +2276,16 @@ inline
 void
 Options::parse_positional(std::string option)
 {
-  parse_positional(std::vector<std::string>{std::move(option)});
+  std::vector<std::string> v;
+  v.push_back(option);
+  parse_positional(v);
 }
 
 inline
 void
 Options::parse_positional(std::vector<std::string> options)
 {
-  m_positional = std::move(options);
+  m_positional = stl::move(options);
 
   m_positional_set.insert(m_positional.begin(), m_positional.end());
 }
@@ -2512,8 +2514,8 @@ Options::add_option
   std::string arg_help
 )
 {
-  auto stringDesc = toLocalString(std::move(desc));
-  auto option = std::make_shared<OptionDetails>(s, l, stringDesc, value);
+  auto stringDesc = toLocalString(stl::move(desc));
+  auto option = stl::make_shared<OptionDetails>(s, l, stringDesc, value);
 
   if (!s.empty())
   {
@@ -2528,12 +2530,12 @@ Options::add_option
   //add the help details
   auto& options = m_help[group];
 
-  options.options.emplace_back(HelpOptionDetails{s, l, stringDesc,
-      value->has_default(), value->get_default_value(),
-      value->has_implicit(), value->get_implicit_value(),
-      std::move(arg_help),
-      value->is_container(),
-      value->is_boolean()});
+  HelpOptionDetails hod = {
+    s, l, stringDesc, value->has_default(), value->get_default_value(),
+    value->has_implicit(), value->get_implicit_value(), stl::move(arg_help),
+    value->is_container(), value->is_boolean()
+  };
+  options.options.push_back(hod);
 }
 
 inline
@@ -2544,7 +2546,7 @@ Options::add_one_option
   const std::tr1::shared_ptr<OptionDetails>& details
 )
 {
-  auto in = m_options->emplace(option, details);
+  auto in = m_options->insert(std::make_pair(option, details));
 
   if (!in.second)
   {
@@ -2556,7 +2558,7 @@ inline
 String
 Options::help_one_group(const std::string& g) const
 {
-  using OptionHelp = std::vector<std::pair<String, String>>;
+  typedef std::vector<std::pair<String, String>> OptionHelp;
 
   auto group = m_help.find(g);
   if (group == m_help.end())
@@ -2657,15 +2659,8 @@ Options::generate_all_groups_help(String& result) const
 {
   std::vector<std::string> all_groups;
 
-  std::transform(
-    m_help.begin(),
-    m_help.end(),
-    std::back_inserter(all_groups),
-    [] (const std::map<std::string, HelpGroupDetails>::value_type& group)
-    {
-      return group.first;
-    }
-  );
+  for (auto it = m_help.begin(); it != m_help.end(); ++it)
+    all_groups.push_back(it->first);
 
   generate_group_help(result, all_groups);
 }
@@ -2701,15 +2696,8 @@ Options::groups() const
 {
   std::vector<std::string> g;
 
-  std::transform(
-    m_help.begin(),
-    m_help.end(),
-    std::back_inserter(g),
-    [] (const std::map<std::string, HelpGroupDetails>::value_type& pair)
-    {
-      return pair.first;
-    }
-  );
+  for (auto it = m_help.begin(); it != m_help.end(); ++it)
+    g.push_back(it->first);
 
   return g;
 }
