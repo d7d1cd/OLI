@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
-
+                                                                                    template <typename T> struct A;
 // Из-за ошибки в реализации стандартной библиотеки, использование
 // std::unordered_set и std::unordered_map невозможно.
 // Чтобы обойти это можно использовать std::set и std::map соответственно.
@@ -1476,8 +1476,8 @@ namespace cxxopts
   typedef std::tr1::unordered_map<size_t, OptionValue> ParsedHashMap;
   typedef std::tr1::unordered_map<std::string, size_t> NameHashMap;
   #else
-  typedef std::map<size_t, OptionValue> ParsedHashMap;
-  typedef std::map<std::string, size_t> NameHashMap;
+  typedef stl::map<size_t, OptionValue> ParsedHashMap;
+  typedef stl::map<std::string, size_t> NameHashMap;
   #endif
 
   class ParseResult
@@ -1677,7 +1677,7 @@ namespace cxxopts
   #ifdef CAN_USE_STD_UNORDERED_SET_MAP
   typedef std::tr1::unordered_map<std::string, std::tr1::shared_ptr<OptionDetails>> OptionMap;
   #else
-  typedef std::map<std::string, std::tr1::shared_ptr<OptionDetails>> OptionMap;
+  typedef stl::map<std::string, std::tr1::shared_ptr<OptionDetails>> OptionMap;
   #endif
 
   typedef std::vector<std::string> PositionalList;
@@ -1810,12 +1810,12 @@ namespace cxxopts
 //    add_options(const std::string& group,
 //                std::initializer_list<Option> options);
 
-    void
-    add_option
-    (
-      const std::string& group,
-      const Option& option
-    );
+//    void
+//    add_option
+//    (
+//      const std::string& group,
+//      const Option& option
+//    );
 
     void
     add_option
@@ -1899,7 +1899,7 @@ namespace cxxopts
     #endif
 
     //mapping from groups to help options
-    std::map<std::string, HelpGroupDetails> m_help;
+    stl::map<std::string, HelpGroupDetails> m_help;
   };
 
   class OptionAdder
@@ -2345,7 +2345,7 @@ OptionParser::parse(int argc, const char* const* argv)
       }
       else
       {
-        unmatched.emplace_back(argv[current]);
+        unmatched.push_back(argv[current]);
       }
       //if we return from here then it was parsed successfully, so continue
     }
@@ -2407,7 +2407,7 @@ OptionParser::parse(int argc, const char* const* argv)
           if (m_allow_unrecognised)
           {
             // keep unrecognised options in argument list, skip to next argument
-            unmatched.emplace_back(argv[current]);
+            unmatched.push_back(argv[current]);
             ++current;
             continue;
           }
@@ -2436,8 +2436,9 @@ OptionParser::parse(int argc, const char* const* argv)
     ++current;
   }
 
-  for (auto& opt : m_options)
+  for (auto it = m_options.begin(); it != m_options.end(); ++it)
   {
+    auto& opt = *it;
     auto& detail = opt.second;
     const auto& value = detail->value();
 
@@ -2465,14 +2466,15 @@ OptionParser::parse(int argc, const char* const* argv)
 
     //adjust argv for any that couldn't be swallowed
     while (current != argc) {
-      unmatched.emplace_back(argv[current]);
+      unmatched.push_back(argv[current]);
       ++current;
     }
   }
 
   finalise_aliases();
 
-  ParseResult parsed(std::move(m_keys), std::move(m_parsed), std::move(m_sequential), std::move(m_defaults), std::move(unmatched));
+  ParseResult parsed(stl::move(m_keys), stl::move(m_parsed), stl::move(m_sequential),
+                     stl::move(m_defaults), stl::move(unmatched));
   return parsed;
 }
 
@@ -2491,16 +2493,16 @@ OptionParser::finalise_aliases()
   }
 }
 
-inline
-void
-Options::add_option
-(
-  const std::string& group,
-  const Option& option
-)
-{
-    add_options(group, {option});
-}
+//inline
+//void
+//Options::add_option
+//(
+//  const std::string& group,
+//  const Option& option
+//)
+//{
+//    add_options(group, {option});
+//}
 
 inline
 void
@@ -2577,8 +2579,9 @@ Options::help_one_group(const std::string& g) const
     result += toLocalString(" " + g + " options:\n");
   }
 
-  for (const auto& o : group->second.options)
+  for (auto it = group->second.options.begin(); it != group->second.options.end(); ++it)
   {
+    const auto& o = *it;
     if (m_positional_set.find(o.l) != m_positional_set.end() &&
         !m_show_positional)
     {
@@ -2599,8 +2602,9 @@ Options::help_one_group(const std::string& g) const
   }
 
   auto fiter = format.begin();
-  for (const auto& o : group->second.options)
+  for (auto it = group->second.options.begin(); it != group->second.options.end(); ++it)
   {
+    const auto& o = *it;
     if (m_positional_set.find(o.l) != m_positional_set.end() &&
         !m_show_positional)
     {
