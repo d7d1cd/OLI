@@ -23,7 +23,7 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   DCL        VAR(&DSTLIB)     TYPE(*CHAR) LEN(10)  VALUE(CSNTST)                /* Библиотека для размещения собранных объектов по умолчанию */
   DCL        VAR(&BUILDM)     TYPE(*CHAR) LEN(10)  VALUE(DEBUG)                 /* Режим сборки по умолчанию */
 
-  DCL        VAR(&SRCFIL)     TYPE(*CHAR) LEN(10)  VALUE(GTEST)                 /* Имя файла с исходным кодом */
+  DCL        VAR(&SRCFIL)     TYPE(*CHAR) LEN(10)  VALUE(GOOGLE)                /* Имя файла с исходным кодом */
 
   DCL        VAR(&TMPLIB)     TYPE(*CHAR) LEN(10)  VALUE(QTEMP)                 /* Временная библиотека */
   DCL        VAR(&DBGVIEW)    TYPE(*CHAR) LEN(10)  VALUE(*ALL)                  /* Режим отладки */

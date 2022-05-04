@@ -81,7 +81,7 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   /* КОМПИЛЯЦИЯ ЗАВИСИМОСТЕЙ ПРОГРАММЫ ЮНИТ-ТЕСТА *****************************/
   IF (&BUILDM *EQ RELEASE) GOTO GOOD                                            /* Если сборка релиза, то программу юнит-теста собирать не нужно */
 
-  CHGVAR     VAR(&DEPMOD) VALUE(GTEST)                                          /* Google test нужен для тестирования */
+  CHGVAR     VAR(&DEPMOD) VALUE(GOOGLE)                                         /* Google test нужен для тестирования */
   CALLSUBR   CREATEDEP
 
 
@@ -91,7 +91,7 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   SNDPGMMSG  MSG('BEGIN MONITORING') KEYVAR(&LOWKEY)
 
   CRTPGM     PGM(&DSTLIB/&UNITPGM) +
-             MODULE(&TMPLIB/&UNITMOD &TMPLIB/GTEST$)
+             MODULE(&TMPLIB/&UNITMOD &TMPLIB/GOOGLE$)
   MONMSG     MSGID(CPF0000) EXEC(GOTO BADBUILD)
 
 

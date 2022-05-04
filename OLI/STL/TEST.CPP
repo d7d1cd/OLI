@@ -2,7 +2,7 @@
 #include "utility"
 #include "memory"
 #include "map"
-#include "GTEST/gtest.h"
+#include "GOOGLE/gtest.h"
 #include <cctype>
 #include <vector>
 
