@@ -1,4 +1,5 @@
 #include "format"
+#include "GOOGLE/gtest.h"
 
 TEST(FMT, simple_test)
 {

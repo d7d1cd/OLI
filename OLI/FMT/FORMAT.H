@@ -905,7 +905,7 @@ class MemoryBuffer : private Allocator, public Buffer<T> {
 };
 
 template <typename T, std::size_t SIZE, typename Allocator>
-void MemoryBuffer<T, SIZE, Allocator>::grow(std::size_t size) {
+inline void MemoryBuffer<T, SIZE, Allocator>::grow(std::size_t size) {
   std::size_t new_capacity = this->capacity_ + this->capacity_ / 2;
   if (size > new_capacity)
       new_capacity = size;
@@ -2140,7 +2140,7 @@ class ArgFormatterBase : public ArgVisitor<Impl, void> {
   void write_pointer(const void *p) {
     spec_.flags_ = HASH_FLAG;
     spec_.type_ = 'x';
-    writer_.write_int(reinterpret_cast<uintptr_t>(p), spec_);
+    writer_.write_int(reinterpret_cast<uint64_t>(p), spec_);
   }
 
   // workaround MSVC two-phase lookup issue
@@ -3820,7 +3820,9 @@ FMT_VARIADIC(void, print_colored, Color, CStringRef)
 namespace internal {
 template <typename Char>
 inline bool is_name_start(Char c) {
-  return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || '_' == c;
+  return ('a' <= c && c <= 'i') || ('j' <= c && c <= 'r') || ('s' <= c && c <= 'z') ||
+         ('A' <= c && c <= 'I') || ('J' <= c && c <= 'R') || ('S' <= c && c <= 'Z') || '_' == c;
+
 }
 
 // Parses an unsigned integer advancing s to the end of the parsed input.
@@ -3947,7 +3949,7 @@ const Char *BasicFormatter<Char, ArgFormatter>::format(
             spec.fill_ = c;
           } else ++s;
           if (spec.align_ == ALIGN_NUMERIC)
-            require_numeric_argument(arg, '=');
+            internal::require_numeric_argument(arg, '=');
           break;
         }
       } while (--p >= s);
@@ -3970,14 +3972,14 @@ const Char *BasicFormatter<Char, ArgFormatter>::format(
     }
 
     if (*s == '#') {
-      require_numeric_argument(arg, '#');
+      internal::require_numeric_argument(arg, '#');
       spec.flags_ |= HASH_FLAG;
       ++s;
     }
 
     // Parse zero flag.
     if (*s == '0') {
-      require_numeric_argument(arg, '0');
+      internal::require_numeric_argument(arg, '0');
       spec.align_ = ALIGN_NUMERIC;
       spec.fill_ = '0';
       ++s;
