@@ -459,13 +459,7 @@ class numeric_limits<fmt::internal::DummyInt> :
   // Portable version of isinf.
   template <typename T>
   static bool isinfinity(T x) {
-    using namespace fmt::internal;
-    // The resolution "priority" is:
-    // isinf macro > std::isinf > ::isinf > fmt::internal::isinf
-    if (const_check(sizeof(isinf(x)) != sizeof(fmt::internal::DummyInt))) {
-      return isinf(x) != 0;
-    }
-    return !_finite(static_cast<double>(x));
+    return std::_Ctr<T>::_Isinf(x);
   }
 
   // Portable version of isnan.
@@ -1293,8 +1287,9 @@ struct ConvertToIntImpl2<T, true> {
 template <typename T>
 struct ConvertToInt {
   enum {
-#pragma warning(suppress: 4244)
+    #pragma report(disable, "CZP2924")
     enable_conversion = sizeof(fmt::internal::convert(get<T>())) == sizeof(Yes)
+    #pragma report(pop)
   };
   enum { value = ConvertToIntImpl2<T, enable_conversion>::value };
 };
