@@ -429,7 +429,7 @@ FMT_FUNC void format_system_error(
 } // namespace fmt
 
 template <typename Char>
-void fmt::internal::FixedBuffer<Char>::grow(std::size_t) {
+inline void fmt::internal::FixedBuffer<Char>::grow(std::size_t) {
   FMT_THROW(std::runtime_error("buffer overflow"));
 }
 
