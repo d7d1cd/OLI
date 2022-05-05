@@ -45,6 +45,7 @@
 #include <string>
 #include <vector>
 #include <utility>  // for std::pair
+#include <complex>
 #undef FMT_INCLUDE
 
 // The fmt library version in the form major * 10000 + minor * 100 + patch.
