@@ -10,12 +10,12 @@
 #define OLI_CORE_OLIDEF_H
 
 
-#pragma comment(copyright, "This program uses the C++ object library for IBM i (OLI).")
+#pragma comment(copyright, "This program uses the C++ object libraries for IBM i (OLI).")
 #pragma comment(user, "Sergey Chebotarev (d7d1cd@gmail.com).")
 
 
-#define OLI_NAMESPACE_BEGIN namespace oli { inline namespace v1 {
-#define OLI_NAMESPACE_END }}
+#define IBM_NAMESPACE_BEGIN namespace ibm { inline namespace v1 {
+#define IBM_NAMESPACE_END }}
 
 
 #define STL_NAMESPACE_BEGIN namespace stl {
