@@ -2,6 +2,7 @@
 #include "utility"
 #include "memory"
 #include "map"
+#include "iterator"
 #include "GOOGLE/gtest.h"
 #include <cctype>
 #include <vector>

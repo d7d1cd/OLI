@@ -1,7 +1,7 @@
 /*
      _____ _____ __
     |   __|_   _|  |     Standard library implementation for IBM i
-    |__   | | | |  |__   File:   STL/map.hpp
+    |__   | | | |  |__   File:   STL/map.h
     |_____| |_| |_____|  Author: Sergey Chebotarev
 
 */
@@ -9,7 +9,6 @@
 #ifndef OLI_STL_MAP_H
 #define OLI_STL_MAP_H
 
-#include "STL/xiter.hpp"
 #include <map>
 
 STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,13 +1,13 @@
 /*
      _____ __    _____
     |     |  |  |_   _|  C++ Object Libraries for IBM i
-    |  |  |  |__ _| |_   File:   ISTRING/istring.hpp
+    |  |  |  |__ _| |_   File:   ISTRING/istring.h
     |_____|_____|_____|  Author: Sergey Chebotarev
 
 */
 
-#ifndef OLI_ISTRING_ISTRING_HPP
-#define OLI_ISTRING_ISTRING_HPP
+#ifndef OLI_ISTRING_ISTRING_H
+#define OLI_ISTRING_ISTRING_H
 
 #include "ISTRING/base.h"
 
@@ -64,5 +64,5 @@ class istring_ref : public istring_detail::istring_base<istring_ref>
 
 IBM_NAMESPACE_END //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // OLI_ISTRING_ISTRING_HPP
+#endif // OLI_ISTRING_ISTRING_H
 

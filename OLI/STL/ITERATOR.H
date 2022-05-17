@@ -1,16 +1,16 @@
 /*
      _____ _____ __
     |   __|_   _|  |     Standard library implementation for IBM i
-    |__   | | | |  |__   File:   STL/xiter.hpp
+    |__   | | | |  |__   File:   STL/iterator.h
     |_____| |_| |_____|  Author: Sergey Chebotarev
 
 */
 
-#ifndef OLI_STL_XITER_H
-#define OLI_STL_XITER_H
+#ifndef OLI_STL_ITERATOR_H
+#define OLI_STL_ITERATOR_H
 
 #include "CORE/olidef.h"
-#include <cstddef>
+#include <iterator>
 
 STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -78,5 +78,5 @@ inline constexpr T* end(T (&Array)[Size])
 
 STL_NAMESPACE_END //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // OLI_STL_XITER_H
+#endif // OLI_STL_ITERATOR_H
 
