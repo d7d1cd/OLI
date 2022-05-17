@@ -9,10 +9,8 @@
 #ifndef OLI_ISTRING_BASE_HPP
 #define OLI_ISTRING_BASE_HPP
 
-#include "CORE/olidef.h"
 #include "STL/type_trait.h"
-#include <cstddef>                                                                                                      // std::size_t, std::ptrdiff_t
-#include <iterator>                                                                                                     // std::reverse_iterator
+#include "STL/iterator"
 
 IBM_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace istring_detail { /////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,34 +38,41 @@ class istring_base
   typedef std::ptrdiff_t difference_type;                                                                               // Тип разницы указателей
 
 
+
   // CONSTANTS ---------------------------------------------------------------------------------------------------------
   static const value_type blank = '\x40';                                                                               // Бланк (символ пустоты в строке)
 
 
+
   // ITERATORS ---------------------------------------------------------------------------------------------------------
+  iterator               begin()         { return data(); }
+  const_iterator         begin()   const { return data(); }
+  const_iterator         cbegin()  const { return data(); }
+  iterator               end()           { return data() + capacity(); }
+  const_iterator         end()     const { return data() + capacity(); }
+  const_iterator         cend()    const { return data() + capacity(); }
+  reverse_iterator       rbegin()        { return reverse_iterator(end()); }
+  const_reverse_iterator rbegin()  const { return const_reverse_iterator(end()); }
+  const_reverse_iterator crbegin() const { return const_reverse_iterator(end()); }
+  reverse_iterator       rend()          { return reverse_iterator(begin()); }
+  const_reverse_iterator rend()    const { return const_reverse_iterator(begin()); }
+  const_reverse_iterator crend()   const { return const_reverse_iterator(begin()); }
 
 
 
   // ELEMENT ACCESS ----------------------------------------------------------------------------------------------------
-  pointer data() {
-    return static_cast<Heir*>(this)->m_data;
-  }
+  pointer       data()       { return static_cast<Heir*>(this)->m_data; }
+  const_pointer data() const { return static_cast<const Heir*>(this)->m_data; }
 
-  const_pointer data() const {
-    return static_cast<const Heir*>(this)->m_data;
-  }
 
 
   // CAPACITY ----------------------------------------------------------------------------------------------------------
-  template <std::size_t N2 = N, typename stl::enable_if<N2 != 0, bool>::type = true>
-  size_type capacity() const {
-    return N2;
-  }
+  template <std::size_t N2 = N, typename stl::enable_if<N2 != 0, int>::type = 0>
+  size_type capacity() const { return N2; }
 
-  template <std::size_t N2 = N, typename stl::enable_if<N2 == 0, bool>::type = true>
-  size_type capacity() const {
-    return static_cast<const Heir*>(this)->m_capacity;
-  }
+  template <std::size_t N2 = N, typename stl::enable_if<N2 == 0, int>::type = 0>
+  size_type capacity() const { return static_cast<const Heir*>(this)->m_capacity; }
+
 
 
   // OPERATIONS --------------------------------------------------------------------------------------------------------
@@ -77,6 +82,15 @@ class istring_base
   // SERVICE -----------------------------------------------------------------------------------------------------------
   private:
 };
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+//**********************************************************************************************************************
+template <typename Heir, std::size_t N>
+const typename istring_base<Heir, N>::value_type istring_base<Heir, N>::blank;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

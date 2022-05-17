@@ -3,68 +3,208 @@
 
 
 
-//**********************************************************************************************************************
-TEST(ISTRING, compile_time)
+//***** ISTRING ********************************************************************************************************
+namespace istring {
+
+TEST(istring, compile_time)
 {
   using namespace std::tr1;
-  using namespace ibm;
+  typedef ibm::istring<10> istring_t;
 
-  // istring<0> istring; // Это не должно компилироваться
+  // ibm::istring<0> istring; // Это не должно компилироваться
 
-  static_assert(is_same<istring<10>::value_type, char>::value, "");
-  static_assert(is_same<istring_dyn::value_type, char>::value, "");
-  static_assert(is_same<istring_ref::value_type, char>::value, "");
-
-  static_assert(is_same<istring<10>::size_type, std::size_t>::value, "");
-  static_assert(is_same<istring_dyn::size_type, std::size_t>::value, "");
-  static_assert(is_same<istring_ref::size_type, std::size_t>::value, "");
-
-  static_assert(is_same<istring<10>::pointer, char*>::value, "");
-  static_assert(is_same<istring_dyn::pointer, char*>::value, "");
-  static_assert(is_same<istring_ref::pointer, char*>::value, "");
-
-  static_assert(is_same<istring<10>::const_pointer, const char*>::value, "");
-  static_assert(is_same<istring_dyn::const_pointer, const char*>::value, "");
-  static_assert(is_same<istring_ref::const_pointer, const char*>::value, "");
-
-  static_assert(is_same<istring<10>::reference, char&>::value, "");
-  static_assert(is_same<istring_dyn::reference, char&>::value, "");
-  static_assert(is_same<istring_ref::reference, char&>::value, "");
-
-  static_assert(is_same<istring<10>::const_reference, const char&>::value, "");
-  static_assert(is_same<istring_dyn::const_reference, const char&>::value, "");
-  static_assert(is_same<istring_ref::const_reference, const char&>::value, "");
-
-  static_assert(is_same<istring<10>::iterator, char*>::value, "");
-  static_assert(is_same<istring_dyn::iterator, char*>::value, "");
-  static_assert(is_same<istring_ref::iterator, char*>::value, "");
-
-  static_assert(is_same<istring<10>::const_iterator, const char*>::value, "");
-  static_assert(is_same<istring_dyn::const_iterator, const char*>::value, "");
-  static_assert(is_same<istring_ref::const_iterator, const char*>::value, "");
-
-  static_assert(is_same<istring<10>::reverse_iterator, std::reverse_iterator<char*>>::value, "");
-  static_assert(is_same<istring_dyn::reverse_iterator, std::reverse_iterator<char*>>::value, "");
-  static_assert(is_same<istring_ref::reverse_iterator, std::reverse_iterator<char*>>::value, "");
-
-  static_assert(is_same<istring<10>::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
-  static_assert(is_same<istring_dyn::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
-  static_assert(is_same<istring_ref::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
-
-  static_assert(is_same<istring<10>::difference_type, std::ptrdiff_t>::value, "");
-  static_assert(is_same<istring_dyn::difference_type, std::ptrdiff_t>::value, "");
-  static_assert(is_same<istring_ref::difference_type, std::ptrdiff_t>::value, "");
-
-  static_assert(istring<10>::blank == '\x40', "");
-  static_assert(istring_dyn::blank == '\x40', "");
-  static_assert(istring_ref::blank == '\x40', "");
-
-  static_assert(sizeof(istring<42>) == 42, "");
+  static_assert(is_same<istring_t::value_type, char>::value, "");
+  static_assert(is_same<istring_t::size_type, std::size_t>::value, "");
+  static_assert(is_same<istring_t::pointer, char*>::value, "");
+  static_assert(is_same<istring_t::const_pointer, const char*>::value, "");
+  static_assert(is_same<istring_t::reference, char&>::value, "");
+  static_assert(is_same<istring_t::const_reference, const char&>::value, "");
+  static_assert(is_same<istring_t::iterator, char*>::value, "");
+  static_assert(is_same<istring_t::const_iterator, const char*>::value, "");
+  static_assert(is_same<istring_t::reverse_iterator, std::reverse_iterator<char*>>::value, "");
+  static_assert(is_same<istring_t::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
+  static_assert(is_same<istring_t::difference_type, std::ptrdiff_t>::value, "");
+  static_assert(istring_t::blank == '\x40', "");
+  static_assert(sizeof(istring_t) == 10, "");
 }
 
-TEST(ISTRING, capacity)
+
+TEST(istring, data)
 {
+  typedef ibm::istring<10> istr_t;
+  istr_t istr;
+  const istr_t cistr;
+
+  ASSERT_EQ(istr.data(), reinterpret_cast<istr_t::pointer>(&istr));
+  ASSERT_EQ(cistr.data(), reinterpret_cast<istr_t::const_pointer>(&cistr));
 }
+
+
+TEST(istring, capacity)
+{
+  ibm::istring<10> istr;
+  const ibm::istring<15> cistr;
+
+  ASSERT_EQ(istr.capacity(), 10);
+  ASSERT_EQ(cistr.capacity(), 15);
+}
+
+
+TEST(istring, begin)
+{
+  typedef ibm::istring<10> istr_t;
+  istr_t istr;
+  const istr_t cistr;
+
+  ASSERT_EQ(istr.begin(), istr.data());
+  ASSERT_EQ(istr.cbegin(), istr.data());
+  ASSERT_EQ(cistr.begin(), cistr.data());
+  ASSERT_EQ(cistr.cbegin(), cistr.data());
+}
+
+
+TEST(istring, end)
+{
+  typedef ibm::istring<10> istr_t;
+  istr_t istr;
+  const istr_t cistr;
+
+  ASSERT_EQ(istr.end(), istr.data() + istr.capacity());
+  ASSERT_EQ(istr.cend(), istr.data() + istr.capacity());
+  ASSERT_EQ(cistr.end(), cistr.data() + cistr.capacity());
+  ASSERT_EQ(cistr.cend(), cistr.data() + cistr.capacity());
+}
+
+
+TEST(istring, rbegin)
+{
+  typedef ibm::istring<10> istr_t;
+  istr_t istr;
+  const istr_t cistr;
+
+  ASSERT_EQ(&(*istr.rbegin()), istr.data() + istr.capacity() - 1);
+  ASSERT_EQ(&(*istr.crbegin()), istr.data() + istr.capacity() - 1);
+  ASSERT_EQ(&(*cistr.rbegin()), cistr.data() + cistr.capacity() - 1);
+  ASSERT_EQ(&(*cistr.crbegin()), cistr.data() + cistr.capacity() - 1);
+}
+
+
+TEST(istring, rend)
+{
+  typedef ibm::istring<10> istr_t;
+  istr_t istr;
+  const istr_t cistr;
+
+  ASSERT_EQ(&(*istr.rend()), istr.data() - 1);
+  ASSERT_EQ(&(*istr.crend()), istr.data() - 1);
+  ASSERT_EQ(&(*cistr.rend()), cistr.data() - 1);
+  ASSERT_EQ(&(*cistr.crend()), cistr.data() - 1);
+}
+} // namespace istring {
+
+
+
+
+//***** ISTRING_REF *****************************************************************************************************
+namespace istring_ref {
+
+TEST(istring_ref, compile_time)
+{
+  using namespace std::tr1;
+  typedef ibm::istring_ref istring_ref_t;
+
+  static_assert(is_same<istring_ref_t::value_type, char>::value, "");
+  static_assert(is_same<istring_ref_t::size_type, std::size_t>::value, "");
+  static_assert(is_same<istring_ref_t::pointer, char*>::value, "");
+  static_assert(is_same<istring_ref_t::const_pointer, const char*>::value, "");
+  static_assert(is_same<istring_ref_t::reference, char&>::value, "");
+  static_assert(is_same<istring_ref_t::const_reference, const char&>::value, "");
+  static_assert(is_same<istring_ref_t::iterator, char*>::value, "");
+  static_assert(is_same<istring_ref_t::const_iterator, const char*>::value, "");
+  static_assert(is_same<istring_ref_t::reverse_iterator, std::reverse_iterator<char*>>::value, "");
+  static_assert(is_same<istring_ref_t::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
+  static_assert(is_same<istring_ref_t::difference_type, std::ptrdiff_t>::value, "");
+  static_assert(istring_ref_t::blank == '\x40', "");
+}
+
+
+TEST(istring_ref, data)
+{
+  typedef ibm::istring_ref ref_t;
+  ref_t::value_type source[10] = {};
+  ref_t ref(source);
+  const ref_t cref(source);
+
+  ASSERT_EQ(ref.data(), reinterpret_cast<ref_t::pointer>(source));
+  ASSERT_EQ(cref.data(), reinterpret_cast<ref_t::const_pointer>(source));
+}
+
+
+TEST(istring_ref, capacity)
+{
+  ibm::istring_ref::value_type src1[10] = {};
+  ibm::istring_ref::value_type src2[15] = {};
+
+  ASSERT_EQ(ibm::istring_ref(src1).capacity(), 10);
+  ASSERT_EQ(ibm::istring_ref(src2).capacity(), 15);
+}
+
+
+TEST(istring_ref, begin)
+{
+  typedef ibm::istring_ref ref_t;
+  ref_t::value_type source[10] = {};
+  ref_t ref(source);
+  const ref_t cref(source);
+
+  ASSERT_EQ(ref.begin(), source);
+  ASSERT_EQ(ref.cbegin(), source);
+  ASSERT_EQ(cref.begin(), source);
+  ASSERT_EQ(cref.cbegin(), source);
+}
+
+
+TEST(istring_ref, end)
+{
+ typedef ibm::istring_ref ref_t;
+  ref_t::value_type source[10] = {};
+  ref_t ref(source);
+  const ref_t cref(source);
+
+  ASSERT_EQ(ref.end(), source + sizeof(source));
+  ASSERT_EQ(ref.cend(), source + sizeof(source));
+  ASSERT_EQ(cref.end(), source + sizeof(source));
+  ASSERT_EQ(cref.cend(), source + sizeof(source));
+}
+
+
+TEST(istring_ref, rbegin)
+{
+ typedef ibm::istring_ref ref_t;
+  ref_t::value_type source[10] = {};
+  ref_t ref(source);
+  const ref_t cref(source);
+
+  ASSERT_EQ(&(*ref.rbegin()), source + sizeof(source) - 1);
+  ASSERT_EQ(&(*ref.crbegin()), source + sizeof(source) - 1);
+  ASSERT_EQ(&(*cref.rbegin()), source + sizeof(source) - 1);
+  ASSERT_EQ(&(*cref.crbegin()), source + sizeof(source) - 1);
+}
+
+
+TEST(istring_ref, rend)
+{
+  typedef ibm::istring_ref ref_t;
+  ref_t::value_type source[10] = {};
+  ref_t ref(source);
+  const ref_t cref(source);
+
+  ASSERT_EQ(&(*ref.rend()), source - 1);
+  ASSERT_EQ(&(*ref.crend()), source - 1);
+  ASSERT_EQ(&(*cref.rend()), source - 1);
+  ASSERT_EQ(&(*cref.crend()), source - 1);
+}
+} // namespace istring_ref {
 
 
 
