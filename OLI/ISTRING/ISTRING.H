@@ -29,8 +29,8 @@ class istring : public istring_detail::istring_base<istring<N>, N>
 
 
   public:                                                                                                               // SPECIAL MEMBER FUNCTIONS
-  istring() {
-    // clear();
+  istring() {                                                                                                           // Конструктор по умолчанию
+    base::clear();
   }
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,11 +50,16 @@ class istring_ref : public istring_detail::istring_base<istring_ref>
 
 
   public:                                                                                                               // SPECIAL MEMBER FUNCTIONS
+  template <typename InputIt>
+  istring_ref(InputIt first, InputIt last, bool clear = false)
+  : m_data(first), m_capacity(std::distance(first, last)) {
+    if (clear)
+      base::clear();
+  }
+
   template <std::size_t N>
   istring_ref(base::value_type (&src)[N], bool clear = false)
-  : m_data(src), m_capacity(N) {
-    if (clear) /*clear()*/;
-  }
+  : istring_ref(stl::begin(src), stl::end(src), clear) {}
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

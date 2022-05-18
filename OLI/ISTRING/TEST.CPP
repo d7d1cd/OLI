@@ -14,6 +14,7 @@ TEST(istring, compile_time)
   // ibm::istring<0> istring; // Это не должно компилироваться
 
   static_assert(is_same<istring_t::value_type, char>::value, "");
+  static_assert(is_same<istring_t::traits_type, std::char_traits<char>>::value, "");
   static_assert(is_same<istring_t::size_type, std::size_t>::value, "");
   static_assert(is_same<istring_t::pointer, char*>::value, "");
   static_assert(is_same<istring_t::const_pointer, const char*>::value, "");
@@ -100,6 +101,16 @@ TEST(istring, rend)
   ASSERT_EQ(&(*cistr.rend()), cistr.data() - 1);
   ASSERT_EQ(&(*cistr.crend()), cistr.data() - 1);
 }
+
+
+TEST(istring, constructors)
+{
+  { // Конструктор по умолчанию
+    ibm::istring<10> istr;
+    ASSERT_EQ(std::distance(istr.begin(), istr.end()), 10);
+    ASSERT_EQ(std::count(istr.begin(), istr.end(), istr.blank), 10);
+  }
+}
 } // namespace istring {
 
 
@@ -114,6 +125,7 @@ TEST(istring_ref, compile_time)
   typedef ibm::istring_ref istring_ref_t;
 
   static_assert(is_same<istring_ref_t::value_type, char>::value, "");
+  static_assert(is_same<istring_ref_t::traits_type, std::char_traits<char>>::value, "");
   static_assert(is_same<istring_ref_t::size_type, std::size_t>::value, "");
   static_assert(is_same<istring_ref_t::pointer, char*>::value, "");
   static_assert(is_same<istring_ref_t::const_pointer, const char*>::value, "");
@@ -203,6 +215,25 @@ TEST(istring_ref, rend)
   ASSERT_EQ(&(*ref.crend()), source - 1);
   ASSERT_EQ(&(*cref.rend()), source - 1);
   ASSERT_EQ(&(*cref.crend()), source - 1);
+}
+
+
+TEST(istring_ref, constructors)
+{
+  // Конструктора по умолчанию быть не может, так как класс является ссылкой и обязан ссылатся на строку
+
+  { // Конструктор из пары итераторов
+    char raw[5] = { '1', '2', 'a', 'b', 'C' };
+    ibm::istring_ref iref(stl::begin(raw), stl::end(raw));
+    ASSERT_EQ(std::distance(iref.begin(), iref.end()), 5);
+    ASSERT_TRUE(std::equal(iref.begin(), iref.end(), stl::begin(raw)));
+  }
+
+  { // Конструктор из массива с очисткой
+    char raw[5] = { '1', '2', 'a', 'b', 'C' };
+    ibm::istring_ref iref(raw, true);
+    ASSERT_EQ(std::count(iref.begin(), iref.end(), iref.blank), 5);
+  }
 }
 } // namespace istring_ref {
 
