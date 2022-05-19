@@ -21,14 +21,16 @@ IBM_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////
 template <std::size_t N>
 class istring : public istring_detail::istring_base<istring<N>, N>
 {
-  static_assert(N > 0, "String size cannot be 0");                                                                      // Проверка размера строки
-  typedef istring_detail::istring_base<istring<N>, N> base;                                                             // Короткое имя базы
-  friend class istring_detail::istring_base<istring<N>, N>;                                                             // База нам друг
-  typename base::value_type m_data[N];                                                                                  // Хранилище строки
+  static_assert(N > 0, "String size cannot be 0");
+  friend class istring_detail::istring_base_const<istring<N>, N>;
+  friend class istring_detail::istring_base<istring<N>, N>;
+  typedef istring_detail::istring_base<istring<N>, N> base;
+  typename base::value_type m_data[N];
 
 
 
-  public:                                                                                                               // SPECIAL MEMBER FUNCTIONS
+  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
+  public:
   istring() {                                                                                                           // Конструктор по умолчанию
     base::clear();
   }
@@ -42,14 +44,16 @@ class istring : public istring_detail::istring_base<istring<N>, N>
 //***** ССЫЛКА НА СТРОКУ ***********************************************************************************************
 class istring_ref : public istring_detail::istring_base<istring_ref>
 {
-  typedef istring_detail::istring_base<istring_ref> base;                                                               // Короткое имя базы
-  friend class istring_detail::istring_base<istring_ref>;                                                               // База нам друг
-  base::pointer m_data;                                                                                                 // Указатель на хранилище строки
-  base::size_type m_capacity;                                                                                           // Емкость строки
+  friend class istring_detail::istring_base_const<istring_ref>;
+  friend class istring_detail::istring_base<istring_ref>;
+  typedef istring_detail::istring_base<istring_ref> base;
+  base::pointer m_data;
+  base::size_type m_capacity;
 
 
 
-  public:                                                                                                               // SPECIAL MEMBER FUNCTIONS
+  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
+  public:
   template <typename InputIt>
   istring_ref(InputIt first, InputIt last, bool clear = false)
   : m_data(first), m_capacity(std::distance(first, last)) {
