@@ -103,13 +103,106 @@ TEST(istring, rend)
 }
 
 
+TEST(istring, assign)
+{
+  { // Копирование по указателю и размеру
+    ibm::istring<5> istr;
+
+    // Размер источника равен размеру строки
+    char src5[] = { '1', '2', 'a', 'b', 'C' };
+    istr.assign(src5, 5);
+    ASSERT_TRUE(std::equal(istr.begin(), istr.end(), src5));
+
+    // Размер источника большше размера строки
+    char src7[] = { 'a', 'b', 'c', 'D', 'E', 'F', '0' };
+    istr.assign(src7, 7);
+    ASSERT_TRUE(std::equal(istr.begin(), istr.end(), src7));
+
+    // Размер источника меньше размера строки
+    char src2[] = { 'ж', 'о' };
+    istr.assign(src2, 2);
+    ASSERT_TRUE(std::equal(stl::begin(src2), stl::end(src2), istr.begin()));
+    ASSERT_EQ(std::count(istr.begin(), istr.end(), istr.blank), 3);
+  }
+
+  { // Копирование из итераторов
+    ibm::istring<5> istr;
+
+    // Размер источника равен размеру строки
+    char src5[] = { '1', '2', 'a', 'b', 'C' };
+    istr.assign(stl::begin(src5), stl::end(src5));
+    ASSERT_TRUE(std::equal(istr.begin(), istr.end(), src5));
+
+    // Размер источника большше размера строки
+    char src7[] = { 'a', 'b', 'c', 'D', 'E', 'F', '0' };
+    istr.assign(stl::begin(src7), stl::end(src7));
+    ASSERT_TRUE(std::equal(istr.begin(), istr.end(), src7));
+
+    // Размер источника меньше размера строки
+    char src2[] = { 'ж', 'о' };
+    istr.assign(stl::begin(src2), stl::end(src2));
+    ASSERT_TRUE(std::equal(stl::begin(src2), stl::end(src2), istr.begin()));
+    ASSERT_EQ(std::count(istr.begin(), istr.end(), istr.blank), 3);
+  }
+
+  { // Копирование из массива
+    ibm::istring<5> istr;
+
+    // Размер источника равен размеру строки
+    char src5[] = { '1', '2', 'a', 'b', 'C' };
+    istr.assign(src5);
+    ASSERT_TRUE(std::equal(istr.begin(), istr.end(), src5));
+
+    // Размер источника большше размера строки
+    char src7[] = { 'a', 'b', 'c', 'D', 'E', 'F', '0' };
+    istr.assign(src7);
+    ASSERT_TRUE(std::equal(istr.begin(), istr.end(), src7));
+
+    // Размер источника меньше размера строки
+    char src2[] = { 'ж', 'о' };
+    istr.assign(src2);
+    ASSERT_TRUE(std::equal(stl::begin(src2), stl::end(src2), istr.begin()));
+    ASSERT_EQ(std::count(istr.begin(), istr.end(), istr.blank), 3);
+  }
+}
+
+
 TEST(istring, constructors)
 {
+  const char raw[5] = { '1', '2', 'a', 'b', 'C' };
+
   { // Конструктор по умолчанию
     ibm::istring<10> istr;
     ASSERT_EQ(std::distance(istr.begin(), istr.end()), 10);
     ASSERT_EQ(std::count(istr.begin(), istr.end(), istr.blank), 10);
   }
+
+  { // Конструктор из пары итераторов
+    ibm::istring<5> istr(stl::begin(raw), stl::end(raw));
+    const ibm::istring<5> cistr(stl::begin(raw), stl::end(raw));
+
+    ASSERT_TRUE(std::equal(istr.begin(), istr.end(), stl::begin(raw)));
+    ASSERT_TRUE(std::equal(cistr.begin(), cistr.end(), stl::begin(raw)));
+  }
+
+  { // Конструктор из массива
+    ibm::istring<8> istr(raw);
+    const ibm::istring<3> cistr(raw);
+
+    ASSERT_TRUE(std::equal(stl::begin(raw), stl::end(raw), istr.begin()));
+    ASSERT_EQ(std::count(istr.begin(), istr.end(), istr.blank), 3);
+    ASSERT_TRUE(std::equal(cistr.begin(), cistr.end(), stl::begin(raw)));
+  }
+}
+
+
+TEST(istring, length)
+{
+  const char raw[5] = { '1', '2', 'a', 'b', 'C' };
+
+  ASSERT_EQ(ibm::istring<5>().length(), 0);    // Пустая строка
+  ASSERT_EQ(ibm::istring<9>(raw).length(), 5); // Частично заполненная строка
+  ASSERT_EQ(ibm::istring<5>(raw).length(), 5); // Полностью заполненная строка
 }
 } // namespace istring {
 
@@ -220,6 +313,73 @@ TEST(istring_ref, rend)
 }
 
 
+TEST(istring_ref, assign)
+{
+  { // Копирование по указателю и размеру
+    char dst[5] = {};
+    ibm::istring_ref iref(dst);
+
+    // Размер источника равен размеру строки
+    char src5[] = { '1', '2', 'a', 'b', 'C' };
+    iref.assign(src5, 5);
+    ASSERT_TRUE(std::equal(stl::begin(dst), stl::end(dst), src5));
+
+    // Размер источника большше размера строки
+    char src7[] = { 'a', 'b', 'c', 'D', 'E', 'F', '0' };
+    iref.assign(src7, 7);
+    ASSERT_TRUE(std::equal(stl::begin(dst), stl::end(dst), src7));
+
+    // Размер источника меньше размера строки
+    char src2[] = { 'ж', 'о' };
+    iref.assign(src2, 2);
+    ASSERT_TRUE(std::equal(stl::begin(src2), stl::end(src2), stl::begin(dst)));
+    ASSERT_EQ(std::count(stl::begin(dst), stl::end(dst), iref.blank), 3);
+  }
+
+  { // Копирование из диапазона
+    char dst[5] = {};
+    ibm::istring_ref iref(dst);
+
+    // Размер источника равен размеру строки
+    char src5[] = { '1', '2', 'a', 'b', 'C' };
+    iref.assign(stl::begin(src5), stl::end(src5));
+    ASSERT_TRUE(std::equal(stl::begin(dst), stl::end(dst), src5));
+
+    // Размер источника большше размера строки
+    char src7[] = { 'a', 'b', 'c', 'D', 'E', 'F', '0' };
+    iref.assign(stl::begin(src7), stl::end(src7));
+    ASSERT_TRUE(std::equal(stl::begin(dst), stl::end(dst), src7));
+
+    // Размер источника меньше размера строки
+    char src2[] = { 'ж', 'о' };
+    iref.assign(stl::begin(src2), stl::end(src2));
+    ASSERT_TRUE(std::equal(stl::begin(src2), stl::end(src2), stl::begin(dst)));
+    ASSERT_EQ(std::count(stl::begin(dst), stl::end(dst), iref.blank), 3);
+  }
+
+  { // Копирование из массива
+    char dst[5] = {};
+    ibm::istring_ref iref(dst);
+
+    // Размер источника равен размеру строки
+    char src5[] = { '1', '2', 'a', 'b', 'C' };
+    iref.assign(src5);
+    ASSERT_TRUE(std::equal(stl::begin(dst), stl::end(dst), src5));
+
+    // Размер источника большше размера строки
+    char src7[] = { 'a', 'b', 'c', 'D', 'E', 'F', '0' };
+    iref.assign(src7);
+    ASSERT_TRUE(std::equal(stl::begin(dst), stl::end(dst), src7));
+
+    // Размер источника меньше размера строки
+    char src2[] = { 'ж', 'о' };
+    iref.assign(src2);
+    ASSERT_TRUE(std::equal(stl::begin(src2), stl::end(src2), stl::begin(dst)));
+    ASSERT_EQ(std::count(stl::begin(dst), stl::end(dst), iref.blank), 3);
+  }
+}
+
+
 TEST(istring_ref, constructors)
 {
   // Конструктора по умолчанию быть не может, так как класс является ссылкой и обязан ссылатся на строку
@@ -238,8 +398,20 @@ TEST(istring_ref, constructors)
   { // Конструктор из массива с очисткой
     char raw[5] = { '1', '2', 'a', 'b', 'C' };
     ibm::istring_ref iref(raw, true);
-    ASSERT_EQ(std::count(iref.begin(), iref.end(), iref.blank), 5);
+    ASSERT_EQ(std::count(stl::begin(raw), stl::end(raw), iref.blank), 5);
   }
+}
+
+
+TEST(istring_ref, length)
+{
+  char empty[] = { ibm::istring_ref::blank };
+  char part[]  = { '1', '2', 'a', 'b', ibm::istring_ref::blank };
+  char full[]  = { '1', '2', 'a', 'b' };
+
+  ASSERT_EQ(ibm::istring_ref(empty).length(), 0); // Пустая строка
+  ASSERT_EQ(ibm::istring_ref(part).length(), 4);  // Частично заполненная строка
+  ASSERT_EQ(ibm::istring_ref(full).length(), 4);  // Полностью заполненная строка
 }
 } // namespace istring_ref {
 
@@ -455,6 +627,18 @@ TEST(istring_view, constructors)
     ASSERT_EQ(std::distance(cview.begin(), cview.end()), 5);
     ASSERT_TRUE(std::equal(cview.begin(), cview.end(), stl::begin(raw)));
   }
+}
+
+
+TEST(istring_view, length)
+{
+  char empty[] = { ibm::istring_view::blank };
+  char part[]  = { '1', '2', 'a', 'b', ibm::istring_view::blank };
+  char full[]  = { '1', '2', 'a', 'b' };
+
+  ASSERT_EQ(ibm::istring_view(empty).length(), 0); // Пустая строка
+  ASSERT_EQ(ibm::istring_view(part).length(), 4);  // Частично заполненная строка
+  ASSERT_EQ(ibm::istring_view(full).length(), 4);  // Полностью заполненная строка
 }
 } // namespace istring_view {
 

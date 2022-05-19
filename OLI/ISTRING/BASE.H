@@ -65,11 +65,19 @@ class istring_base_const
 
 
   // CAPACITY ----------------------------------------------------------------------------------------------------------
-  template <std::size_t N2 = N, typename stl::enable_if<N2 != 0, int>::type = 0>
-  size_type capacity() const { return N2; }
+  template <std::size_t N2 = N, typename stl::enable_if<N2 != 0, int>::type = 0>                                        // Емкость строки для
+  size_type capacity() const { return N2; }                                                                             // istring
 
-  template <std::size_t N2 = N, typename stl::enable_if<N2 == 0, int>::type = 0>
-  size_type capacity() const { return static_cast<const Heir*>(this)->m_capacity; }
+  template <std::size_t N2 = N, typename stl::enable_if<N2 == 0, int>::type = 0>                                        // Емкость строки для
+  size_type capacity() const { return static_cast<const Heir*>(this)->m_capacity; }                                     // istring_ref, _view
+
+  size_type length() const {                                                                                            // Длина строки
+    auto crit = crbegin(), end = crend();
+    for (; crit != end; ++crit)
+      if (*crit != blank)
+        break;
+    return std::distance(crit, end);
+  }
 
 
 
@@ -95,8 +103,27 @@ class istring_base : public istring_base_const<Heir, N>
 
 
 
-  // ITERATORS ---------------------------------------------------------------------------------------------------------
+  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
+  Heir& assign(typename base::const_pointer start, typename base::size_type size) {                                     // Копирование в строку из указателя и длины
+    auto less = std::min(size, base::capacity());
+    auto tail = std::copy(start, start + less, begin());
+    fill_with(tail, base::blank);
+    return *static_cast<Heir*>(this);
+  }
+
+  template <typename InputIt>                                                                                           // Копирование в строку из диапазона
+  Heir& assign(InputIt first, InputIt last) {
+    return assign(first, std::distance(first, last));
+  }
+
+  template <std::size_t S>                                                                                              // Копирование из массива
+  Heir& assign(const typename base::value_type (&src)[S]) {
+    return assign(src, S);
+  }
+
+
+  // ITERATORS ---------------------------------------------------------------------------------------------------------
   using    base::begin;
   using    base::end;
   using    base::rbegin;
@@ -120,7 +147,7 @@ class istring_base : public istring_base_const<Heir, N>
 
   // SERVICE -----------------------------------------------------------------------------------------------------------
   private:
-  void fill_with(typename base::iterator whence, typename base::value_type agg) {
+  void fill_with(typename base::iterator whence, typename base::value_type agg) {                                       // Заполнение хвоста строки
     std::fill(whence, end(), agg);
   }
 };

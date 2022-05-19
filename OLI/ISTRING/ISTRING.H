@@ -34,6 +34,16 @@ class istring : public istring_detail::istring_base<istring<N>, N>
   istring() {                                                                                                           // Конструктор по умолчанию
     base::clear();
   }
+
+  template <typename InputIt>                                                                                           // Конструктор из диапазона
+  istring(InputIt first, InputIt last) {
+    base::assign(first, last);
+  }
+
+  template <typename T, std::size_t S>                                                                                  // Конструктор из массива
+  istring(T (&src)[S]) {
+    base::assign(src, S);
+  }
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -54,15 +64,15 @@ class istring_ref : public istring_detail::istring_base<istring_ref>
 
   // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
-  template <typename InputIt>
+  template <typename InputIt>                                                                                           // Конструктор из диапазона
   istring_ref(InputIt first, InputIt last, bool clear = false)
   : m_data(first), m_capacity(std::distance(first, last)) {
     if (clear)
       base::clear();
   }
 
-  template <std::size_t N>
-  istring_ref(base::value_type (&src)[N], bool clear = false)
+  template <typename T, std::size_t N>                                                                                  // Конструктор из массива
+  istring_ref(T (&src)[N], bool clear = false)
   : istring_ref(stl::begin(src), stl::end(src), clear) {}
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,12 +93,12 @@ class istring_view : public istring_detail::istring_base_const<istring_view>
 
   // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
-  template <typename InputIt>
+  template <typename InputIt>                                                                                           // Конструктор из диапазона
   istring_view(InputIt first, InputIt last)
   : m_data(first), m_capacity(std::distance(first, last)) {}
 
-  template <std::size_t N>
-  istring_view(const base::value_type (&src)[N])
+  template <typename T, std::size_t N>                                                                                  // Конструктор из массива
+  istring_view(T (&src)[N])
   : istring_view(stl::begin(src), stl::end(src)) {}
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
