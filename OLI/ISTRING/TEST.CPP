@@ -154,11 +154,13 @@ TEST(istring_ref, data)
 
 TEST(istring_ref, capacity)
 {
-  ibm::istring_ref::value_type src1[10] = {};
-  ibm::istring_ref::value_type src2[15] = {};
+  typedef ibm::istring_ref ref_t;
+  ref_t::value_type source[10] = {};
+  ref_t ref(source);
+  const ref_t cref(source);
 
-  ASSERT_EQ(ibm::istring_ref(src1).capacity(), 10);
-  ASSERT_EQ(ibm::istring_ref(src2).capacity(), 15);
+  ASSERT_EQ(ref.capacity(), 10);
+  ASSERT_EQ(cref.capacity(), 10);
 }
 
 
@@ -178,7 +180,7 @@ TEST(istring_ref, begin)
 
 TEST(istring_ref, end)
 {
- typedef ibm::istring_ref ref_t;
+  typedef ibm::istring_ref ref_t;
   ref_t::value_type source[10] = {};
   ref_t ref(source);
   const ref_t cref(source);
@@ -224,9 +226,13 @@ TEST(istring_ref, constructors)
 
   { // Конструктор из пары итераторов
     char raw[5] = { '1', '2', 'a', 'b', 'C' };
-    ibm::istring_ref iref(stl::begin(raw), stl::end(raw));
-    ASSERT_EQ(std::distance(iref.begin(), iref.end()), 5);
-    ASSERT_TRUE(std::equal(iref.begin(), iref.end(), stl::begin(raw)));
+    ibm::istring_ref ref(stl::begin(raw), stl::end(raw));
+    const ibm::istring_ref cref(stl::begin(raw), stl::end(raw));
+
+    ASSERT_EQ(std::distance(ref.begin(), ref.end()), 5);
+    ASSERT_TRUE(std::equal(ref.begin(), ref.end(), stl::begin(raw)));
+    ASSERT_EQ(std::distance(cref.begin(), cref.end()), 5);
+    ASSERT_TRUE(std::equal(cref.begin(), cref.end(), stl::begin(raw)));
   }
 
   { // Конструктор из массива с очисткой
@@ -236,6 +242,221 @@ TEST(istring_ref, constructors)
   }
 }
 } // namespace istring_ref {
+
+
+
+
+//***** ISTRING_VIEW **************************************************************************************************1*
+namespace istring_view {
+
+TEST(istring_view, compile_time)
+{
+  using namespace std::tr1;
+  typedef ibm::istring_view istring_view_t;
+
+  static_assert(is_same<istring_view_t::value_type, char>::value, "");
+  static_assert(is_same<istring_view_t::traits_type, std::char_traits<char>>::value, "");
+  static_assert(is_same<istring_view_t::size_type, std::size_t>::value, "");
+  static_assert(is_same<istring_view_t::pointer, char*>::value, "");
+  static_assert(is_same<istring_view_t::const_pointer, const char*>::value, "");
+  static_assert(is_same<istring_view_t::reference, char&>::value, "");
+  static_assert(is_same<istring_view_t::const_reference, const char&>::value, "");
+  static_assert(is_same<istring_view_t::iterator, char*>::value, "");
+  static_assert(is_same<istring_view_t::const_iterator, const char*>::value, "");
+  static_assert(is_same<istring_view_t::reverse_iterator, std::reverse_iterator<char*>>::value, "");
+  static_assert(is_same<istring_view_t::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
+  static_assert(is_same<istring_view_t::difference_type, std::ptrdiff_t>::value, "");
+  static_assert(istring_view_t::blank == '\x40', "");
+}
+
+
+TEST(istring_view, data)
+{
+  typedef ibm::istring_view view_t;
+
+  {
+    view_t::value_type src[10] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(view.data(), reinterpret_cast<view_t::const_pointer>(src));
+    ASSERT_EQ(cview.data(), reinterpret_cast<view_t::const_pointer>(src));
+  }
+
+  {
+    const view_t::value_type src[15] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(view.data(), reinterpret_cast<view_t::const_pointer>(src));
+    ASSERT_EQ(cview.data(), reinterpret_cast<view_t::const_pointer>(src));
+  }
+}
+
+
+TEST(istring_view, capacity)
+{
+  typedef ibm::istring_view view_t;
+
+  {
+    view_t::value_type src[10] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(view.capacity(), 10);
+    ASSERT_EQ(cview.capacity(), 10);
+  }
+
+  {
+    const view_t::value_type src[15] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(view.capacity(), 15);
+    ASSERT_EQ(cview.capacity(), 15);
+  }
+}
+
+
+TEST(istring_view, begin)
+{
+  typedef ibm::istring_view view_t;
+
+  {
+    view_t::value_type src[10] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(view.begin(), src);
+    ASSERT_EQ(view.cbegin(), src);
+    ASSERT_EQ(cview.begin(), src);
+    ASSERT_EQ(cview.cbegin(), src);
+  }
+
+  {
+    const view_t::value_type src[15] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(view.begin(), src);
+    ASSERT_EQ(view.cbegin(), src);
+    ASSERT_EQ(cview.begin(), src);
+    ASSERT_EQ(cview.cbegin(), src);
+  }
+}
+
+
+TEST(istring_view, end)
+{
+  typedef ibm::istring_view view_t;
+
+  {
+    view_t::value_type src[10] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(view.end(), src + sizeof(src));
+    ASSERT_EQ(view.cend(), src + sizeof(src));
+    ASSERT_EQ(cview.end(), src + sizeof(src));
+    ASSERT_EQ(cview.cend(), src + sizeof(src));
+  }
+
+  {
+    const view_t::value_type src[15] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(view.end(), src + sizeof(src));
+    ASSERT_EQ(view.cend(), src + sizeof(src));
+    ASSERT_EQ(cview.end(), src + sizeof(src));
+    ASSERT_EQ(cview.cend(), src + sizeof(src));
+  }
+}
+
+
+TEST(istring_view, rbegin)
+{
+  typedef ibm::istring_view view_t;
+
+  {
+    view_t::value_type src[10] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(&(*view.rbegin()), src + sizeof(src) - 1);
+    ASSERT_EQ(&(*view.crbegin()), src + sizeof(src) - 1);
+    ASSERT_EQ(&(*cview.rbegin()), src + sizeof(src) - 1);
+    ASSERT_EQ(&(*cview.crbegin()), src + sizeof(src) - 1);
+  }
+
+  {
+    const view_t::value_type src[15] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(&(*view.rbegin()), src + sizeof(src) - 1);
+    ASSERT_EQ(&(*view.crbegin()), src + sizeof(src) - 1);
+    ASSERT_EQ(&(*cview.rbegin()), src + sizeof(src) - 1);
+    ASSERT_EQ(&(*cview.crbegin()), src + sizeof(src) - 1);
+  }
+}
+
+
+TEST(istring_view, rend)
+{
+  typedef ibm::istring_view view_t;
+
+  {
+    view_t::value_type src[10] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(&(*view.rend()), src - 1);
+    ASSERT_EQ(&(*view.crend()), src - 1);
+    ASSERT_EQ(&(*cview.rend()), src - 1);
+    ASSERT_EQ(&(*cview.crend()), src - 1);
+  }
+
+  {
+    const view_t::value_type src[15] = {};
+    view_t view(src);
+    const view_t cview(src);
+
+    ASSERT_EQ(&(*view.rend()), src - 1);
+    ASSERT_EQ(&(*view.crend()), src - 1);
+    ASSERT_EQ(&(*cview.rend()), src - 1);
+    ASSERT_EQ(&(*cview.crend()), src - 1);
+  }
+}
+
+
+TEST(istring_view, constructors)
+{
+  // Конструктора по умолчанию нет по аналогии с istring_ref
+
+  { // Конструктор из пары итераторов
+    char raw[5] = { '1', '2', 'a', 'b', 'C' };
+    ibm::istring_view view(stl::begin(raw), stl::end(raw));
+    const ibm::istring_view cview(stl::begin(raw), stl::end(raw));
+
+    ASSERT_EQ(std::distance(view.begin(), view.end()), 5);
+    ASSERT_TRUE(std::equal(view.begin(), view.end(), stl::begin(raw)));
+    ASSERT_EQ(std::distance(cview.begin(), cview.end()), 5);
+    ASSERT_TRUE(std::equal(cview.begin(), cview.end(), stl::begin(raw)));
+  }
+
+  { // Конструктор из константного массива
+    const char raw[5] = { '1', '2', 'a', 'b', 'C' };
+    ibm::istring_view view(stl::begin(raw), stl::end(raw));
+    const ibm::istring_view cview(stl::begin(raw), stl::end(raw));
+
+    ASSERT_EQ(std::distance(view.begin(), view.end()), 5);
+    ASSERT_TRUE(std::equal(view.begin(), view.end(), stl::begin(raw)));
+    ASSERT_EQ(std::distance(cview.begin(), cview.end()), 5);
+    ASSERT_TRUE(std::equal(cview.begin(), cview.end(), stl::begin(raw)));
+  }
+}
+} // namespace istring_view {
 
 
 

@@ -71,6 +71,32 @@ class istring_ref : public istring_detail::istring_base<istring_ref>
 
 
 
+//***** ПРЕДСТАВЛЕНИЕ НА СТРОКУ ****************************************************************************************
+class istring_view : public istring_detail::istring_base_const<istring_view>
+{
+  friend class istring_detail::istring_base_const<istring_view>;
+  typedef istring_detail::istring_base_const<istring_view> base;
+  base::const_pointer m_data;
+  base::size_type m_capacity;
+
+
+
+  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
+  public:
+  template <typename InputIt>
+  istring_view(InputIt first, InputIt last)
+  : m_data(first), m_capacity(std::distance(first, last)) {}
+
+  template <std::size_t N>
+  istring_view(const base::value_type (&src)[N])
+  : istring_view(stl::begin(src), stl::end(src)) {}
+};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
 IBM_NAMESPACE_END //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif // OLI_ISTRING_ISTRING_H
