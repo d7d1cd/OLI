@@ -73,9 +73,7 @@ class istring_base_const
 
   size_type length() const {                                                                                            // Длина строки
     auto crit = crbegin(), end = crend();
-    for (; crit != end; ++crit)
-      if (*crit != blank)
-        break;
+    while (crit != end && *crit == blank) ++crit;
     return std::distance(crit, end);
   }
 
@@ -105,22 +103,13 @@ class istring_base : public istring_base_const<Heir, N>
 
   // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
-  Heir& assign(typename base::const_pointer start, typename base::size_type size) {                                     // Копирование в строку из указателя и длины
+  Heir& assign(typename base::const_pointer start, typename base::size_type size) {                                     // Копирование из указателя и длины
     auto less = std::min(size, base::capacity());
     auto tail = std::copy(start, start + less, begin());
-    fill_with(tail, base::blank);
+    fill_tail(tail);
     return *static_cast<Heir*>(this);
   }
 
-  template <typename InputIt>                                                                                           // Копирование в строку из диапазона
-  Heir& assign(InputIt first, InputIt last) {
-    return assign(first, std::distance(first, last));
-  }
-
-  template <std::size_t S>                                                                                              // Копирование из массива
-  Heir& assign(const typename base::value_type (&src)[S]) {
-    return assign(src, S);
-  }
 
 
   // ITERATORS ---------------------------------------------------------------------------------------------------------
@@ -142,14 +131,12 @@ class istring_base : public istring_base_const<Heir, N>
 
 
   // OPERATIONS --------------------------------------------------------------------------------------------------------
-  void clear() { fill_with(begin(), base::blank); }
+  void clear() { fill_tail(begin()); }
 
 
   // SERVICE -----------------------------------------------------------------------------------------------------------
   private:
-  void fill_with(typename base::iterator whence, typename base::value_type agg) {                                       // Заполнение хвоста строки
-    std::fill(whence, end(), agg);
-  }
+  void fill_tail(typename base::iterator whence) { std::fill(whence, end(), base::blank); }                             // Заполнение хвоста
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
