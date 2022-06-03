@@ -60,6 +60,9 @@ class istring_ref : public istring_detail::istring_base<istring_ref>
     if (clear)
       base::clear();
   }
+
+  istring_ref(const istring_ref&) = delete;
+  istring_ref& operator=(const istring_ref&) = delete;
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -82,6 +85,9 @@ class istring_view : public istring_detail::istring_base_const<istring_view>
   template <typename T, std::size_t N>                                                                                  // Конструктор из массива
   istring_view(T (&src)[N])
   : m_data(src), m_capacity(N) {}
+
+  istring_view(const istring_view&) = delete;
+  istring_view& operator=(const istring_view&) = delete;
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
