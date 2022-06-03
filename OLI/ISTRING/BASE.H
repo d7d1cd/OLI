@@ -105,8 +105,8 @@ class istring_base : public istring_base_const<Heir, N>
   public:
   Heir& assign(typename base::const_pointer start, typename base::size_type size) {                                     // Копирование из указателя и длины
     auto less = std::min(size, base::capacity());
-    auto tail = std::copy(start, start + less, begin());
-    fill_tail(tail);
+    std::memcpy(begin(), start, less);
+    fill_tail(begin() + less);
     return *static_cast<Heir*>(this);
   }
 
@@ -136,7 +136,9 @@ class istring_base : public istring_base_const<Heir, N>
 
   // SERVICE -----------------------------------------------------------------------------------------------------------
   private:
-  void fill_tail(typename base::iterator whence) { std::fill(whence, end(), base::blank); }                             // Заполнение хвоста
+  void fill_tail(typename base::iterator whence) {                                                                      // Заполнение хвоста
+    std::memset(whence, base::blank, end() - whence);
+  }
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

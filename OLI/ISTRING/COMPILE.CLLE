@@ -25,7 +25,7 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
 
   DCL        VAR(&SRCFIL)     TYPE(*CHAR) LEN(10)  VALUE(ISTRING)               /* Имя файла с исходным кодом */
 
-  DCL        VAR(&TMPLIB)     TYPE(*CHAR) LEN(10)  VALUE(QTEMP)                 /* Временная библиотека */
+  DCL        VAR(&TMPLIB)     TYPE(*CHAR) LEN(10)  VALUE(CSNTST)                /* Временная библиотека */
   DCL        VAR(&DBGVIEW)    TYPE(*CHAR) LEN(10)  VALUE(*ALL)                  /* Режим отладки */
   DCL        VAR(&OPTIMIZE)   TYPE(*INT)  LEN(2)   VALUE(20)                    /* Уровень оптимизации */
   DCL        VAR(&DEFINE)     TYPE(*CHAR) LEN(10)  VALUE('DEBUG')               /* Макрос конфигурации сборки */
@@ -71,8 +71,9 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   CRTCPPMOD  MODULE(&TMPLIB/&UNITMOD) SRCFILE(&SRCLIB/&SRCFIL) SRCMBR(TEST) +
              DBGVIEW(&DBGVIEW) OPTIMIZE(&OPTIMIZE) +
              DEFINE('__IBMCPP_TR1__=1' &DEFINE) +
-             LANGLVL(*EXTENDED0X) PFROPT(*STRDONLY) +
-             OPTION(*EVENTF) CHECKOUT(*COND *PARM *REACH *UNUSED)
+             LANGLVL(*EXTENDED0X) PFROPT(*STRDONLY) OPTION(*EVENTF) +
+             CHECKOUT(*CLASS *COND *EFFECT *GENERAL *GOTO *LANG *PARM *REACH +
+                      *TRUNC *UNUSED)
   MONMSG     MSGID(CPF0000) EXEC(GOTO BADMOD)
 
 
@@ -91,7 +92,7 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   SNDPGMMSG  MSG('BEGIN MONITORING') KEYVAR(&LOWKEY)
 
   CRTPGM     PGM(&DSTLIB/&UNITPGM) +
-             MODULE(&TMPLIB/&UNITMOD &TMPLIB/GOOGLE$)
+             MODULE(&TMPLIB/&UNITMOD OLIDEV/GOOGLE$)
   MONMSG     MSGID(CPF0000) EXEC(GOTO BADBUILD)
 
 
@@ -245,8 +246,8 @@ PGM PARM(&@SRCLIB &@DSTLIB &@BUILDM)
   /* ПОДПРОЦЕДУРА СОЗДАНИЯ МОДУЛЯ ЗАВИСИМОСТИ *********************************/
   SUBR CREATEDEP
 
-  CRTBNDCL   PGM(QTEMP/COMPILE) SRCFILE(&SRCLIB/&DEPMOD)
-  CALL       PGM(QTEMP/COMPILE) PARM(&SRCLIB &TMPLIB RELEASE)
+  /*CRTBNDCL   PGM(QTEMP/COMPILE) SRCFILE(&SRCLIB/&DEPMOD)*/
+  /*CALL       PGM(QTEMP/COMPILE) PARM(&SRCLIB &TMPLIB RELEASE)*/
 
   ENDSUBR
 
