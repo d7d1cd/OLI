@@ -1,8 +1,8 @@
-#include "type_trait"
-#include "utility"
-#include "memory"
-#include "map"
-#include "iterator"
+#include "STL/type_trait.h"
+#include "STL/utility.h"
+#include "STL/memory.h"
+#include "STL/map.h"
+#include "STL/iterator.h"
 #include "GOOGLE/gtest.h"
 #include <cctype>
 #include <vector>
@@ -498,15 +498,4 @@ TEST(STL, end)
 }
 } // namespace end {
 
-
-
-
-//**********************************************************************************************************************
-#ifdef DEBUG
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-#endif
 

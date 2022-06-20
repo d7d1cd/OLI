@@ -1,4 +1,4 @@
-#include "istring"
+#include "ISTRING/istring.h"
 #include "GOOGLE/gtest.h"
 
 
@@ -528,16 +528,4 @@ TEST(istring_view, length)
   ASSERT_EQ(ibm::istring_view(full).length(), 4);  // Полностью заполненная строка
 }
 } // namespace istring_view {
-
-
-
-
-//**********************************************************************************************************************
-#ifdef DEBUG
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-#endif
 

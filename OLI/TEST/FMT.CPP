@@ -1,4 +1,4 @@
-#include "format"
+#include "FMT/format.h"
 #include "GOOGLE/gtest.h"
 #include "GOOGLE/gmock.h"
 #include <cstdarg>
@@ -1515,14 +1515,4 @@ TEST(FMT_Format, FixedEnum) {
 }
 } // namespace format {
 
-
-
-
-#ifdef DEBUG
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-#endif
 
