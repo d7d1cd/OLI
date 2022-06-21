@@ -1,29 +1,29 @@
 /*
      _____ __    _____
     |     |  |  |_   _|  C++ Object Libraries for IBM i
-    |  |  |  |__ _| |_   File:   ISTRING/base.h
+    |  |  |  |__ _| |_   File:   CORE/string.h
     |_____|_____|_____|  Author: Sergey Chebotarev
 
 */
 
-#ifndef OLI_ISTRING_BASE_H
-#define OLI_ISTRING_BASE_H
+#ifndef OLI_CORE_STRING_H
+#define OLI_CORE_STRING_H
 
-#include "CORE/olidef.h"
 #include "STL/type_trait.h"
 #include "STL/iterator.h"
 #include <algorithm>
 
-IBM_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////
-namespace istring_detail { /////////////////////////////////////////////////////////////////////////////////////////////
+namespace ibmi { ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
 
-//***** КОНСТАНТАНАЯ БАЗА ISTRING **************************************************************************************
+//***** КОНСТАНТАНАЯ БАЗА STRING ***************************************************************************************
+namespace string_detail {
+
 template <typename Heir, std::size_t N = 0>
-class istring_base_const
+class string_base_const
 {
   // MEMBER TYPES ------------------------------------------------------------------------------------------------------
   public:
@@ -66,10 +66,10 @@ class istring_base_const
 
   // CAPACITY ----------------------------------------------------------------------------------------------------------
   template <std::size_t N2 = N, typename stl::enable_if<N2 != 0, int>::type = 0>                                        // Емкость строки для
-  size_type capacity() const { return N2; }                                                                             // istring
+  size_type capacity() const { return N2; }                                                                             // string_base
 
   template <std::size_t N2 = N, typename stl::enable_if<N2 == 0, int>::type = 0>                                        // Емкость строки для
-  size_type capacity() const { return static_cast<const Heir*>(this)->m_capacity; }                                     // istring_ref, _view
+  size_type capacity() const { return static_cast<const Heir*>(this)->m_capacity; }                                     // string_ref, _view
 
   size_type length() const {                                                                                            // Длина строки
     auto crit = crbegin(), end = crend();
@@ -86,18 +86,20 @@ class istring_base_const
 
 
 template <typename Heir, std::size_t N>
-const typename istring_base_const<Heir, N>::value_type istring_base_const<Heir, N>::blank;
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const typename string_base_const<Heir, N>::value_type string_base_const<Heir, N>::blank;
+} // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
 
-//***** ИЗМЕНЯЕМАЯ БАЗА ISTRING ****************************************************************************************
+//***** ИЗМЕНЯЕМАЯ БАЗА string_base ****************************************************************************************
+namespace string_detail {
+
 template <typename Heir, std::size_t N = 0>
-class istring_base : public istring_base_const<Heir, N>
+class string_base : public string_base_const<Heir, N>
 {
-  typedef istring_base_const<Heir, N> base;
+  typedef string_base_const<Heir, N> base;
 
 
 
@@ -140,14 +142,89 @@ class istring_base : public istring_base_const<Heir, N>
     std::memset(whence, base::blank, end() - whence);
   }
 };
+} // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+//***** СТАТИЧЕСКАЯ СТРОКА *********************************************************************************************
+template <std::size_t N>
+class string : public string_detail::string_base<string<N>, N>
+{
+  static_assert(N > 0, "String size cannot be 0");
+  friend class string_detail::string_base_const<string<N>, N>;
+  friend class string_detail::string_base<string<N>, N>;
+  typedef string_detail::string_base<string<N>, N> base;
+  typename base::value_type m_data[N];
+
+
+
+  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
+  public:
+  string() {                                                                                                            // Конструктор по умолчанию
+    base::clear();
+  }
+};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
 
-} // namespace istring_detail //////////////////////////////////////////////////////////////////////////////////////////
-IBM_NAMESPACE_END //////////////////////////////////////////////////////////////////////////////////////////////////////
+//***** ССЫЛКА НА СТРОКУ ***********************************************************************************************
+class string_ref : public string_detail::string_base<string_ref>
+{
+  friend class string_detail::string_base_const<string_ref>;
+  friend class string_detail::string_base<string_ref>;
+  typedef string_detail::string_base<string_ref> base;
+  base::pointer m_data;
+  base::size_type m_capacity;
 
-#endif // OLI_ISTRING_BASE_H
+
+
+  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
+  public:
+  template <typename T, std::size_t N>                                                                                  // Конструктор из массива
+  string_ref(T (&src)[N], bool clear = false)
+  : m_data(src), m_capacity(N) {
+    if (clear)
+      base::clear();
+  }
+
+  string_ref(const string_ref&) = delete;
+  string_ref& operator=(const string_ref&) = delete;
+};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+//***** ПРЕДСТАВЛЕНИЕ НА СТРОКУ ****************************************************************************************
+class string_view : public string_detail::string_base_const<string_view>
+{
+  friend class string_detail::string_base_const<string_view>;
+  typedef string_detail::string_base_const<string_view> base;
+  base::const_pointer m_data;
+  base::size_type m_capacity;
+
+
+
+  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
+  public:
+  template <typename T, std::size_t N>                                                                                  // Конструктор из массива
+  string_view(T (&src)[N])
+  : m_data(src), m_capacity(N) {}
+
+  string_view(const string_view&) = delete;
+  string_view& operator=(const string_view&) = delete;
+};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+} // namespace ibmi ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#endif // OLI_CORE_STRING_H
 

@@ -11,20 +11,19 @@
 #***** ОПЦИИ КОМПИЛЯЦИИ И СБОРКИ ***************************************************************************************
 !if $(debug) == 0
 tmplib   = QTEMP
-optimize = DBGVIEW(*NONE) OPTIMIZE(40) MODCRTOPT(*KEEPILDTA) INLINE(*ON) 
+optimize = DBGVIEW(*NONE) OPTIMIZE(40) INLINE(*ON) 
 define   = DEFINE('__IBMCPP_TR1__=1' 'NDEBUG')
-linker   = IPA(*NO)
 
 !else
 tmplib   = $(dstlib)
-optimize = DBGVIEW(*ALL) OPTIMIZE(20) MODCRTOPT(*NOKEEPILDTA)
+optimize = DBGVIEW(*ALL) OPTIMIZE(20)
 define   = DEFINE('__IBMCPP_TR1__=1' 'DEBUG')
-linker   = IPA(*NO)
 
 !endif
 
 options  = LANGLVL(*EXTENDED0X) PFROPT(*STRDONLY) +
-         # CHECKOUT(*CLASS *COND *EFFECT *GENERAL *GOTO *LANG *PARM *REACH *TRUNC *UNUSED)
+           CHECKOUT(*CLASS *COND *EFFECT *GENERAL *GOTO *LANG *PARM *REACH *TRUNC *UNUSED)
+linker   = BNDSRVPGM(QYPPRT370 QYPPSL510)
 
 
 
@@ -32,14 +31,14 @@ options  = LANGLVL(*EXTENDED0X) PFROPT(*STRDONLY) +
 
 #***** ПОЛНАЯ СБОРКА ***************************************************************************************************
 all: $(dstlib)/OLITEST<PGM>
-$(dstlib)/OLITEST<PGM>: test_main fmt_tst stl_tst istring_tst +
+$(dstlib)/OLITEST<PGM>: test_main fmt_tst stl_tst string_tst +
                         google_lib fmt_lib
    -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
     CRTBNDDIR  BNDDIR($(dstlib)/OLI)
     ADDBNDDIRE BNDDIR($(dstlib)/OLI) OBJ(($(dstlib)/GOOGLE\$ *MODULE) ($(dstlib)/FMT\$ *MODULE))
     CRTPGM     PGM($(@L)/$(@F)) +
-               MODULE($(tmplib)/MAIN $(tmplib)/FMT $(tmplib)/STL $(tmplib)/ISTRING) +
-               BNDDIR($(dstlib)/OLI)
+               MODULE($(tmplib)/MAIN $(tmplib)/FMT $(tmplib)/STL $(tmplib)/STRING) +
+               BNDDIR($(dstlib)/OLI) +
                $(linker)
 
 
@@ -47,7 +46,7 @@ $(dstlib)/OLITEST<PGM>: test_main fmt_tst stl_tst istring_tst +
 
 
 #***** ПОЛНАЯ ОЧИСТКА **************************************************************************************************
-clean: google_clr fmt_clr stl_clr istring_clr
+clean: google_clr fmt_clr stl_clr string_clr
    -DLTMOD     MODULE($(dstlib)/MAIN)
    -DLTPGM     PGM($(dstlib)/OLITEST)
    -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
@@ -127,18 +126,18 @@ $(tmplib)/STL<MODULE>: $(srclib)/STL.TEST $(srclib)/TYPE_TRAIT.STL $(srclib)/UTI
 
 
 #***** STRING **********************************************************************************************************
-istring:     $(dstlib)/ISTRING<PGM>
-istring_tst: $(tmplib)/ISTRING<MODULE>
-istring_clr:
-   -DLTPGM     PGM($(dstlib)/ISTRING)
-   -DLTMOD     MODULE($(tmplib)/ISTRING)
+string:     $(dstlib)/STRING<PGM>
+string_tst: $(tmplib)/STRING<MODULE>
+string_clr:
+   -DLTPGM     PGM($(dstlib)/STRING)
+   -DLTMOD     MODULE($(tmplib)/STRING)
 
-$(dstlib)/ISTRING<PGM>: test_main $(dstlib)/ISTRING<MODULE> google_lib
+$(dstlib)/STRING<PGM>: test_main $(dstlib)/STRING<MODULE> google_lib
     CRTPGM     PGM($(@L)/$(@F)) +
-               MODULE($(tmplib)/MAIN $(tmplib)/ISTRING $(dstlib)/GOOGLE\$) +
+               MODULE($(tmplib)/MAIN $(tmplib)/STRING $(dstlib)/GOOGLE\$) +
                $(linker)
 
-$(tmplib)/ISTRING<MODULE>: $(srclib)/ISTRING.TEST $(srclib)/ISTRING.ISTRING $(srclib)/BASE.ISTRING
+$(tmplib)/STRING<MODULE>: $(srclib)/STRING.TEST $(srclib)/STRING.CORE
     CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/TEST) SRCMBR($(@F)) +
                $(optimize) $(define) $(options)
 

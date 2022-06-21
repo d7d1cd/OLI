@@ -1,38 +1,38 @@
-#include "ISTRING/istring.h"
+#include "CORE/string.h"
 #include "GOOGLE/gtest.h"
 
 
 
-//***** ISTRING ********************************************************************************************************
-namespace istring {
+//***** string ********************************************************************************************************
+namespace string {
 
-TEST(istring, compile_time)
+TEST(string, compile_time)
 {
   using namespace std::tr1;
-  typedef ibm::istring<10> istring_t;
+  typedef ibmi::string<10> string_t;
 
-  // ibm::istring<0> istring; // Это не должно компилироваться
+  // ibmi::string<0> string; // Это не должно компилироваться
 
-  static_assert(is_same<istring_t::value_type, char>::value, "");
-  static_assert(is_same<istring_t::traits_type, std::char_traits<char>>::value, "");
-  static_assert(is_same<istring_t::size_type, std::size_t>::value, "");
-  static_assert(is_same<istring_t::pointer, char*>::value, "");
-  static_assert(is_same<istring_t::const_pointer, const char*>::value, "");
-  static_assert(is_same<istring_t::reference, char&>::value, "");
-  static_assert(is_same<istring_t::const_reference, const char&>::value, "");
-  static_assert(is_same<istring_t::iterator, char*>::value, "");
-  static_assert(is_same<istring_t::const_iterator, const char*>::value, "");
-  static_assert(is_same<istring_t::reverse_iterator, std::reverse_iterator<char*>>::value, "");
-  static_assert(is_same<istring_t::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
-  static_assert(is_same<istring_t::difference_type, std::ptrdiff_t>::value, "");
-  static_assert(istring_t::blank == '\x40', "");
-  static_assert(sizeof(istring_t) == 10, "");
+  static_assert(is_same<string_t::value_type, char>::value, "");
+  static_assert(is_same<string_t::traits_type, std::char_traits<char>>::value, "");
+  static_assert(is_same<string_t::size_type, std::size_t>::value, "");
+  static_assert(is_same<string_t::pointer, char*>::value, "");
+  static_assert(is_same<string_t::const_pointer, const char*>::value, "");
+  static_assert(is_same<string_t::reference, char&>::value, "");
+  static_assert(is_same<string_t::const_reference, const char&>::value, "");
+  static_assert(is_same<string_t::iterator, char*>::value, "");
+  static_assert(is_same<string_t::const_iterator, const char*>::value, "");
+  static_assert(is_same<string_t::reverse_iterator, std::reverse_iterator<char*>>::value, "");
+  static_assert(is_same<string_t::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
+  static_assert(is_same<string_t::difference_type, std::ptrdiff_t>::value, "");
+  static_assert(string_t::blank == '\x40', "");
+  static_assert(sizeof(string_t) == 10, "");
 }
 
 
-TEST(istring, data)
+TEST(string, data)
 {
-  typedef ibm::istring<10> istr_t;
+  typedef ibmi::string<10> istr_t;
   istr_t istr;
   const istr_t cistr;
 
@@ -41,19 +41,19 @@ TEST(istring, data)
 }
 
 
-TEST(istring, capacity)
+TEST(string, capacity)
 {
-  ibm::istring<10> istr;
-  const ibm::istring<15> cistr;
+  ibmi::string<10> istr;
+  const ibmi::string<15> cistr;
 
   ASSERT_EQ(istr.capacity(), 10);
   ASSERT_EQ(cistr.capacity(), 15);
 }
 
 
-TEST(istring, begin)
+TEST(string, begin)
 {
-  typedef ibm::istring<10> istr_t;
+  typedef ibmi::string<10> istr_t;
   istr_t istr;
   const istr_t cistr;
 
@@ -64,9 +64,9 @@ TEST(istring, begin)
 }
 
 
-TEST(istring, end)
+TEST(string, end)
 {
-  typedef ibm::istring<10> istr_t;
+  typedef ibmi::string<10> istr_t;
   istr_t istr;
   const istr_t cistr;
 
@@ -77,9 +77,9 @@ TEST(istring, end)
 }
 
 
-TEST(istring, rbegin)
+TEST(string, rbegin)
 {
-  typedef ibm::istring<10> istr_t;
+  typedef ibmi::string<10> istr_t;
   istr_t istr;
   const istr_t cistr;
 
@@ -90,9 +90,9 @@ TEST(istring, rbegin)
 }
 
 
-TEST(istring, rend)
+TEST(string, rend)
 {
-  typedef ibm::istring<10> istr_t;
+  typedef ibmi::string<10> istr_t;
   istr_t istr;
   const istr_t cistr;
 
@@ -103,10 +103,10 @@ TEST(istring, rend)
 }
 
 
-TEST(istring, assign)
+TEST(string, assign)
 {
   { // Копирование по указателю и размеру
-    ibm::istring<5> istr;
+    ibmi::string<5> istr;
 
     // Размер источника равен размеру строки
     char src5[] = { '1', '2', 'a', 'b', 'C' };
@@ -127,58 +127,58 @@ TEST(istring, assign)
 }
 
 
-TEST(istring, constructors)
+TEST(string, constructors)
 {
   const char raw[5] = { '1', '2', 'a', 'b', 'C' };
 
   { // Конструктор по умолчанию
-    ibm::istring<10> istr;
+    ibmi::string<10> istr;
     ASSERT_EQ(std::distance(istr.begin(), istr.end()), 10);
     ASSERT_EQ(std::count(istr.begin(), istr.end(), istr.blank), 10);
   }
 }
 
 
-TEST(istring, length)
+TEST(string, length)
 {
   const char raw[5] = { '1', '2', 'a', 'b', 'C' };
 
-  ASSERT_EQ(ibm::istring<5>().length(), 0);                // Пустая строка
-  ASSERT_EQ(ibm::istring<9>().assign(raw, 5).length(), 5); // Частично заполненная строка
-  ASSERT_EQ(ibm::istring<5>().assign(raw, 5).length(), 5); // Полностью заполненная строка
+  ASSERT_EQ(ibmi::string<5>().length(), 0);                // Пустая строка
+  ASSERT_EQ(ibmi::string<9>().assign(raw, 5).length(), 5); // Частично заполненная строка
+  ASSERT_EQ(ibmi::string<5>().assign(raw, 5).length(), 5); // Полностью заполненная строка
 }
-} // namespace istring {
+} // namespace string {
 
 
 
 
-//***** ISTRING_REF *****************************************************************************************************
-namespace istring_ref {
+//***** string_ref *****************************************************************************************************
+namespace string_ref {
 
-TEST(istring_ref, compile_time)
+TEST(string_ref, compile_time)
 {
   using namespace std::tr1;
-  typedef ibm::istring_ref istring_ref_t;
+  typedef ibmi::string_ref string_ref_t;
 
-  static_assert(is_same<istring_ref_t::value_type, char>::value, "");
-  static_assert(is_same<istring_ref_t::traits_type, std::char_traits<char>>::value, "");
-  static_assert(is_same<istring_ref_t::size_type, std::size_t>::value, "");
-  static_assert(is_same<istring_ref_t::pointer, char*>::value, "");
-  static_assert(is_same<istring_ref_t::const_pointer, const char*>::value, "");
-  static_assert(is_same<istring_ref_t::reference, char&>::value, "");
-  static_assert(is_same<istring_ref_t::const_reference, const char&>::value, "");
-  static_assert(is_same<istring_ref_t::iterator, char*>::value, "");
-  static_assert(is_same<istring_ref_t::const_iterator, const char*>::value, "");
-  static_assert(is_same<istring_ref_t::reverse_iterator, std::reverse_iterator<char*>>::value, "");
-  static_assert(is_same<istring_ref_t::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
-  static_assert(is_same<istring_ref_t::difference_type, std::ptrdiff_t>::value, "");
-  static_assert(istring_ref_t::blank == '\x40', "");
+  static_assert(is_same<string_ref_t::value_type, char>::value, "");
+  static_assert(is_same<string_ref_t::traits_type, std::char_traits<char>>::value, "");
+  static_assert(is_same<string_ref_t::size_type, std::size_t>::value, "");
+  static_assert(is_same<string_ref_t::pointer, char*>::value, "");
+  static_assert(is_same<string_ref_t::const_pointer, const char*>::value, "");
+  static_assert(is_same<string_ref_t::reference, char&>::value, "");
+  static_assert(is_same<string_ref_t::const_reference, const char&>::value, "");
+  static_assert(is_same<string_ref_t::iterator, char*>::value, "");
+  static_assert(is_same<string_ref_t::const_iterator, const char*>::value, "");
+  static_assert(is_same<string_ref_t::reverse_iterator, std::reverse_iterator<char*>>::value, "");
+  static_assert(is_same<string_ref_t::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
+  static_assert(is_same<string_ref_t::difference_type, std::ptrdiff_t>::value, "");
+  static_assert(string_ref_t::blank == '\x40', "");
 }
 
 
-TEST(istring_ref, data)
+TEST(string_ref, data)
 {
-  typedef ibm::istring_ref ref_t;
+  typedef ibmi::string_ref ref_t;
   ref_t::value_type source[10] = {};
   ref_t ref(source);
   const ref_t cref(source);
@@ -188,9 +188,9 @@ TEST(istring_ref, data)
 }
 
 
-TEST(istring_ref, capacity)
+TEST(string_ref, capacity)
 {
-  typedef ibm::istring_ref ref_t;
+  typedef ibmi::string_ref ref_t;
   ref_t::value_type source[10] = {};
   ref_t ref(source);
   const ref_t cref(source);
@@ -200,9 +200,9 @@ TEST(istring_ref, capacity)
 }
 
 
-TEST(istring_ref, begin)
+TEST(string_ref, begin)
 {
-  typedef ibm::istring_ref ref_t;
+  typedef ibmi::string_ref ref_t;
   ref_t::value_type source[10] = {};
   ref_t ref(source);
   const ref_t cref(source);
@@ -214,9 +214,9 @@ TEST(istring_ref, begin)
 }
 
 
-TEST(istring_ref, end)
+TEST(string_ref, end)
 {
-  typedef ibm::istring_ref ref_t;
+  typedef ibmi::string_ref ref_t;
   ref_t::value_type source[10] = {};
   ref_t ref(source);
   const ref_t cref(source);
@@ -228,9 +228,9 @@ TEST(istring_ref, end)
 }
 
 
-TEST(istring_ref, rbegin)
+TEST(string_ref, rbegin)
 {
- typedef ibm::istring_ref ref_t;
+ typedef ibmi::string_ref ref_t;
   ref_t::value_type source[10] = {};
   ref_t ref(source);
   const ref_t cref(source);
@@ -242,9 +242,9 @@ TEST(istring_ref, rbegin)
 }
 
 
-TEST(istring_ref, rend)
+TEST(string_ref, rend)
 {
-  typedef ibm::istring_ref ref_t;
+  typedef ibmi::string_ref ref_t;
   ref_t::value_type source[10] = {};
   ref_t ref(source);
   const ref_t cref(source);
@@ -256,11 +256,11 @@ TEST(istring_ref, rend)
 }
 
 
-TEST(istring_ref, assign)
+TEST(string_ref, assign)
 {
   { // Копирование по указателю и размеру
     char dst[5] = {};
-    ibm::istring_ref iref(dst);
+    ibmi::string_ref iref(dst);
 
     // Размер источника равен размеру строки
     char src5[] = { '1', '2', 'a', 'b', 'C' };
@@ -281,68 +281,68 @@ TEST(istring_ref, assign)
 }
 
 
-TEST(istring_ref, constructors)
+TEST(string_ref, constructors)
 {
   // Конструктора по умолчанию быть не может, так как класс является ссылкой и обязан ссылатся на строку
 
   { // Конструктор из массива
     char raw[5] = { '1', '2', 'a', 'b', 'C' };
-    ibm::istring_ref ref(raw);
-    const ibm::istring_ref cref(raw);
+    ibmi::string_ref ref(raw);
+    const ibmi::string_ref cref(raw);
 
     ASSERT_EQ(std::distance(ref.begin(), ref.end()), 5);
     ASSERT_TRUE(std::equal(ref.begin(), ref.end(), stl::begin(raw)));
     ASSERT_EQ(std::distance(cref.begin(), cref.end()), 5);
     ASSERT_TRUE(std::equal(cref.begin(), cref.end(), stl::begin(raw)));
 
-    ibm::istring_ref iref(raw, true);
+    ibmi::string_ref iref(raw, true);
     ASSERT_EQ(std::count(stl::begin(raw), stl::end(raw), iref.blank), 5);
   }
 }
 
 
-TEST(istring_ref, length)
+TEST(string_ref, length)
 {
-  char empty[] = { ibm::istring_ref::blank };
-  char part[]  = { '1', '2', 'a', 'b', ibm::istring_ref::blank };
+  char empty[] = { ibmi::string_ref::blank };
+  char part[]  = { '1', '2', 'a', 'b', ibmi::string_ref::blank };
   char full[]  = { '1', '2', 'a', 'b' };
 
-  ASSERT_EQ(ibm::istring_ref(empty).length(), 0); // Пустая строка
-  ASSERT_EQ(ibm::istring_ref(part).length(), 4);  // Частично заполненная строка
-  ASSERT_EQ(ibm::istring_ref(full).length(), 4);  // Полностью заполненная строка
+  ASSERT_EQ(ibmi::string_ref(empty).length(), 0); // Пустая строка
+  ASSERT_EQ(ibmi::string_ref(part).length(), 4);  // Частично заполненная строка
+  ASSERT_EQ(ibmi::string_ref(full).length(), 4);  // Полностью заполненная строка
 }
-} // namespace istring_ref {
+} // namespace string_ref {
 
 
 
 
-//***** ISTRING_VIEW **************************************************************************************************1*
-namespace istring_view {
+//***** string_view **************************************************************************************************1*
+namespace string_view {
 
-TEST(istring_view, compile_time)
+TEST(string_view, compile_time)
 {
   using namespace std::tr1;
-  typedef ibm::istring_view istring_view_t;
+  typedef ibmi::string_view string_view_t;
 
-  static_assert(is_same<istring_view_t::value_type, char>::value, "");
-  static_assert(is_same<istring_view_t::traits_type, std::char_traits<char>>::value, "");
-  static_assert(is_same<istring_view_t::size_type, std::size_t>::value, "");
-  static_assert(is_same<istring_view_t::pointer, char*>::value, "");
-  static_assert(is_same<istring_view_t::const_pointer, const char*>::value, "");
-  static_assert(is_same<istring_view_t::reference, char&>::value, "");
-  static_assert(is_same<istring_view_t::const_reference, const char&>::value, "");
-  static_assert(is_same<istring_view_t::iterator, char*>::value, "");
-  static_assert(is_same<istring_view_t::const_iterator, const char*>::value, "");
-  static_assert(is_same<istring_view_t::reverse_iterator, std::reverse_iterator<char*>>::value, "");
-  static_assert(is_same<istring_view_t::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
-  static_assert(is_same<istring_view_t::difference_type, std::ptrdiff_t>::value, "");
-  static_assert(istring_view_t::blank == '\x40', "");
+  static_assert(is_same<string_view_t::value_type, char>::value, "");
+  static_assert(is_same<string_view_t::traits_type, std::char_traits<char>>::value, "");
+  static_assert(is_same<string_view_t::size_type, std::size_t>::value, "");
+  static_assert(is_same<string_view_t::pointer, char*>::value, "");
+  static_assert(is_same<string_view_t::const_pointer, const char*>::value, "");
+  static_assert(is_same<string_view_t::reference, char&>::value, "");
+  static_assert(is_same<string_view_t::const_reference, const char&>::value, "");
+  static_assert(is_same<string_view_t::iterator, char*>::value, "");
+  static_assert(is_same<string_view_t::const_iterator, const char*>::value, "");
+  static_assert(is_same<string_view_t::reverse_iterator, std::reverse_iterator<char*>>::value, "");
+  static_assert(is_same<string_view_t::const_reverse_iterator, std::reverse_iterator<const char*>>::value, "");
+  static_assert(is_same<string_view_t::difference_type, std::ptrdiff_t>::value, "");
+  static_assert(string_view_t::blank == '\x40', "");
 }
 
 
-TEST(istring_view, data)
+TEST(string_view, data)
 {
-  typedef ibm::istring_view view_t;
+  typedef ibmi::string_view view_t;
 
   {
     view_t::value_type src[10] = {};
@@ -364,9 +364,9 @@ TEST(istring_view, data)
 }
 
 
-TEST(istring_view, capacity)
+TEST(string_view, capacity)
 {
-  typedef ibm::istring_view view_t;
+  typedef ibmi::string_view view_t;
 
   {
     view_t::value_type src[10] = {};
@@ -388,9 +388,9 @@ TEST(istring_view, capacity)
 }
 
 
-TEST(istring_view, begin)
+TEST(string_view, begin)
 {
-  typedef ibm::istring_view view_t;
+  typedef ibmi::string_view view_t;
 
   {
     view_t::value_type src[10] = {};
@@ -416,9 +416,9 @@ TEST(istring_view, begin)
 }
 
 
-TEST(istring_view, end)
+TEST(string_view, end)
 {
-  typedef ibm::istring_view view_t;
+  typedef ibmi::string_view view_t;
 
   {
     view_t::value_type src[10] = {};
@@ -444,9 +444,9 @@ TEST(istring_view, end)
 }
 
 
-TEST(istring_view, rbegin)
+TEST(string_view, rbegin)
 {
-  typedef ibm::istring_view view_t;
+  typedef ibmi::string_view view_t;
 
   {
     view_t::value_type src[10] = {};
@@ -472,9 +472,9 @@ TEST(istring_view, rbegin)
 }
 
 
-TEST(istring_view, rend)
+TEST(string_view, rend)
 {
-  typedef ibm::istring_view view_t;
+  typedef ibmi::string_view view_t;
 
   {
     view_t::value_type src[10] = {};
@@ -500,14 +500,14 @@ TEST(istring_view, rend)
 }
 
 
-TEST(istring_view, constructors)
+TEST(string_view, constructors)
 {
-  // Конструктора по умолчанию нет по аналогии с istring_ref
+  // Конструктора по умолчанию нет по аналогии с string_ref
 
   { // Конструктор из константного массива
     const char raw[5] = { '1', '2', 'a', 'b', 'C' };
-    ibm::istring_view view(raw);
-    const ibm::istring_view cview(raw);
+    ibmi::string_view view(raw);
+    const ibmi::string_view cview(raw);
 
     ASSERT_EQ(std::distance(view.begin(), view.end()), 5);
     ASSERT_TRUE(std::equal(view.begin(), view.end(), stl::begin(raw)));
@@ -517,15 +517,15 @@ TEST(istring_view, constructors)
 }
 
 
-TEST(istring_view, length)
+TEST(string_view, length)
 {
-  char empty[] = { ibm::istring_view::blank };
-  char part[]  = { '1', '2', 'a', 'b', ibm::istring_view::blank };
+  char empty[] = { ibmi::string_view::blank };
+  char part[]  = { '1', '2', 'a', 'b', ibmi::string_view::blank };
   char full[]  = { '1', '2', 'a', 'b' };
 
-  ASSERT_EQ(ibm::istring_view(empty).length(), 0); // Пустая строка
-  ASSERT_EQ(ibm::istring_view(part).length(), 4);  // Частично заполненная строка
-  ASSERT_EQ(ibm::istring_view(full).length(), 4);  // Полностью заполненная строка
+  ASSERT_EQ(ibmi::string_view(empty).length(), 0); // Пустая строка
+  ASSERT_EQ(ibmi::string_view(part).length(), 4);  // Частично заполненная строка
+  ASSERT_EQ(ibmi::string_view(full).length(), 4);  // Полностью заполненная строка
 }
-} // namespace istring_view {
+} // namespace string_view {
 
