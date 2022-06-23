@@ -499,3 +499,41 @@ TEST(STL, end)
 } // namespace end {
 
 
+
+
+//**********************************************************************************************************************
+namespace next {
+
+TEST(STL, next)
+{
+  int array[5] = { 1, 2, 3, 4, 5 };
+
+  ASSERT_EQ(*stl::next(array), 2);
+  ASSERT_EQ(*stl::next(array, 0), 1);
+  ASSERT_EQ(*stl::next(array, 4), 5);
+
+  auto it = stl::next(array, 4);
+  ASSERT_EQ(*stl::next(it, -1), 4);
+}
+} // namespace next {
+
+
+
+
+//**********************************************************************************************************************
+namespace prev {
+
+TEST(STL, prev)
+{
+  int array[5] = { 1, 2, 3, 4, 5 };
+  auto last = array + 4;
+
+  ASSERT_EQ(*stl::prev(last), 4);
+  ASSERT_EQ(*stl::prev(last, 0), 5);
+  ASSERT_EQ(*stl::prev(last, 4), 1);
+
+  auto it = stl::prev(last, 4);
+  ASSERT_EQ(*stl::prev(it, -1), 2);
+}
+} // namespace prev {
+
