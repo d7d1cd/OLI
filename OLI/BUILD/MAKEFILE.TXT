@@ -32,10 +32,11 @@ linker   = BNDSRVPGM(QYPPRT370 QYPPSL510)
 #***** ПОЛНАЯ СБОРКА ***************************************************************************************************
 all: $(dstlib)/OLITEST<PGM>
 $(dstlib)/OLITEST<PGM>: test_main fmt_tst stl_tst string_tst +
-                        google_lib fmt_lib
+                        google_lib fmt_lib icore_lib
    -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
     CRTBNDDIR  BNDDIR($(dstlib)/OLI)
-    ADDBNDDIRE BNDDIR($(dstlib)/OLI) OBJ(($(dstlib)/GOOGLE\$ *MODULE) ($(dstlib)/FMT\$ *MODULE))
+    ADDBNDDIRE BNDDIR($(dstlib)/OLI) +
+               OBJ(($(dstlib)/GOOGLE\$ *MODULE) ($(dstlib)/FMT\$ *MODULE) ($(dstlib)/ICORE\$ *MODULE))
     CRTPGM     PGM($(@L)/$(@F)) +
                MODULE($(tmplib)/MAIN $(tmplib)/FMT $(tmplib)/STL $(tmplib)/STRING) +
                BNDDIR($(dstlib)/OLI) +
@@ -46,8 +47,8 @@ $(dstlib)/OLITEST<PGM>: test_main fmt_tst stl_tst string_tst +
 
 
 #***** ПОЛНАЯ ОЧИСТКА **************************************************************************************************
-clean: google_clr fmt_clr stl_clr string_clr
-   -DLTMOD     MODULE($(dstlib)/MAIN)
+clean: google_clr fmt_clr stl_clr icore_clr string_clr
+   -DLTMOD     MODULE($(tmplib)/MAIN)
    -DLTPGM     PGM($(dstlib)/OLITEST)
    -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
 
@@ -125,6 +126,19 @@ $(tmplib)/STL<MODULE>: $(srclib)/STL.TEST $(srclib)/TYPE_TRAIT.STL $(srclib)/UTI
 
 
 
+#***** IBM I CORE ******************************************************************************************************
+icore_lib: $(dstlib)/ICORE\$<MODULE>
+icore_clr:
+   -DLTMOD     MODULE($(dstlib)/ICORE\$)
+
+$(dstlib)/ICORE\$<MODULE>: $(srclib)/STRING.ICORE $(srclib)/ICORE\$.ICORE
+    CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/ICORE) SRCMBR($(@F)) +
+               $(optimize) $(define) $(options)
+
+
+
+
+
 #***** STRING **********************************************************************************************************
 string:     $(dstlib)/STRING<PGM>
 string_tst: $(tmplib)/STRING<MODULE>
@@ -132,12 +146,12 @@ string_clr:
    -DLTPGM     PGM($(dstlib)/STRING)
    -DLTMOD     MODULE($(tmplib)/STRING)
 
-$(dstlib)/STRING<PGM>: test_main $(dstlib)/STRING<MODULE> google_lib
+$(dstlib)/STRING<PGM>: test_main string_tst icore_lib google_lib
     CRTPGM     PGM($(@L)/$(@F)) +
-               MODULE($(tmplib)/MAIN $(tmplib)/STRING $(dstlib)/GOOGLE\$) +
+               MODULE($(tmplib)/MAIN $(tmplib)/STRING $(dstlib)/ICORE\$ $(dstlib)/GOOGLE\$) +
                $(linker)
 
-$(tmplib)/STRING<MODULE>: $(srclib)/STRING.TEST $(srclib)/STRING.CORE
+$(tmplib)/STRING<MODULE>: $(srclib)/STRING.TEST $(srclib)/STRING.ICORE
     CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/TEST) SRCMBR($(@F)) +
                $(optimize) $(define) $(options)
 

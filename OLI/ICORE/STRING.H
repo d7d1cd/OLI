@@ -1,7 +1,7 @@
 /*
      _____ __    _____
     |     |  |  |_   _|  C++ Object Libraries for IBM i
-    |  |  |  |__ _| |_   File:   CORE/string.h
+    |  |  |  |__ _| |_   File:   ICORE/string.h
     |_____|_____|_____|  Author: Sergey Chebotarev
 
 */
@@ -12,6 +12,7 @@
 #include "STL/type_trait.h"
 #include "STL/iterator.h"
 #include <algorithm>
+#include <array>
 
 namespace ibmi { ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,15 +20,14 @@ namespace ibmi { ///////////////////////////////////////////////////////////////
 
 
 
-//***** КОНСТАНТАНАЯ БАЗА STRING ***************************************************************************************
+//***** ТИПЫ И КОНСТАНТЫ СТРОКИ ****************************************************************************************
 namespace string_detail {
 
-template <typename Heir, std::size_t N = 0>
-class string_base_const
+struct types_holder
 {
   // MEMBER TYPES ------------------------------------------------------------------------------------------------------
-  public:
   typedef char value_type;
+  typedef std::tr1::array<value_type, 10> blanks_type;
   typedef std::char_traits<value_type> traits_type;
   typedef std::size_t size_type;
   typedef std::ptrdiff_t difference_type;
@@ -43,14 +43,26 @@ class string_base_const
 
 
   // CONSTANTS ---------------------------------------------------------------------------------------------------------
-  static const value_type blank = '\x40';
+  enum blank_type : value_type { blank = '\x40' };
+  static const blanks_type blanks;
+};
+} // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////
 
 
 
+
+
+//***** КОНСТАНТАНАЯ БАЗА СТРОКИ ***************************************************************************************
+namespace string_detail {
+
+template <typename Heir, std::size_t N = 0>
+class string_base_const : public types_holder
+{
   // ITERATORS ---------------------------------------------------------------------------------------------------------
+  public:
   const_iterator         begin()   const { return data(); }
   const_iterator         cbegin()  const { return begin(); }
-  const_iterator         end()     const { return data() + capacity(); }
+  const_iterator         end()     const { return stl::next(data(), capacity()); }
   const_iterator         cend()    const { return end(); }
   const_reverse_iterator rbegin()  const { return const_reverse_iterator(end()); }
   const_reverse_iterator crbegin() const { return rbegin(); }
@@ -66,10 +78,16 @@ class string_base_const
 
   // CAPACITY ----------------------------------------------------------------------------------------------------------
   template <std::size_t N2 = N, typename stl::enable_if<N2 != 0, int>::type = 0>                                        // Емкость строки для
-  size_type capacity() const { return N2; }                                                                             // string_base
+  size_type capacity() const {                                                                                          // string_base
+    static_assert(N2 == N, "");
+    return N2;
+  }
 
   template <std::size_t N2 = N, typename stl::enable_if<N2 == 0, int>::type = 0>                                        // Емкость строки для
-  size_type capacity() const { return static_cast<const Heir*>(this)->m_capacity; }                                     // string_ref, _view
+  size_type capacity() const {                                                                                          // string_ref, _view
+    static_assert(N2 == N, "");
+    return static_cast<const Heir*>(this)->m_capacity;
+  }
 
   size_type length() const {                                                                                            // Длина строки
     auto crit = crbegin(), end = crend();
@@ -77,23 +95,17 @@ class string_base_const
     return std::distance(crit, end);
   }
 
-
-
-  // SERVICE -----------------------------------------------------------------------------------------------------------
-  private:
+  size_type length2() const {
+    return 0;
+  }
 };
-
-
-
-template <typename Heir, std::size_t N>
-const typename string_base_const<Heir, N>::value_type string_base_const<Heir, N>::blank;
 } // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
 
-//***** ИЗМЕНЯЕМАЯ БАЗА string_base ****************************************************************************************
+//***** ИЗМЕНЯЕМАЯ БАЗА СТРОКИ *****************************************************************************************
 namespace string_detail {
 
 template <typename Heir, std::size_t N = 0>
@@ -108,7 +120,7 @@ class string_base : public string_base_const<Heir, N>
   Heir& assign(typename base::const_pointer start, typename base::size_type size) {                                     // Копирование из указателя и длины
     auto less = std::min(size, base::capacity());
     std::memcpy(begin(), start, less);
-    fill_tail(begin() + less);
+    fill_tail(stl::next(begin(), less));
     return *static_cast<Heir*>(this);
   }
 
@@ -120,7 +132,7 @@ class string_base : public string_base_const<Heir, N>
   using    base::rbegin;
   using    base::rend;
   typename base::iterator         begin()  { return data(); }
-  typename base::iterator         end()    { return data() + base::capacity(); }
+  typename base::iterator         end()    { return stl::next(data(), base::capacity()); }
   typename base::reverse_iterator rbegin() { return base::reverse_iterator(end()); }
   typename base::reverse_iterator rend()   { return base::reverse_iterator(begin()); }
 
@@ -139,7 +151,7 @@ class string_base : public string_base_const<Heir, N>
   // SERVICE -----------------------------------------------------------------------------------------------------------
   private:
   void fill_tail(typename base::iterator whence) {                                                                      // Заполнение хвоста
-    std::memset(whence, base::blank, end() - whence);
+    std::memset(whence, base::blank, std::distance(whence, end()));
   }
 };
 } // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +164,7 @@ class string_base : public string_base_const<Heir, N>
 template <std::size_t N>
 class string : public string_detail::string_base<string<N>, N>
 {
-  static_assert(N > 0, "String size cannot be 0");
+  static_assert(N > 0, "String capacity cannot be 0");
   friend class string_detail::string_base_const<string<N>, N>;
   friend class string_detail::string_base<string<N>, N>;
   typedef string_detail::string_base<string<N>, N> base;

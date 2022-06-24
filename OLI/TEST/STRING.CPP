@@ -1,4 +1,4 @@
-#include "CORE/string.h"
+#include "ICORE/string.h"
 #include "GOOGLE/gtest.h"
 
 
@@ -27,6 +27,14 @@ TEST(string, compile_time)
   static_assert(is_same<string_t::difference_type, std::ptrdiff_t>::value, "");
   static_assert(string_t::blank == '\x40', "");
   static_assert(sizeof(string_t) == 10, "");
+}
+
+
+TEST(string, static_values)
+{
+  typedef ibmi::string<10> string_t;
+  auto blanks = string_t::blanks;
+  ASSERT_EQ(std::count(blanks.begin(), blanks.end(), string_t::blank), blanks.size());
 }
 
 
@@ -146,6 +154,10 @@ TEST(string, length)
   ASSERT_EQ(ibmi::string<5>().length(), 0);                // Пустая строка
   ASSERT_EQ(ibmi::string<9>().assign(raw, 5).length(), 5); // Частично заполненная строка
   ASSERT_EQ(ibmi::string<5>().assign(raw, 5).length(), 5); // Полностью заполненная строка
+
+  ibmi::string<10> str;
+  str.assign(raw, 5);
+  auto l = str.length2();
 }
 } // namespace string {
 
