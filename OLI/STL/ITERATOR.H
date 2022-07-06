@@ -82,7 +82,7 @@ inline constexpr T* end(T (&Array)[Size])
 //
 
 template <typename InputIt>
-InputIt next(InputIt it, typename std::iterator_traits<InputIt>::difference_type n = 1)
+inline InputIt next(InputIt it, typename std::iterator_traits<InputIt>::difference_type n = 1)
 {
   std::advance(it, n);
   return it;
@@ -99,7 +99,7 @@ InputIt next(InputIt it, typename std::iterator_traits<InputIt>::difference_type
 //
 
 template <typename BidirIt>
-BidirIt prev(BidirIt it, typename std::iterator_traits<BidirIt>::difference_type n = 1)
+inline BidirIt prev(BidirIt it, typename std::iterator_traits<BidirIt>::difference_type n = 1)
 {
   std::advance(it, -n);
   return it;
