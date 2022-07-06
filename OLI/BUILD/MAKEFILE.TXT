@@ -31,7 +31,7 @@ linker   = BNDSRVPGM(QYPPRT370 QYPPSL510)
 
 #***** ПОЛНАЯ СБОРКА ***************************************************************************************************
 all: $(dstlib)/OLITEST<PGM>
-$(dstlib)/OLITEST<PGM>: test_main fmt_tst stl_tst string_tst +
+$(dstlib)/OLITEST<PGM>: test_main fmt_tst stl_tst $(tmplib)/STRING<MODULE> +
                         google_lib fmt_lib icore_lib
    -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
     CRTBNDDIR  BNDDIR($(dstlib)/OLI)
