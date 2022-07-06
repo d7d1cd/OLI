@@ -77,6 +77,9 @@ class string_base_const : public types_holder
 
 
   // CAPACITY ----------------------------------------------------------------------------------------------------------
+  /*
+     Емкость строки
+  */
   template <std::size_t N2 = N, typename stl::enable_if<N2 != 0, int>::type = 0>                                        // Емкость строки для
   size_type capacity() const {                                                                                          // string_base
     static_assert(N2 == N, "");
@@ -89,14 +92,86 @@ class string_base_const : public types_holder
     return static_cast<const Heir*>(this)->m_capacity;
   }
 
-  size_type length() const {                                                                                            // Длина строки
-    auto crit = crbegin(), end = crend();
-    while (crit != end && *crit == blank) ++crit;
-    return std::distance(crit, end);
+  /*
+     Длина строки
+  */
+  size_type length() const {
+    auto crit = crbegin(), rend = crend();
+    while (crit != rend && *crit == blank) ++crit;
+    return std::distance(crit, rend);
   }
 
   size_type length2() const {
-    return 0;
+    auto ne = find_not_blanks();
+
+    if (ne.first == end())
+      return capacity();
+    if (ne.second == cbegin())
+      return 0;
+
+    return std::distance(begin(), find_blanks_begin(ne));
+  }
+
+  size_type length3() const {                                                                                           // Когда емкость известна на этапе компиляции
+    std::tr1::array<value_type, N> empty;
+    std::memset(empty.begin(), blank, N);
+
+    auto left = cbegin(), right = cend(), pos = cbegin();
+
+    while (pos != right) {
+      if (std::memcmp(pos, empty.begin(), std::distance(pos, right)))
+        left = stl::next(pos);
+      else
+        right = pos;
+      pos = stl::next(left, std::distance(left, right) / 2);
+    }
+
+    return std::distance(begin(), pos);
+  }
+
+
+
+  // SERVICE -----------------------------------------------------------------------------------------------------------
+  private:
+  /*
+     Поиск в строке с конца не пустого участка
+     Возвращает пару итераторов на непустой участок.
+     Если оба итератора равны cbegin(), то в строке нет непустого участка (вся строка пуста).
+     Если итератор second равен cend(), то вся строка заполнена.
+  */
+  std::pair<const_iterator, const_iterator> find_not_blanks() const {
+    auto check_size = capacity();
+    auto left = cend();
+    if (*stl::prev(left) != blank)
+      return std::make_pair(cend(), cend());
+
+    while (check_size) {
+      auto piece = std::min(blanks.size(), check_size);
+      left = stl::prev(left, piece);
+      check_size -= piece;
+      if (std::memcmp(left, blanks.begin(), piece))
+        return std::make_pair(left, stl::next(left, piece));
+    }
+
+    return std::make_pair(cbegin(), cbegin());
+  }
+
+  /*
+     "Бинарный" поиск позиции начала пустоты в заданном участке строки
+  */
+  const_iterator find_blanks_begin(std::pair<const_iterator, const_iterator> ne) const {
+    auto pos = ne.first;
+
+    while (pos != ne.second) {
+      if (std::memcmp(pos, blanks.begin(), std::distance(pos, ne.second)))
+        ne.first = stl::next(pos);
+      else
+        ne.second = pos;
+
+      pos = stl::next(ne.first, std::distance(ne.first, ne.second) / 2);
+    }
+
+    return pos;
   }
 };
 } // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////

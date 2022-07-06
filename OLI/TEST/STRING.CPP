@@ -32,7 +32,7 @@ TEST(string, compile_time)
 
 TEST(string, static_values)
 {
-  typedef ibmi::string<10> string_t;
+  typedef ibmi::string<1> string_t;
   auto blanks = string_t::blanks;
   ASSERT_EQ(std::count(blanks.begin(), blanks.end(), string_t::blank), blanks.size());
 }
@@ -121,7 +121,7 @@ TEST(string, assign)
     istr.assign(src5, 5);
     ASSERT_TRUE(std::equal(istr.begin(), istr.end(), src5));
 
-    // Размер источника большше размера строки
+    // Размер источника больше размера строки
     char src7[] = { 'a', 'b', 'c', 'D', 'E', 'F', '0' };
     istr.assign(src7, 7);
     ASSERT_TRUE(std::equal(istr.begin(), istr.end(), src7));
@@ -149,15 +149,16 @@ TEST(string, constructors)
 
 TEST(string, length)
 {
-  const char raw[5] = { '1', '2', 'a', 'b', 'C' };
+  constexpr size_t string_size = 10 * 2 + 3;
+  char raw[string_size];
+  std::fill(stl::begin(raw), stl::end(raw), 'A');
+  ibmi::string<string_size> str;
 
-  ASSERT_EQ(ibmi::string<5>().length(), 0);                // Пустая строка
-  ASSERT_EQ(ibmi::string<9>().assign(raw, 5).length(), 5); // Частично заполненная строка
-  ASSERT_EQ(ibmi::string<5>().assign(raw, 5).length(), 5); // Полностью заполненная строка
-
-  ibmi::string<10> str;
-  str.assign(raw, 5);
-  auto l = str.length2();
+  for (int i = 0; i < string_size; ++i) {
+    str.assign(raw, i);
+    ASSERT_EQ(str.length(), i);
+    ASSERT_EQ(str.length2(), i);
+  }
 }
 } // namespace string {
 
