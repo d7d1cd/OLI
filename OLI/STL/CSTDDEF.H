@@ -9,7 +9,7 @@
 #ifndef OLI_STL_CSTDDEF_H
 #define OLI_STL_CSTDDEF_H
 
-#include "ICORE/olidef.h"
+#include "STL/define.h"
 #include <cstddef>
 
 STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////

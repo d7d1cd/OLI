@@ -9,7 +9,7 @@
 #ifndef OLI_STL_TYPE_TRAITS_H
 #define OLI_STL_TYPE_TRAITS_H
 
-#include "ICORE/olidef.h"
+#include "STL/define.h"
 #include <type_traits>
 
 STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////

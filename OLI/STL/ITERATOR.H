@@ -9,7 +9,7 @@
 #ifndef OLI_STL_ITERATOR_H
 #define OLI_STL_ITERATOR_H
 
-#include "ICORE/olidef.h"
+#include "STL/define.h"
 #include <iterator>
 
 STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////////////////////////////////////////////
