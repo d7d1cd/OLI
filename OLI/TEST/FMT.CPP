@@ -1,6 +1,5 @@
 #include "FMT/format.h"
 #include "GOOGLE/gtest.h"
-#include "GOOGLE/gmock.h"
 #include <cstdarg>
 #include <cctype>
 
