@@ -6,28 +6,30 @@
 
 */
 
-#ifndef OLI_CORE_STRING_H
-#define OLI_CORE_STRING_H
+#ifndef OLI_ICORE_STRING_H
+#define OLI_ICORE_STRING_H
 
+#include "ICORE/define.h"
 #include "STL/type_trait.h"
 #include "STL/iterator.h"
 #include <algorithm>
 #include <array>
 
-namespace ibmi { ///////////////////////////////////////////////////////////////////////////////////////////////////////
+IBMI_NAMESPACE_BEGIN ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
 
-//***** ТИПЫ И КОНСТАНТЫ СТРОКИ ****************************************************************************************
+//***** КОНСТАНТАНАЯ БАЗА СТРОКИ ***************************************************************************************
 namespace string_detail {
 
-struct types_holder
+template <typename Heir, std::size_t N = 0>
+class string_base_const
 {
   // MEMBER TYPES ------------------------------------------------------------------------------------------------------
+  public:
   typedef char value_type;
-  typedef std::tr1::array<value_type, 10> blanks_type;
   typedef std::char_traits<value_type> traits_type;
   typedef std::size_t size_type;
   typedef std::ptrdiff_t difference_type;
@@ -44,20 +46,9 @@ struct types_holder
 
   // CONSTANTS ---------------------------------------------------------------------------------------------------------
   enum blank_type : value_type { blank = '\x40' };
-  static const blanks_type blanks;
-};
-} // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////
 
 
 
-
-
-//***** КОНСТАНТАНАЯ БАЗА СТРОКИ ***************************************************************************************
-namespace string_detail {
-
-template <typename Heir, std::size_t N = 0>
-class string_base_const : public types_holder
-{
   // ITERATORS ---------------------------------------------------------------------------------------------------------
   public:
   const_iterator         begin()   const { return data(); }
@@ -95,24 +86,9 @@ class string_base_const : public types_holder
   /*
      Длина строки
   */
+  template <std::size_t N2 = N, typename stl::enable_if<N2 != 0, int>::type = 0>
   size_type length() const {
-    auto crit = crbegin(), rend = crend();
-    while (crit != rend && *crit == blank) ++crit;
-    return std::distance(crit, rend);
-  }
-
-  size_type length2() const {
-    auto ne = find_not_blanks();
-
-    if (ne.first == end())
-      return capacity();
-    if (ne.second == cbegin())
-      return 0;
-
-    return std::distance(begin(), find_blanks_begin(ne));
-  }
-
-  size_type length3() const {                                                                                           // Когда емкость известна на этапе компиляции
+    static_assert(N2 == N, "");
     std::tr1::array<value_type, N> empty;
     std::memset(empty.begin(), blank, N);
 
@@ -129,49 +105,12 @@ class string_base_const : public types_holder
     return std::distance(begin(), pos);
   }
 
-
-
-  // SERVICE -----------------------------------------------------------------------------------------------------------
-  private:
-  /*
-     Поиск в строке с конца не пустого участка
-     Возвращает пару итераторов на непустой участок.
-     Если оба итератора равны cbegin(), то в строке нет непустого участка (вся строка пуста).
-     Если итератор second равен cend(), то вся строка заполнена.
-  */
-  std::pair<const_iterator, const_iterator> find_not_blanks() const {
-    auto check_size = capacity();
-    auto left = cend();
-    if (*stl::prev(left) != blank)
-      return std::make_pair(cend(), cend());
-
-    while (check_size) {
-      auto piece = std::min(blanks.size(), check_size);
-      left = stl::prev(left, piece);
-      check_size -= piece;
-      if (std::memcmp(left, blanks.begin(), piece))
-        return std::make_pair(left, stl::next(left, piece));
-    }
-
-    return std::make_pair(cbegin(), cbegin());
-  }
-
-  /*
-     "Бинарный" поиск позиции начала пустоты в заданном участке строки
-  */
-  const_iterator find_blanks_begin(std::pair<const_iterator, const_iterator> ne) const {
-    auto pos = ne.first;
-
-    while (pos != ne.second) {
-      if (std::memcmp(pos, blanks.begin(), std::distance(pos, ne.second)))
-        ne.first = stl::next(pos);
-      else
-        ne.second = pos;
-
-      pos = stl::next(ne.first, std::distance(ne.first, ne.second) / 2);
-    }
-
-    return pos;
+  template <std::size_t N2 = N, typename stl::enable_if<N2 == 0, int>::type = 0>
+  size_type length() const {
+    static_assert(N2 == N, "");
+    auto cit = stl::prev(cend()), cend = stl::prev(cbegin());                                                           // Реверс-итераторы не используются, так как с ними медленнее
+    while (cit != cend && *cit == blank) --cit;
+    return std::distance(cend, cit);
   }
 };
 } // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////
@@ -311,7 +250,7 @@ class string_view : public string_detail::string_base_const<string_view>
 
 
 
-} // namespace ibmi ////////////////////////////////////////////////////////////////////////////////////////////////////
+IBMI_NAMESPACE_END /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // OLI_CORE_STRING_H
+#endif // OLI_ICORE_STRING_H
 

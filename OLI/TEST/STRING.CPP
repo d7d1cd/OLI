@@ -30,14 +30,6 @@ TEST(string, compile_time)
 }
 
 
-TEST(string, static_values)
-{
-  typedef ibmi::string<1> string_t;
-  auto blanks = string_t::blanks;
-  ASSERT_EQ(std::count(blanks.begin(), blanks.end(), string_t::blank), blanks.size());
-}
-
-
 TEST(string, data)
 {
   typedef ibmi::string<10> istr_t;
@@ -157,7 +149,6 @@ TEST(string, length)
   for (int i = 0; i < string_size; ++i) {
     str.assign(raw, i);
     ASSERT_EQ(str.length(), i);
-    ASSERT_EQ(str.length2(), i);
   }
 }
 } // namespace string {
@@ -316,13 +307,15 @@ TEST(string_ref, constructors)
 
 TEST(string_ref, length)
 {
-  char empty[] = { ibmi::string_ref::blank };
-  char part[]  = { '1', '2', 'a', 'b', ibmi::string_ref::blank };
-  char full[]  = { '1', '2', 'a', 'b' };
+  constexpr size_t string_size = 10 * 2 + 3;
+  char raw[string_size];
+  ibmi::string_ref ref(raw);
 
-  ASSERT_EQ(ibmi::string_ref(empty).length(), 0); // Пустая строка
-  ASSERT_EQ(ibmi::string_ref(part).length(), 4);  // Частично заполненная строка
-  ASSERT_EQ(ibmi::string_ref(full).length(), 4);  // Полностью заполненная строка
+  for (int i = 0; i < string_size; ++i) {
+    std::fill(ref.begin(), stl::next(ref.begin(), i), 'A');
+    std::fill(stl::next(ref.begin(), i), ref.end(), ref.blank);
+    ASSERT_EQ(ref.length(), i);
+  }
 }
 } // namespace string_ref {
 
