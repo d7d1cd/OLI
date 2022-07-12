@@ -1,9 +1,9 @@
-# 
-#
-#
-#
-#
-#
+#     _____ __    _____
+#    |     |  |  |_   _|  C++ Object Libraries for IBM i
+#    |  |  |  |__ _| |_   File:   BUILD/makefile.txt
+#    |_____|_____|_____|  Author: Sergey Chebotarev
+#     
+
 
 
 
@@ -18,7 +18,6 @@ define   = DEFINE('__IBMCPP_TR1__=1' 'NDEBUG')
 tmplib   = $(dstlib)
 optimize = DBGVIEW(*ALL) OPTIMIZE(20)
 define   = DEFINE('__IBMCPP_TR1__=1' 'DEBUG')
-
 !endif
 
 options  = LANGLVL(*EXTENDED0X) PFROPT(*STRDONLY) +
@@ -31,12 +30,14 @@ linker   = BNDSRVPGM(QYPPRT370 QYPPSL510)
 
 #***** ПОЛНАЯ СБОРКА ***************************************************************************************************
 all: $(dstlib)/OLITEST<PGM>
-$(dstlib)/OLITEST<PGM>: test_main fmt_tst stl_tst $(tmplib)/STRING<MODULE> +
-                        google_lib fmt_lib icore_lib
+
+$(dstlib)/OLITEST<PGM>: $(tmplib)/MAIN<MODULE> $(tmplib)/FMT<MODULE> $(tmplib)/STL<MODULE> $(tmplib)/STRING<MODULE> +
+                        $(dstlib)/GOOGLE\$<MODULE> $(dstlib)/FMT\$<MODULE>
    -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
     CRTBNDDIR  BNDDIR($(dstlib)/OLI)
     ADDBNDDIRE BNDDIR($(dstlib)/OLI) +
-               OBJ(($(dstlib)/GOOGLE\$ *MODULE) ($(dstlib)/FMT\$ *MODULE) ($(dstlib)/ICORE\$ *MODULE))
+               OBJ(($(dstlib)/GOOGLE\$ *MODULE) ($(dstlib)/FMT\$ *MODULE))
+   -DLTPGM     PGM($(@L)/$(@F))
     CRTPGM     PGM($(@L)/$(@F)) +
                MODULE($(tmplib)/MAIN $(tmplib)/FMT $(tmplib)/STL $(tmplib)/STRING) +
                BNDDIR($(dstlib)/OLI) +
@@ -47,122 +48,56 @@ $(dstlib)/OLITEST<PGM>: test_main fmt_tst stl_tst $(tmplib)/STRING<MODULE> +
 
 
 #***** ПОЛНАЯ ОЧИСТКА **************************************************************************************************
-clean: google_clr fmt_clr stl_clr icore_clr string_clr
-   -DLTMOD     MODULE($(tmplib)/MAIN)
+clean:
    -DLTPGM     PGM($(dstlib)/OLITEST)
    -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
-
-
-
-
-
-#***** ГЛАВНЫЙ МОДУЛЬ ЮНИТ-ТЕСТОВ **************************************************************************************
-test_main: $(tmplib)/MAIN<MODULE>
-$(tmplib)/MAIN<MODULE>: $(srclib)/MAIN.TEST
-    CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/TEST) SRCMBR($(@F)) +
-               $(optimize) $(define) $(options)
-
-
-
-
-
-#***** GOOGLE **********************************************************************************************************
-google_lib: $(dstlib)/GOOGLE\$<MODULE>
-google_clr:
    -DLTMOD     MODULE($(dstlib)/GOOGLE\$)
+   -DLTMOD     MODULE($(dstlib)/FMT\$)
+   -DLTMOD     MODULE($(tmplib)/MAIN)
+   -DLTMOD     MODULE($(tmplib)/FMT)
+   -DLTMOD     MODULE($(tmplib)/STL)
+   -DLTMOD     MODULE($(tmplib)/STRING)
 
+
+
+
+
+#***** СБОРКА МОДУЛЕЙ БИБЛИОТЕКИ ***************************************************************************************
 $(dstlib)/GOOGLE\$<MODULE>: $(srclib)/GTEST.GOOGLE $(srclib)/GMOCK.GOOGLE $(srclib)/GOOGLE\$.GOOGLE
+   -DLTMOD     MODULE($(@L)/$(@F))
     CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/GOOGLE) SRCMBR($(@F)) +
                $(optimize) $(define) $(options)
 
-
-
-
-
-#***** FMT *************************************************************************************************************
-fmt:     $(dstlib)/FMT<PGM>
-fmt_tst: $(tmplib)/FMT<MODULE>
-fmt_lib: $(dstlib)/FMT\$<MODULE>
-fmt_clr:
-   -DLTPGM     PGM($(dstlib)/FMT)
-   -DLTMOD     MODULE($(tmplib)/FMT)
-   -DLTMOD     MODULE($(dstlib)/FMT\$)
-
-$(dstlib)/FMT<PGM>: test_main $(dstlib)/FMT<MODULE> $(dstlib)/FMT\$<MODULE> google_lib 
-    CRTPGM     PGM($(@L)/$(@F)) +
-               MODULE($(tmplib)/MAIN $(tmplib)/FMT $(dstlib)/FMT\$ $(dstlib)/GOOGLE\$) + 
-               $(linker)
-
-$(dstlib)/FMT\$<MODULE>: $(srclib)/FMT\$.FMT $(srclib)/FORMAT\$.FMT $(srclib)/FORMAT.FMT
-    CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/FMT) SRCMBR($(@F)) +
+$(dstlib)/FMT\$<MODULE>: $(srclib)/FORMAT\$.FMT $(srclib)/FORMAT.FMT
+   -DLTMOD     MODULE($(@L)/$(@F))
+    CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/FMT) SRCMBR(FORMAT\$) +
                $(optimize) $(define) $(options)
 
-$(tmplib)/FMT<MODULE>: $(srclib)/FMT.TEST $(srclib)/FORMAT.FMT
+
+
+
+
+#***** ОПИСАНИЕ ЗАВИСИМОСТЕЙ МОДУЛЕЙ ЮНИТ-ТЕСТОВ ***********************************************************************
+$(tmplib)/MAIN<MODULE>: +
+    $(srclib)/MAIN.TEST $(srclib)/GTEST.GOOGLE
+
+$(tmplib)/FMT<MODULE>: +
+    $(srclib)/FMT.TEST $(srclib)/FORMAT.FMT $(srclib)/GTEST.GOOGLE
+
+$(tmplib)/STL<MODULE>: +
+    $(srclib)/STL.TEST $(srclib)/TYPE_TRAIT.STL $(srclib)/UTILITY.STL $(srclib)/MEMORY.STL +
+    $(srclib)/MAP.STL $(srclib)/ITERATOR.STL $(srclib)/DEFINE.STL
+
+$(tmplib)/STRING<MODULE>: +
+    $(srclib)/STRING.TEST $(srclib)/STRING.ICORE +
+    $(srclib)/DEFINE.ICORE $(srclib)/TYPE_TRAIT.STL $(srclib)/ITERATOR.STL
+
+
+
+
+
+#***** ПРАВИЛО КОМПИЛЯЦИИ МОДУЛЕЙ ЮНИТ-ТЕСТОВ **************************************************************************
+$(tmplib)/MAIN<MODULE> $(tmplib)/FMT<MODULE> $(tmplib)/STL<MODULE> $(tmplib)/STRING<MODULE>:
+   -DLTMOD     MODULE($(@L)/$(@F))
     CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/TEST) SRCMBR($(@F)) +
                $(optimize) $(define) $(options)
-
-
-
-
-
-#***** STL *************************************************************************************************************
-stl:     $(dstlib)/STL<PGM>
-stl_tst: $(tmplib)/STL<MODULE>
-stl_clr:
-   -DLTPGM     PGM($(dstlib)/STL)
-   -DLTMOD     MODULE($(tmplib)/STL)
-
-$(dstlib)/STL<PGM>: test_main $(dstlib)/STL<MODULE> google_lib
-    CRTPGM     PGM($(@L)/$(@F)) +
-               MODULE($(tmplib)/MAIN $(tmplib)/STL $(dstlib)/GOOGLE\$) +
-               $(linker)
-
-$(tmplib)/STL<MODULE>: $(srclib)/STL.TEST $(srclib)/TYPE_TRAIT.STL $(srclib)/UTILITY.STL $(srclib)/MEMORY.STL +
-                       $(srclib)/MAP.STL $(srclib)/ITERATOR.STL
-    CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/TEST) SRCMBR($(@F)) +
-               $(optimize) $(define) $(options)
-
-
-
-
-
-#***** IBM I CORE ******************************************************************************************************
-icore_lib: $(dstlib)/ICORE\$<MODULE>
-icore_clr:
-   -DLTMOD     MODULE($(dstlib)/ICORE\$)
-
-$(dstlib)/ICORE\$<MODULE>: $(srclib)/STRING.ICORE $(srclib)/ICORE\$.ICORE
-    CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/ICORE) SRCMBR($(@F)) +
-               $(optimize) $(define) $(options)
-
-
-
-
-
-#***** STRING **********************************************************************************************************
-string:     $(dstlib)/STRING<PGM>
-string_tst: $(tmplib)/STRING<MODULE>
-string_clr:
-   -DLTPGM     PGM($(dstlib)/STRING)
-   -DLTMOD     MODULE($(tmplib)/STRING)
-
-$(dstlib)/STRING<PGM>: test_main string_tst icore_lib google_lib
-    CRTPGM     PGM($(@L)/$(@F)) +
-               MODULE($(tmplib)/MAIN $(tmplib)/STRING $(dstlib)/ICORE\$ $(dstlib)/GOOGLE\$) +
-               $(linker)
-
-$(tmplib)/STRING<MODULE>: $(srclib)/STRING.TEST $(srclib)/STRING.ICORE
-    CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/TEST) SRCMBR($(@F)) +
-               $(optimize) $(define) $(options)
-
-
-
-
-
-
-
-
-
-
-
-
