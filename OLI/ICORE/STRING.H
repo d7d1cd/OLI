@@ -12,6 +12,7 @@
 #include "ICORE/define.h"
 #include "STL/type_trait.h"
 #include "STL/iterator.h"
+#include "STL/cstddef.h"
 #include <algorithm>
 #include <array>
 
@@ -131,11 +132,18 @@ class string_base : public string_base_const<Heir, N>
 
   // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
-  Heir& assign(typename base::const_pointer start, typename base::size_type size) {                                     // Копирование из указателя и длины
+  /*
+     Копирование в строку
+  */
+  Heir& assign(typename base::const_pointer start, typename base::size_type size) {                                     // Из указателя и длины
     auto less = std::min(size, base::capacity());
     std::memcpy(begin(), start, less);
     fill_tail(stl::next(begin(), less));
     return *static_cast<Heir*>(this);
+  }
+
+  Heir& assign(const char* src) {                                                                                       // Из C строки
+    return assign(src, src == nullptr ? 0 : std::strlen(src));
   }
 
 
@@ -188,8 +196,15 @@ class string : public string_detail::string_base<string<N>, N>
 
   // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
-  string() {                                                                                                            // Конструктор по умолчанию
+  /*
+     Конструкторы
+  */
+  string() {                                                                                                            // По умолчанию
     base::clear();
+  }
+
+  string(const char* src) {                                                                                             // Из С строки
+    base::assign(src);
   }
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

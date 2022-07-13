@@ -86,11 +86,13 @@ $(tmplib)/FMT<MODULE>: +
 
 $(tmplib)/STL<MODULE>: +
     $(srclib)/STL.TEST $(srclib)/TYPE_TRAIT.STL $(srclib)/UTILITY.STL $(srclib)/MEMORY.STL +
-    $(srclib)/MAP.STL $(srclib)/ITERATOR.STL $(srclib)/DEFINE.STL
+    $(srclib)/MAP.STL $(srclib)/ITERATOR.STL +
+    $(srclib)/DEFINE.STL
 
 $(tmplib)/STRING<MODULE>: +
     $(srclib)/STRING.TEST $(srclib)/STRING.ICORE +
-    $(srclib)/DEFINE.ICORE $(srclib)/TYPE_TRAIT.STL $(srclib)/ITERATOR.STL
+    $(srclib)/DEFINE.ICORE $(srclib)/TYPE_TRAIT.STL $(srclib)/ITERATOR.STL $(srclib)/CSTDDEF.STL +
+    $(srclib)/DEFINE.STL
 
 
 

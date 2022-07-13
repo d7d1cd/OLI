@@ -136,6 +136,23 @@ TEST(string, constructors)
     ASSERT_EQ(std::distance(istr.begin(), istr.end()), 10);
     ASSERT_EQ(std::count(istr.begin(), istr.end(), istr.blank), 10);
   }
+
+  { // Конструктор от С строки
+    ibmi::string<10> str1("Hello");
+    ASSERT_EQ(std::memcmp(str1.begin(), "Hello     ", str1.capacity()), 0);
+
+    ibmi::string<3> str2("Hello");
+    ASSERT_EQ(std::memcmp(str2.begin(), "Hel", str2.capacity()), 0);
+
+    ibmi::string<5> str3("Hello");
+    ASSERT_EQ(std::memcmp(str3.begin(), "Hello", str3.capacity()), 0);
+
+    ibmi::string<5> str4("");
+    ASSERT_EQ(std::memcmp(str4.begin(), "     ", str4.capacity()), 0);
+
+    ibmi::string<5> str5(nullptr);
+    ASSERT_EQ(std::memcmp(str5.begin(), "     ", str5.capacity()), 0);
+  }
 }
 
 
