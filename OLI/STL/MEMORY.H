@@ -23,10 +23,10 @@ STL_NAMESPACE_BEGIN ////////////////////////////////////////////////////////////
 // Реализовано по причине отсутствия в std IBM i
 //
 
-template <typename T, class... Types>
-std::tr1::shared_ptr<T> make_shared(Types&&... args)
+template <typename T, typename... Ts>
+std::tr1::shared_ptr<T> make_shared(Ts&&... args)
 {
-  return std::tr1::shared_ptr<T>(new T(stl::forward<Types>(args)...));
+  return std::tr1::shared_ptr<T>(new T(stl::forward<Ts>(args)...));
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
