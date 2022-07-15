@@ -114,6 +114,14 @@ class string_base_const
     while (cit != cend && *cit == blank) --cit;
     return std::distance(cend, cit);
   }
+
+
+
+  // OPERATIONS --------------------------------------------------------------------------------------------------------
+  /* Получение стандартной строки
+  */ std::string stdstr() const {
+    return std::string(begin(), length());
+  }
 };
 } // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////
 

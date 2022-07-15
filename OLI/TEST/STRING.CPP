@@ -185,7 +185,23 @@ TEST(string, length)
     ASSERT_EQ(str.length(), i);
   }
 }
-} // namespace string {
+
+
+TEST(string, stdstr)
+{
+  ibmi::string<10> str;
+  ASSERT_EQ(std::string(""), str.stdstr());
+
+  str.assign("short");
+  ASSERT_EQ(std::string("short"), str.stdstr());
+
+  str.assign("too long for ibmi::string<10>");
+  ASSERT_EQ(std::string("too long f"), str.stdstr());
+
+  str.assign("equal twos");
+  ASSERT_EQ(std::string("equal twos"), str.stdstr());
+}
+} // namespace ibmi_string {
 
 
 
