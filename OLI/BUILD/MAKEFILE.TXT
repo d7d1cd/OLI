@@ -32,14 +32,15 @@ linker   = BNDSRVPGM(QYPPRT370 QYPPSL510)
 all: $(dstlib)/OLITEST<PGM>
 
 $(dstlib)/OLITEST<PGM>: $(tmplib)/MAIN<MODULE> $(tmplib)/FMT<MODULE> $(tmplib)/STL<MODULE> $(tmplib)/STRING<MODULE> +
-                        $(dstlib)/GOOGLE\$<MODULE> $(dstlib)/FMT\$<MODULE>
+                        $(tmplib)/OBJECT<MODULE> +
+                        $(dstlib)/GOOGLE\$<MODULE> $(dstlib)/FMT\$<MODULE> $(dstlib)/OBJECT\$<MODULE>
    -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
     CRTBNDDIR  BNDDIR($(dstlib)/OLI)
     ADDBNDDIRE BNDDIR($(dstlib)/OLI) +
-               OBJ(($(dstlib)/GOOGLE\$ *MODULE) ($(dstlib)/FMT\$ *MODULE))
+               OBJ(($(dstlib)/GOOGLE\$ *MODULE) ($(dstlib)/FMT\$ *MODULE) ($(dstlib)/OBJECT\$ *MODULE))
    -DLTPGM     PGM($(@L)/$(@F))
     CRTPGM     PGM($(@L)/$(@F)) +
-               MODULE($(tmplib)/MAIN $(tmplib)/FMT $(tmplib)/STL $(tmplib)/STRING) +
+               MODULE($(tmplib)/MAIN $(tmplib)/FMT $(tmplib)/STL $(tmplib)/STRING $(tmplib)/OBJECT) +
                BNDDIR($(dstlib)/OLI) +
                $(linker)
 
@@ -53,10 +54,28 @@ clean:
    -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
    -DLTMOD     MODULE($(dstlib)/GOOGLE\$)
    -DLTMOD     MODULE($(dstlib)/FMT\$)
+   -DLTMOD     MODULE($(dstlib)/OBJECT\$)
    -DLTMOD     MODULE($(tmplib)/MAIN)
    -DLTMOD     MODULE($(tmplib)/FMT)
    -DLTMOD     MODULE($(tmplib)/STL)
    -DLTMOD     MODULE($(tmplib)/STRING)
+   -DLTMOD     MODULE($(tmplib)/OBJECT)
+
+
+
+
+
+#***** ОПИСАНИЕ ЗАВИСИМОСТЕЙ ЗАГОЛОВОЧНЫХ ФАЙЛОВ ***********************************************************************
+google_gtest  = $(srclib)/GTEST.GOOGLE
+icore_define  = $(srclib)/DEFINE.ICORE
+stl_define    = $(srclib)/DEFINE.STL
+object_define = $(srclib)/DEFINE.OBJECT
+
+stl_typetrait = $(srclib)/TYPE_TRAIT.STL $(stl_define)
+stl_iterator  = $(srclib)/ITERATOR.STL   $(stl_define)
+stl_cstddef   = $(srclib)/CSTDDEF.STL    $(stl_define)
+icore_string  = $(srclib)/STRING.ICORE   $(icore_define) $(stl_typetrait) $(stl_iterator) $(stl_cstddef)
+object_fs     = $(srclib)/FS.OBJECT      $(object_define) $(icore_string)
 
 
 
@@ -71,6 +90,11 @@ $(dstlib)/GOOGLE\$<MODULE>: $(srclib)/GTEST.GOOGLE $(srclib)/GMOCK.GOOGLE $(srcl
 $(dstlib)/FMT\$<MODULE>: $(srclib)/FORMAT\$.FMT $(srclib)/FORMAT.FMT
    -DLTMOD     MODULE($(@L)/$(@F))
     CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/FMT) SRCMBR(FORMAT\$) +
+               $(optimize) $(define) $(options)
+
+$(dstlib)/OBJECT\$<MODULE>: $(srclib)/OBJECT\$.OBJECT $(object_fs) $(google_gtest)
+   -DLTMOD     MODULE($(@L)/$(@F))
+    CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/OBJECT) SRCMBR($(@F)) +
                $(optimize) $(define) $(options)
 
 
@@ -89,17 +113,15 @@ $(tmplib)/STL<MODULE>: +
     $(srclib)/MAP.STL $(srclib)/ITERATOR.STL +
     $(srclib)/DEFINE.STL
 
-$(tmplib)/STRING<MODULE>: +
-    $(srclib)/STRING.TEST $(srclib)/STRING.ICORE +
-    $(srclib)/DEFINE.ICORE $(srclib)/TYPE_TRAIT.STL $(srclib)/ITERATOR.STL $(srclib)/CSTDDEF.STL +
-    $(srclib)/DEFINE.STL
+$(tmplib)/STRING<MODULE>: $(srclib)/STRING.TEST $(icore_string) $(google_gtest)
 
+$(tmplib)/OBJECT<MODULE>: $(srclib)/OBJECT.TEST $(object_fs) $(google_gtest)
 
 
 
 
 #***** ПРАВИЛО КОМПИЛЯЦИИ МОДУЛЕЙ ЮНИТ-ТЕСТОВ **************************************************************************
-$(tmplib)/MAIN<MODULE> $(tmplib)/FMT<MODULE> $(tmplib)/STL<MODULE> $(tmplib)/STRING<MODULE>:
+$(tmplib)/MAIN<MODULE> $(tmplib)/FMT<MODULE> $(tmplib)/STL<MODULE> $(tmplib)/STRING<MODULE> $(tmplib)/OBJECT<MODULE>:
    -DLTMOD     MODULE($(@L)/$(@F))
     CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE($(srclib)/TEST) SRCMBR($(@F)) +
                $(optimize) $(define) $(options)
