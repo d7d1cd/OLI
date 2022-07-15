@@ -15,6 +15,7 @@
 #include "STL/cstddef.h"
 #include <algorithm>
 #include <array>
+#include <string>
 
 IBMI_NAMESPACE_BEGIN ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -146,6 +147,10 @@ class string_base : public string_base_const<Heir, N>
     return assign(src, src == nullptr ? 0 : std::strlen(src));
   }
 
+  Heir& assign(const std::string& src) {                                                                                // Из стандартной строки
+    return assign(src.c_str(), src.length());
+  }
+
 
 
   // ITERATORS ---------------------------------------------------------------------------------------------------------
@@ -199,13 +204,9 @@ class string : public string_detail::string_base<string<N>, N>
   /*
      Конструкторы
   */
-  string() {                                                                                                            // По умолчанию
-    base::clear();
-  }
-
-  string(const char* src) {                                                                                             // Из С строки
-    base::assign(src);
-  }
+  string()                       { base::clear(); }                                                                     // По умолчанию
+  string(const char* src)        { base::assign(src); }                                                                 // Из С строки
+  string(const std::string& src) { base::assign(src); }                                                                 // Из стандартной строки
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

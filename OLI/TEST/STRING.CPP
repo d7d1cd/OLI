@@ -4,7 +4,7 @@
 
 
 //***** string ********************************************************************************************************
-namespace string {
+namespace ibmi_string {
 
 TEST(string, compile_time)
 {
@@ -152,6 +152,23 @@ TEST(string, constructors)
 
     ibmi::string<5> str5(nullptr);
     ASSERT_EQ(std::memcmp(str5.begin(), "     ", str5.capacity()), 0);
+  }
+
+  { // Конструктор от стандартной строки
+    std::string stdstr = "hello";
+
+    ibmi::string<5> str1(stdstr);
+    ASSERT_EQ(std::memcmp(str1.begin(), &stdstr[0], 5), 0);
+
+    ibmi::string<7> str2(stdstr);
+    ASSERT_EQ(std::memcmp(str2.begin(), &stdstr[0], 5), 0);
+    ASSERT_EQ(std::count(str2.begin(), str2.end(), str2.blank), 2);
+
+    ibmi::string<3> str3(stdstr);
+    ASSERT_EQ(std::memcmp(str3.begin(), &stdstr[0], 3), 0);
+
+    ibmi::string<5> str4((std::string()));
+    ASSERT_EQ(std::count(str4.begin(), str4.end(), str4.blank), 5);
   }
 }
 
