@@ -339,7 +339,21 @@ TEST(string_ref, constructors)
 {
   // Конструктора по умолчанию быть не может, так как класс является ссылкой и обязан ссылатся на строку
 
-  { // Конструктор из массива
+  { // Конструктор от указателя на начало памяти и емкости
+    char raw[5] = { '1', '2', 'a', 'b', 'C' };
+    ibmi::string_ref ref(raw, 4);
+    const ibmi::string_ref cref(raw, 4);
+
+    ASSERT_EQ(std::distance(ref.begin(), ref.end()), 4);
+    ASSERT_TRUE(std::equal(ref.begin(), ref.end(), stl::begin(raw)));
+    ASSERT_EQ(std::distance(cref.begin(), cref.end()), 4);
+    ASSERT_TRUE(std::equal(cref.begin(), cref.end(), stl::begin(raw)));
+
+    ibmi::string_ref iref(raw, 4, true);
+    ASSERT_EQ(std::count(stl::begin(raw), stl::end(raw), iref.blank), 4);
+  }
+
+    { // Конструктор из массива
     char raw[5] = { '1', '2', 'a', 'b', 'C' };
     ibmi::string_ref ref(raw);
     const ibmi::string_ref cref(raw);

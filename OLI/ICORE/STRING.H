@@ -235,12 +235,19 @@ class string_ref : public string_detail::string_base<string_ref>
 
   // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
-  template <typename T, std::size_t N>                                                                                  // Конструктор из массива
-  string_ref(T (&src)[N], bool clear = false)
-  : m_data(src), m_capacity(N) {
+  /* Конструктор от указателя на начало памяти и доступного размера (емкость строки)
+     Параметр clear позволяет выполнить очистку памяти, передаваемую в управление
+  */ string_ref(base::pointer begin, base::size_type capacity, bool clear = false)
+     : m_data(begin), m_capacity(capacity) {
     if (clear)
       base::clear();
   }
+
+  /* Конструктор от массива
+     Параметр clear позволяет выполнить очистку памяти, передаваемую в управление
+  */ template <std::size_t N>
+     string_ref(base::value_type (&src)[N], bool clear = false)
+     : string_ref(src, N, clear) {}
 
   string_ref(const string_ref&) = delete;
   string_ref& operator=(const string_ref&) = delete;
