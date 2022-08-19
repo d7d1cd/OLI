@@ -52,6 +52,13 @@ TEST(path, exception)
 }
 
 
+TEST(path, constants)
+{
+  ASSERT_STREQ(ibmi::fs::path::libl, "*LIBL");
+  ASSERT_STREQ(ibmi::fs::path::curlib, "*CURLIB");
+}
+
+
 TEST(path, constructors)
 {
   std::string lib, obj, mbr;
@@ -64,6 +71,7 @@ TEST(path, constructors)
   }
 
   { // Задано только имя объекта
+    lib = ibmi::fs::path::libl;
     obj = "object";
     ibmi::fs::path p(obj);
     ASSERT_EQ(upper_case(lib), p.library());
@@ -110,6 +118,14 @@ TEST(path, constructors)
     ASSERT_EQ(upper_case(obj), p.object());
     ASSERT_EQ(upper_case(mbr), p.member());
   }
+
+  { // Конструктор копии
+    ibmi::fs::path p(lib + "/" + obj + "(" + mbr + ")");
+    ibmi::fs::path p2(p);
+    ASSERT_EQ(upper_case(lib), p2.library());
+    ASSERT_EQ(upper_case(obj), p2.object());
+    ASSERT_EQ(upper_case(mbr), p2.member());
+  }
 }
 
 
@@ -131,6 +147,36 @@ TEST(path, assignment_operator)
     ASSERT_EQ(upper_case(obj), p2.object());
     ASSERT_EQ(upper_case(mbr), p2.member());
   }
+}
+
+
+TEST(path, native_path)
+{
+  // Задано только имя объекта
+  ibmi::fs::path p("object");
+  ASSERT_EQ(p.native_path(), "*LIBL/OBJECT");
+
+  // Задано имя объекта и библиотеки
+  p = "library/object";
+  ASSERT_EQ(p.native_path(), "LIBRARY/OBJECT");
+
+  // Задано имя файла и мембера
+  p = "file(member)";
+  ASSERT_EQ(p.native_path(), "*LIBL/FILE(MEMBER)");
+
+  // Задано имя библиотеки, файла и мембера
+  p = "library/file(member)";
+  ASSERT_EQ(p.native_path(), "LIBRARY/FILE(MEMBER)");
+}
+
+
+TEST(path, qname)
+{
+  ibmi::fs::path p("file(member)");
+  ASSERT_EQ(memcmp(p.qname(), "FILE      *LIBL     ", 20), 0);
+
+  p = "library/object";
+  ASSERT_EQ(memcmp(p.qname(), "OBJECT    LIBRARY   ", 20), 0);
 }
 } // namespace ibmi_fs_path {
 
