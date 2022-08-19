@@ -18,8 +18,8 @@ IBMI_NAMESPACE_BEGIN ///////////////////////////////////////////////////////////
 FS_NAMESPACE_BEGIN
 
 /* Инициализация статических констант
-*/ path::name_type::const_pointer path::libl   = "*LIBL";
-   path::name_type::const_pointer path::curlib = "*CURLIB";
+*/ path::name_type::const_pointer const path::libl   = "*LIBL";
+   path::name_type::const_pointer const path::curlib = "*CURLIB";
 
 
 

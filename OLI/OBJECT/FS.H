@@ -41,8 +41,8 @@ class path
 
   // CONSTANTS ---------------------------------------------------------------------------------------------------------
   /* Стандартные значения IBM i для определения имени библиотеки
-  */ static name_type::const_pointer libl;
-     static name_type::const_pointer curlib;
+  */ static name_type::const_pointer const libl;
+     static name_type::const_pointer const curlib;
 
 
 
