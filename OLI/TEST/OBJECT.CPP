@@ -70,6 +70,13 @@ TEST(path, constructors)
     ASSERT_EQ(mbr, p.member());
   }
 
+  { // Задан пустой путь
+    ibmi::fs::path p("");
+    ASSERT_EQ(lib, p.library());
+    ASSERT_EQ(obj, p.object());
+    ASSERT_EQ(mbr, p.member());
+  }
+
   { // Задано только имя объекта
     lib = ibmi::fs::path::libl;
     obj = "object";
@@ -126,34 +133,38 @@ TEST(path, constructors)
     ASSERT_EQ(upper_case(obj), p2.object());
     ASSERT_EQ(upper_case(mbr), p2.member());
   }
+
+  { // Конструктор от const char* + проверка copy initialization
+    ibmi::fs::path p = "library/file(member)";
+    ASSERT_EQ(p.library(), "LIBRARY");
+    ASSERT_EQ(p.object(), "FILE");
+    ASSERT_EQ(p.member(), "MEMBER");
+  }
 }
 
 
-TEST(path, assignment_operator)
+TEST(path, clear)
 {
-  std::string lib = "library", obj = "object", mbr = "member";
-  ibmi::fs::path p, p2;
+  ibmi::fs::path p("library/file(member)");
+  ASSERT_EQ(p.library(), "LIBRARY");
+  ASSERT_EQ(p.object(), "FILE");
+  ASSERT_EQ(p.member(), "MEMBER");
 
-  { // Оператор присваивания от стандартной строки
-    p = lib + "/" + obj + "(" + mbr + ")";
-    ASSERT_EQ(upper_case(lib), p.library());
-    ASSERT_EQ(upper_case(obj), p.object());
-    ASSERT_EQ(upper_case(mbr), p.member());
-  }
-
-  { // Оператор присваивания копированием
-    p2 = p;
-    ASSERT_EQ(upper_case(lib), p2.library());
-    ASSERT_EQ(upper_case(obj), p2.object());
-    ASSERT_EQ(upper_case(mbr), p2.member());
-  }
+  p.clear();
+  ASSERT_EQ(p.library(), "");
+  ASSERT_EQ(p.object(), "");
+  ASSERT_EQ(p.member(), "");
 }
 
 
 TEST(path, native_path)
 {
+  // Путь пуст
+  ibmi::fs::path p;
+  ASSERT_EQ(p.native_path(), "");
+
   // Задано только имя объекта
-  ibmi::fs::path p("object");
+  p = "object";
   ASSERT_EQ(p.native_path(), "*LIBL/OBJECT");
 
   // Задано имя объекта и библиотеки
@@ -177,6 +188,9 @@ TEST(path, qname)
 
   p = "library/object";
   ASSERT_EQ(memcmp(p.qname(), "OBJECT    LIBRARY   ", 20), 0);
+
+  p.clear();
+  ASSERT_EQ(memcmp(p.qname(), "                    ", 20), 0);
 }
 } // namespace ibmi_fs_path {
 

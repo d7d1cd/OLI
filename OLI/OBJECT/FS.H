@@ -48,8 +48,8 @@ class path
 
   // CONSTRUCTORS ------------------------------------------------------------------------------------------------------
   path() = default;
+  path(const char* p)        { parse_path(p); }
   path(const std::string& p)            { parse_path(p); }
-  path& operator=(const std::string& p) { parse_path(p); return *this; }
 
 
 

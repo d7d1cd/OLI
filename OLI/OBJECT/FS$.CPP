@@ -36,6 +36,9 @@ FS_NAMESPACE_BEGIN
 /* Путь к объекту в "родном" для файловой системы IBM i формате
 */ std::string path::native_path() const
 {
+  if (*m_object.begin() == name_type::blank)
+    return std::string();
+
   auto res = library();
   res.reserve(33);
   res += '/' + object();
@@ -50,6 +53,9 @@ FS_NAMESPACE_BEGIN
 /* Парсинг пути к объекту
 */ void path::parse_path(std::string p)
 {
+  if (p.empty())
+    return clear();
+
   std::tr1::smatch match;
   std::tr1::regex  rgx("^\\s*((([$#@A-IJ-RS-Z][$#@\\w.]{0,9})|\\*LIBL|\\*CURLIB)/)?"
                        "([$#@A-IJ-RS-Z][$#@\\w.]{0,9})"
