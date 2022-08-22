@@ -61,6 +61,9 @@ class path
 
 
   // OPERATIONS --------------------------------------------------------------------------------------------------------
+  /* Очистка
+  */ void clear();
+
   /* Извлечение компонентов пути
   */ std::string library() const { return m_library.stdstr(); }
      std::string object()  const { return m_object.stdstr(); }

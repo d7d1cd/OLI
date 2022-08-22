@@ -23,6 +23,16 @@ FS_NAMESPACE_BEGIN
 
 
 
+/* Очистка
+*/ void path::clear()
+{
+  m_object.clear();
+  m_library.clear();
+  m_member.clear();
+}
+
+
+
 /* Путь к объекту в "родном" для файловой системы IBM i формате
 */ std::string path::native_path() const
 {
