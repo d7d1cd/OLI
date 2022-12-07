@@ -1,0 +1,173 @@
+#     _____ __    _____
+#    |     |  |  |_   _|  C++ Object Libraries for IBM i
+#    |  |  |  |__ _| |_   File:   BUILD/makefile.txt
+#    |_____|_____|_____|  Author: Sergey Chebotarev
+#                  
+
+
+
+#***** НАСТРАИВАЕМЫЕ ПАРАМЕТРЫ СБОРКИ **************************************************************
+#
+#   Значения данных макросов разрешено задавать при запуске TMKMAKE.
+#   По умолчанию сборка выполняется в отладочном режиме.
+#
+dstlib     =                                                                                        # Библиотека для размещения объектов OLI
+debug      = 1                                                                                      # Сборка в режиме отладки (1) или релиза (0)
+
+
+
+
+
+#***** ЗАВИСИМЫЕ ПАРАМЕТРЫ СБОРКИ ******************************************************************
+#
+#   Значения ниже представленных макросов указывать при запуске TMKMAKE нельзя.
+#   По умолчанию значения этих макросов настраиваются на сборку в отладочном режиме.
+#
+.SUFFIXES: .TEST<FILE> .<MODULE>                                                                    # Суффиксное правило для компиляции модулей юнит-тестов
+
+ndebug     = _DEBUG                                                                                 # Стандартный отладочный макрос
+optimize   = DBGVIEW(*ALL) OPTIMIZE(10) INLINE(*OFF) MODCRTOPT(*NOKEEPILDTA)                        # Оптимизация компиляции
+showinc    = *SHOWINC                                                                               # Включение в отладочный листинг заголовочных файлов
+
+!if $(debug) == 0                                                                                   # Если требуется сборка релиза
+ndebug     = NDEBUG
+optimize   = DBGVIEW(*NONE) OPTIMIZE(40) INLINE(*ON) MODCRTOPT(*KEEPILDTA)
+showinc    = *NOSHOWSRC
+!endif
+
+options    = LANGLVL(*EXTENDED0X) PFROPT(*STRDONLY) OPTION($(showinc)) +
+             DEFINE('__IBMCPP_TR1__=1' '$(ndebug)') +
+             CHECKOUT(*COND *PARM *REACH *UNUSED *CLASS *EFFECT *GENERAL *LANG *TRUNC)              # Другие опции компиляции
+
+
+
+
+
+#***** ГЛАВНАЯ ЦЕЛЬ ********************************************************************************
+#
+#   Основными продуктами сборки являются модули библиотеки и каталог связывания. Однако программа
+#   юнит-тестирования не может быть собрана без этих компонентов. Поэтому главной целью сборки
+#   является эта программа.
+#
+all: $(dstlib)/OLITEST<PGM>
+
+$(dstlib)/OLITEST<PGM>: $(dstlib)/OLI<BNDDIR> +
+  MAIN\$<MODULE> FORMAT\$<MODULE> STL\$<MODULE> STRING\$<MODULE> FS\$<MODULE> RFILE\$<MODULE>
+                        
+$(dstlib)/OLITEST<PGM>:
+  -@DLTPGM     PGM($(@L)/$(@F))
+    CRTPGM     PGM($(@L)/$(@F)) +
+               MODULE(MAIN\$ FORMAT\$ STL\$ STRING\$ FS\$ RFILE\$) +
+               BNDDIR($(dstlib)/OLI) +
+               BNDSRVPGM(QSYS/QYPPRT370 QSYS/QYPPSL510)
+
+
+
+
+
+#***** СОЗДАНИЕ КАТАЛОГА СВЯЗЫВАНИЯ ****************************************************************
+#
+#
+#
+$(dstlib)/OLI<BNDDIR>: +
+  $(dstlib)/GOOGLE<MODULE> $(dstlib)/FMT<MODULE> $(dstlib)/IOBJECT<MODULE> +
+  $(dstlib)/IFILE<MODULE>
+
+$(dstlib)/OLI<BNDDIR>:
+  -@DLTBNDDIR  BNDDIR($(@L)/OLI)
+    CRTBNDDIR  BNDDIR($(@L)/OLI)
+    ADDBNDDIRE BNDDIR($(@L)/OLI) +
+               OBJ(($(dstlib)/GOOGLE *MODULE) ($(dstlib)/FMT *MODULE) +
+                   ($(dstlib)/IOBJECT *MODULE) ($(dstlib)/IFILE *MODULE))
+
+
+
+
+
+#***** ОПИСАНИЕ ЗАВИСИМОСТЕЙ ЗАГОЛОВОЧНЫХ ФАЙЛОВ ***************************************************
+#
+#
+#
+google_gtest  = GTEST.GOOGLE
+google_gmock  = GMOCK.GOOGLE
+fmt_format    = FORMAT.FMT
+stl_config    = CONFIG__.STL
+icore_config  = CONFIG__.ICORE
+
+stl_typetrait = TYPE_TRAIT.STL $(stl_config)
+stl_iterator  = ITERATOR.STL   $(stl_config)
+stl_cstddef   = CSTDDEF.STL    $(stl_config)
+stl_map       = MAP.STL        $(stl_config)
+stl_utility   = UTILITY.STL    $(stl_typetrait)
+stl_memory    = MEMORY.STL     $(stl_utility)
+
+icore_string  = STRING.ICORE   $(icore_config) $(stl_typetrait) $(stl_iterator) $(stl_cstddef)
+iobject_fs    = FS.IOBJECT     $(icore_string)
+ifile_rfile   = RFILE.IFILE    $(iobject_fs)
+
+
+
+
+
+#***** ЗАВИСИМОСТИ И КОМПИЛЯЦИЯ МОДУЛЕЙ БИБЛИОТЕКИ *************************************************
+#
+#   При описании зависимостей модуля первым должен быть указан его основной (передаваемый на
+#   компиляцию) CPP исходник, расположенный в файле SRC, затем должны быть указаны заголовочные
+#   файлы этого CPP исходника.
+#
+$(dstlib)/GOOGLE<MODULE>:  $(@F).SRC $(google_gtest) $(google_gmock)
+$(dstlib)/FMT<MODULE>:     $(@F).SRC $(fmt_format)
+$(dstlib)/IOBJECT<MODULE>: $(@F).SRC $(iobject_fs)
+$(dstlib)/IFILE<MODULE>:   $(@F).SRC $(ifile_rfile)
+
+
+$(dstlib)/GOOGLE<MODULE> +
+$(dstlib)/FMT<MODULE> +
+$(dstlib)/IOBJECT<MODULE> +
+$(dstlib)/IFILE<MODULE>:
+  -@DLTMOD     MODULE($(@L)/$(@F))
+    CRTCPPMOD  MODULE($(@L)/$(@F)) SRCFILE(SRC) $(optimize) $(options)
+
+
+
+
+
+#***** ЗАВИСИМОСТИ И КОМПИЛЯЦИЯ МОДУЛЕЙ ЮНИТ-ТЕСТОВ ************************************************
+# 
+#   При описании зависимостей модуля юнит-теста не нужно указывать его CPP исходник.
+#   Необходимо лишь указать заголовочные файлы этого CPP исходника.
+#
+MAIN\$<MODULE>:   $(google_gtest)
+FORMAT\$<MODULE>: $(fmt_format) $(google_gtest)
+STL\$<MODULE>:    $(stl_memory) $(stl_map) $(stl_iterator) $(google_gtest)
+STRING\$<MODULE>: $(icore_string) $(google_gtest)
+FS\$<MODULE>:     $(iobject_fs) $(google_gtest)
+RFILE\$<MODULE>:  $(ifile_rfile) $(google_gtest)
+
+.TEST.<MODULE>:                                                                                     # Неявное правило компиляции модулей юнит-тестов
+  -@DLTMOD     MODULE(*CURLIB/$*)
+    CRTCPPMOD  MODULE($*) SRCFILE(TEST) $(optimize) $(options)
+
+
+
+
+
+#***** ПОЛНАЯ ОЧИСТКА ******************************************************************************
+#
+#   Удаление всех объектов, создаваемых при сборке.
+#   Зависит от значения макроса dstlib.
+#
+clean:
+   -DLTPGM     PGM($(dstlib)/OLITEST)
+   -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
+   -DLTMOD     MODULE($(dstlib)/GOOGLE)
+   -DLTMOD     MODULE($(dstlib)/FMT)
+   -DLTMOD     MODULE($(dstlib)/IOBJECT)
+   -DLTMOD     MODULE($(dstlib)/IFILE)
+   -DLTF       FILE(*CURLIB/EVFEVENT)
+   -DLTMOD     MODULE(*CURLIB/MAIN\$)
+   -DLTMOD     MODULE(*CURLIB/FORMAT\$)
+   -DLTMOD     MODULE(*CURLIB/STL\$)
+   -DLTMOD     MODULE(*CURLIB/STRING\$)
+   -DLTMOD     MODULE(*CURLIB/FS\$)
+   -DLTMOD     MODULE(*CURLIB/RFILE\$)
