@@ -157,27 +157,27 @@ TEST(path, clear)
 }
 
 
-TEST(path, native_path)
+TEST(path, native)
 {
   // Путь пуст
   ibmi::fs::path p;
-  ASSERT_EQ(p.native_path(), "");
+  ASSERT_EQ(p.native(), "");
 
   // Задано только имя объекта
   p = "object";
-  ASSERT_EQ(p.native_path(), "*LIBL/OBJECT");
+  ASSERT_EQ(p.native(), "*LIBL/OBJECT");
 
   // Задано имя объекта и библиотеки
   p = "library/object";
-  ASSERT_EQ(p.native_path(), "LIBRARY/OBJECT");
+  ASSERT_EQ(p.native(), "LIBRARY/OBJECT");
 
   // Задано имя файла и мембера
   p = "file(member)";
-  ASSERT_EQ(p.native_path(), "*LIBL/FILE(MEMBER)");
+  ASSERT_EQ(p.native(), "*LIBL/FILE(MEMBER)");
 
   // Задано имя библиотеки, файла и мембера
   p = "library/file(member)";
-  ASSERT_EQ(p.native_path(), "LIBRARY/FILE(MEMBER)");
+  ASSERT_EQ(p.native(), "LIBRARY/FILE(MEMBER)");
 }
 
 

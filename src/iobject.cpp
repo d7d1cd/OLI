@@ -34,7 +34,7 @@ FS_NAMESPACE_BEGIN
 
 
 /* Путь к объекту в "родном" для файловой системы IBM i формате
-*/ std::string path::native_path() const
+*/ std::string path::native() const
 {
   if (*m_object.begin() == name_type::blank)
     return std::string();

@@ -16,6 +16,9 @@
 #define FS_NAMESPACE_BEGIN namespace fs {
 #define FS_NAMESPACE_END }
 
+#define FILE_NAMESPACE_BEGIN namespace file {
+#define FILE_NAMESPACE_END }
+
 
 #endif // OLI_ICORE_CONFIG_H
 
