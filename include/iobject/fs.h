@@ -49,6 +49,7 @@ struct path
   path() = default;
   path(const char* p)        { parse_path(p); }
   path(const std::string& p) { parse_path(p); }
+  path(const std::string& lib, const std::string& obj, const std::string& mbr = std::string());
 
 
 
@@ -83,6 +84,9 @@ struct path
      Имя мембера может иметь значение *FIRST. Все имена могут быть набраны в любом регистре.
      В случае несоответствия пути шаблону бросается исключение std::invalid_argument.
   */ void parse_path(std::string);
+
+  /*
+  */ std::string combine(std::string lib, const std::string& obj, const std::string& mbr) const;
 
   /* Компоненты пути к объекту по порядку: имя объекта, имя библиотеки, имя мембера файла
   */ name_type m_object;

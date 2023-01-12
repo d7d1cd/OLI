@@ -140,6 +140,20 @@ TEST(path, constructors)
     ASSERT_EQ(p.object(), "FILE");
     ASSERT_EQ(p.member(), "MEMBER");
   }
+
+  { // Конструктор от библиотеки и объекта
+    ibmi::fs::path p("lib", "obj");
+    ASSERT_EQ(p.library(), "LIB");
+    ASSERT_EQ(p.object(), "OBJ");
+    ASSERT_EQ(p.member(), "");
+  }
+
+  { // Конструктор от библиотеки, файла и мембера
+    ibmi::fs::path p("lib", "file", "mbr");
+    ASSERT_EQ(p.library(), "LIB");
+    ASSERT_EQ(p.object(), "FILE");
+    ASSERT_EQ(p.member(), "MBR");
+  }
 }
 
 

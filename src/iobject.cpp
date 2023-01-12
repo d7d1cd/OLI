@@ -23,6 +23,13 @@ FS_NAMESPACE_BEGIN
 
 
 
+/*
+*/ path::path(const std::string& lib, const std::string& obj, const std::string& mbr)
+{
+  parse_path(combine(lib, obj, mbr));
+}
+
+
 /* Очистка
 */ void path::clear()
 {
@@ -39,13 +46,7 @@ FS_NAMESPACE_BEGIN
   if (*m_object.begin() == name_type::blank)
     return std::string();
 
-  auto res = library();
-  res.reserve(33);
-  res += '/' + object();
-  auto mbr = member();
-  if (!mbr.empty())
-    res += '(' + mbr + ')';
-  return res;
+  return combine(library(), object(), member());
 }
 
 
@@ -76,6 +77,15 @@ FS_NAMESPACE_BEGIN
     m_member.assign(match[6].str());
   else
     m_member.clear();
+}
+
+
+/*
+*/ std::string path::combine(std::string lib, const std::string& obj, const std::string& mbr) const
+{
+  lib.reserve(33);
+  lib += '/' + obj + (mbr.empty() ? std::string() : ('(' + mbr + ')'));
+  return lib;
 }
 
 FS_NAMESPACE_END
