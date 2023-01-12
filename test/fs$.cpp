@@ -49,6 +49,10 @@ TEST(path, exception)
   EXPECT_THROW(ibmi::fs::path("*lib/obj"), std::invalid_argument);
   EXPECT_THROW(ibmi::fs::path("lib/obj(*mbr)"), std::invalid_argument);
   EXPECT_THROW(ibmi::fs::path("lib\\obj"), std::invalid_argument);
+
+  EXPECT_THROW(ibmi::fs::path("?lib", "obj"), std::invalid_argument);
+  EXPECT_THROW(ibmi::fs::path("lib", "longnameobject"), std::invalid_argument);
+  EXPECT_THROW(ibmi::fs::path("lib", "file", "1mbr"), std::invalid_argument);
 }
 
 
