@@ -51,15 +51,30 @@ options    = LANGLVL(*EXTENDED0X) PFROPT(*STRDONLY) OPTION($(showinc)) +
 #
 all: $(dstlib)/OLITEST<PGM>
 
-$(dstlib)/OLITEST<PGM>: $(dstlib)/OLI<BNDDIR> +
-  MAIN\$<MODULE> FORMAT\$<MODULE> STL\$<MODULE> STRING\$<MODULE> FS\$<MODULE> RFILE\$<MODULE>
+$(dstlib)/OLITEST<PGM>: $(dstlib)/OLI<BNDDIR> $(dstlib)/DB_TEST<FILE> +
+  MAIN\$<MODULE> FORMAT\$<MODULE> STL\$<MODULE> STRING\$<MODULE> FS\$<MODULE> RFILE\$<MODULE> +
+  DATA_BASE\$<MODULE>
                         
 $(dstlib)/OLITEST<PGM>:
   -@DLTPGM     PGM($(@L)/$(@F))
     CRTPGM     PGM($(@L)/$(@F)) +
-               MODULE(MAIN\$ FORMAT\$ STL\$ STRING\$ FS\$ RFILE\$) +
+               MODULE(MAIN\$ FORMAT\$ STL\$ STRING\$ FS\$ RFILE\$ DATA_BASE\$) +
                BNDDIR($(dstlib)/OLI) +
                BNDSRVPGM(QSYS/QYPPRT370 QSYS/QYPPSL510)
+
+
+
+
+
+#***** СОЗДАНИЕ ТЕСТОВЫХ ОБЪЕКТОВ ******************************************************************
+#
+#
+#
+$(dstlib)/DB_TEST<FILE>: DB_TEST.TEST
+  -@DLTF       FILE($(@L)/$(@F))
+    CRTPF      FILE($(@L)/$(@F)) SRCFILE(TEST) +
+               LVLCHK(*NO) WAITFILE(*IMMED) MAXMBRS(*NOMAX) MBR(DB_MBR) +
+               OPTION(*NOSRC *NOLIST)
 
 
 
@@ -88,22 +103,23 @@ $(dstlib)/OLI<BNDDIR>:
 #
 #
 #
-google_gtest  = GTEST.GOOGLE
-google_gmock  = GMOCK.GOOGLE
-fmt_format    = FORMAT.FMT
-stl_config    = CONFIG__.STL
-icore_config  = CONFIG__.ICORE
+google_gtest    = GTEST.GOOGLE
+google_gmock    = GMOCK.GOOGLE
+fmt_format      = FORMAT.FMT
+stl_config      = CONFIG__.STL
+icore_config    = CONFIG__.ICORE
 
-stl_typetrait = TYPE_TRAIT.STL $(stl_config)
-stl_iterator  = ITERATOR.STL   $(stl_config)
-stl_cstddef   = CSTDDEF.STL    $(stl_config)
-stl_map       = MAP.STL        $(stl_config)
-stl_utility   = UTILITY.STL    $(stl_typetrait)
-stl_memory    = MEMORY.STL     $(stl_utility)
+stl_typetrait   = TYPE_TRAIT.STL  $(stl_config)
+stl_iterator    = ITERATOR.STL    $(stl_config)
+stl_cstddef     = CSTDDEF.STL     $(stl_config)
+stl_map         = MAP.STL         $(stl_config)
+stl_utility     = UTILITY.STL     $(stl_typetrait)
+stl_memory      = MEMORY.STL      $(stl_utility)
 
-icore_string  = STRING.ICORE   $(icore_config) $(stl_typetrait) $(stl_iterator) $(stl_cstddef)
-iobject_fs    = FS.IOBJECT     $(icore_string)
-ifile_rfile   = RFILE.IFILE    $(iobject_fs)
+icore_string    = STRING.ICORE    $(icore_config) $(stl_typetrait) $(stl_iterator) $(stl_cstddef)
+iobject_fs      = FS.IOBJECT      $(icore_string)
+ifile_rfile     = RFILE.IFILE     $(iobject_fs)
+ifile_data_base = DATA_BASE.IFILE $(ifile_rfile)
 
 
 
@@ -137,12 +153,13 @@ $(dstlib)/IFILE<MODULE>:
 #   При описании зависимостей модуля юнит-теста не нужно указывать его CPP исходник.
 #   Необходимо лишь указать заголовочные файлы этого CPP исходника.
 #
-MAIN\$<MODULE>:   $(google_gtest)
-FORMAT\$<MODULE>: $(fmt_format) $(google_gtest)
-STL\$<MODULE>:    $(stl_memory) $(stl_map) $(stl_iterator) $(google_gtest)
-STRING\$<MODULE>: $(icore_string) $(google_gtest)
-FS\$<MODULE>:     $(iobject_fs) $(google_gtest)
-RFILE\$<MODULE>:  $(ifile_rfile) $(google_gtest)
+MAIN\$<MODULE>:      $(google_gtest)
+FORMAT\$<MODULE>:    $(fmt_format) $(google_gtest)
+STL\$<MODULE>:       $(stl_memory) $(stl_map) $(stl_iterator) $(google_gtest)
+STRING\$<MODULE>:    $(icore_string) $(google_gtest)
+FS\$<MODULE>:        $(iobject_fs) $(google_gtest)
+RFILE\$<MODULE>:     $(ifile_rfile) $(google_gtest)
+DATA_BASE\$<MODULE>: $(ifile_data_base) $(google_gtest)
 
 .TEST.<MODULE>:                                                                                     # Неявное правило компиляции модулей юнит-тестов
   -@DLTMOD     MODULE(*CURLIB/$*)
@@ -160,6 +177,7 @@ RFILE\$<MODULE>:  $(ifile_rfile) $(google_gtest)
 clean:
    -DLTPGM     PGM($(dstlib)/OLITEST)
    -DLTBNDDIR  BNDDIR($(dstlib)/OLI)
+   -DLTF       FILE($(dstlib)/DB_FILE)
    -DLTMOD     MODULE($(dstlib)/GOOGLE)
    -DLTMOD     MODULE($(dstlib)/FMT)
    -DLTMOD     MODULE($(dstlib)/IOBJECT)
@@ -171,3 +189,4 @@ clean:
    -DLTMOD     MODULE(*CURLIB/STRING\$)
    -DLTMOD     MODULE(*CURLIB/FS\$)
    -DLTMOD     MODULE(*CURLIB/RFILE\$)
+   -DLTMOD     MODULE(*CURLIB/DATA_BASE\$)
