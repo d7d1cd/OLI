@@ -1,61 +1,32 @@
 #include "IFILE/rfile.h"
 #include "GOOGLE/gtest.h"
 
+extern std::string TEST_LIBRARY; // Имя тестовой библиотеки. Определено в test/main$.cpp
+
+namespace {
+const std::string DB_FILE = "DB_TEST";
+const std::string DB_MBR  = "DB_MBR";
+}
+
 
 
 //***** ibmi::file::rfile **********************************************************************************************
 namespace ibmi_file_rfile {
 
-struct rfile : public testing::Test
+TEST(rfile, exception)
 {
-  static void SetUpTestCase() {
-    delete_test_file();
-    system("RMVLIBLE LIB(QTEMP)");
-    if (system("ADDLIBLE LIB(QTEMP)"))
-      FAIL() << "Cannot add QTEMP to *LIBL";
-    if (system("CRTSRCPF FILE(QTEMP/RFILE_TEST) MBR(MEMBER)"))
-      FAIL() << "Cannot create test file QTEMP/RFILE_TEST";
-  }
-
-  static void TearDownTestCase() {
-    delete_test_file();
-  }
-
-  static void delete_test_file() {
-    system("DLTF FILE(QTEMP/RFILE_TEST)");
-  }
-};
-
-
-TEST_F(rfile, exception)
-{
-  ibmi::file::rfile f("qtemp/not_create", "rr");
-  EXPECT_THROW(static_cast<_RFILE*>(f), std::runtime_error);
+  EXPECT_THROW(ibmi::file::rfile("qtemp/not_exists", "rr"), std::runtime_error);
 }
 
 
-TEST_F(rfile, constructor)
+TEST(rfile, constructor)
 {
-  { // Конструктор от параметров
-    ibmi::file::rfile f("rfile_test", "rr");
-
-    auto ptr = static_cast<_RFILE*>(f);
-    ASSERT_NE(ptr, nullptr);
-
-    auto fbk = _Ropnfbk(ptr);
-    ASSERT_EQ(ibmi::string_view(fbk->library_name).stdstr(), "QTEMP");
-    ASSERT_EQ(ibmi::string_view(fbk->file_name).stdstr(), "RFILE_TEST");
-    ASSERT_EQ(ibmi::string_view(fbk->member_name).stdstr(), "MEMBER");
-  }
-
-  { // Конструктор копии
-//    ibmi::file::rfile src("rfile_test", "rr");
-//    auto src_ptr = static_cast<_RFILE*>(src);
-//
-//    ibmi::file::rfile dst(src);
-//    auto dst_ptr = static_cast<_RFILE*>(dst);
-//
-//    ASSERT_NE(src_ptr, dst_ptr);
+  { // Конструктор от пути должен открыть файл, чтобы определить имена всех компонентов пути
+    ibmi::file::rfile f(DB_FILE, "rr");
+    auto p = f.path();
+    ASSERT_EQ(p.library(), TEST_LIBRARY);
+    ASSERT_EQ(p.object(), DB_FILE);
+    ASSERT_EQ(p.member(), DB_MBR);
   }
 }
 } // namespace ibmi_file_rfile {

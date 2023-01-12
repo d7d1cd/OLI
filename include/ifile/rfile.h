@@ -20,17 +20,10 @@ FILE_NAMESPACE_BEGIN
 
 
 //***** ДЕСКРИПТОР ФАЙЛА СИСТЕМЫ IBM I *********************************************************************************
-/*
-   ИНВАРИАНТЫ
-   1.
-*/
 class rfile
 {
   public:
-  rfile(fs::path path, const char* mode)
-  : path_(path), mode_(mode), handle_(nullptr) {}
-
-
+  rfile(fs::path path, const char* mode);
   rfile(const rfile& src) = delete;
   rfile(rfile&& src) = delete;
   rfile& operator = (const rfile& src) = delete;
@@ -39,12 +32,16 @@ class rfile
 
 
   operator _RFILE* () {
-    return handle_ ? handle_ : (open(), handle_);
+    return handle_ ? handle_ : open();
+  }
+
+  fs::path path() const {
+    return path_;
   }
 
 
   private:
-  void open();
+  _RFILE* open();
   void close();
 
 

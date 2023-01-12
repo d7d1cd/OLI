@@ -1,0 +1,7 @@
+     A          R RCDFMT
+     A            CHARFLD       10A
+     A            DECFLD         5P 0
+
+     A          K CHARFLD
+     A          K DECFLD
+
