@@ -201,6 +201,26 @@ TEST(string, stdstr)
   str.assign("equal twos");
   ASSERT_EQ(std::string("equal twos"), str.stdstr());
 }
+
+
+TEST(string, cast_to_stdstr)
+{
+  ibmi::string<10> str;
+  auto stdstr = static_cast<std::string>(str);
+  ASSERT_EQ("", stdstr);
+
+  str.assign("short");
+  stdstr = static_cast<std::string>(str);
+  ASSERT_EQ("short", stdstr);
+
+  str.assign("too long for ibmi::string<10>");
+  stdstr = static_cast<std::string>(str);
+  ASSERT_EQ("too long f", stdstr);
+
+  str.assign("equal twos");
+  stdstr = static_cast<std::string>(str);
+  ASSERT_EQ("equal twos", stdstr);
+}
 } // namespace ibmi_string {
 
 

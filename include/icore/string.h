@@ -122,6 +122,11 @@ class string_base_const
   */ std::string stdstr() const {
     return std::string(begin(), length());
   }
+
+  /* Приведение к стандартной строке
+  */ operator std::string () {
+    return stdstr();
+  }
 };
 } // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////
 
