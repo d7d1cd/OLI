@@ -52,13 +52,12 @@ options    = LANGLVL(*EXTENDED0X) PFROPT(*STRDONLY) OPTION($(showinc)) +
 all: $(dstlib)/OLITEST<PGM>
 
 $(dstlib)/OLITEST<PGM>: $(dstlib)/OLI<BNDDIR> $(dstlib)/DB_TEST<FILE> +
-  MAIN\$<MODULE> FORMAT\$<MODULE> STL\$<MODULE> STRING\$<MODULE> FS\$<MODULE> RFILE\$<MODULE> +
-  DATA_BASE\$<MODULE>
+  MAIN\$<MODULE> FORMAT\$<MODULE> STL\$<MODULE> STRING\$<MODULE> FS\$<MODULE> IFILE\$<MODULE>
                         
 $(dstlib)/OLITEST<PGM>:
   -@DLTPGM     PGM($(@L)/$(@F))
     CRTPGM     PGM($(@L)/$(@F)) +
-               MODULE(MAIN\$ FORMAT\$ STL\$ STRING\$ FS\$ RFILE\$ DATA_BASE\$) +
+               MODULE(MAIN\$ FORMAT\$ STL\$ STRING\$ FS\$ IFILE\$) +
                BNDDIR($(dstlib)/OLI) +
                BNDSRVPGM(QSYS/QYPPRT370 QSYS/QYPPSL510)
 
@@ -158,8 +157,7 @@ FORMAT\$<MODULE>:    $(fmt_format) $(google_gtest)
 STL\$<MODULE>:       $(stl_memory) $(stl_map) $(stl_iterator) $(google_gtest)
 STRING\$<MODULE>:    $(icore_string) $(google_gtest)
 FS\$<MODULE>:        $(iobject_fs) $(google_gtest)
-RFILE\$<MODULE>:     $(ifile_rfile) $(google_gtest)
-DATA_BASE\$<MODULE>: $(ifile_data_base) $(google_gtest)
+IFILE\$<MODULE>:     $(ifile_data_base) $(google_gtest)
 
 .TEST.<MODULE>:                                                                                     # Неявное правило компиляции модулей юнит-тестов
   -@DLTMOD     MODULE(*CURLIB/$*)
@@ -188,5 +186,4 @@ clean:
    -DLTMOD     MODULE(*CURLIB/STL\$)
    -DLTMOD     MODULE(*CURLIB/STRING\$)
    -DLTMOD     MODULE(*CURLIB/FS\$)
-   -DLTMOD     MODULE(*CURLIB/RFILE\$)
-   -DLTMOD     MODULE(*CURLIB/DATA_BASE\$)
+   -DLTMOD     MODULE(*CURLIB/IFILE\$)
