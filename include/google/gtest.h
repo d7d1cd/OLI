@@ -7782,8 +7782,10 @@ class ImplicitlyConvertible {
   // functions (C++Builder 2009 and above only).
   static const bool value = __is_convertible(From, To);
 #else
+  #pragma report(disable, "CZP2924")
   static const bool value =
       sizeof(Helper(ImplicitlyConvertible::MakeFrom())) == 1;
+  #pragma report(pop)
 #endif  // _MSV_VER
 };
 template <typename From, typename To>
