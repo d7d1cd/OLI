@@ -31,21 +31,18 @@ FS_NAMESPACE_BEGIN
 */
 struct path
 {
-  // MEMBER TYPES ------------------------------------------------------------------------------------------------------
-  public:
   /* Тип имени компонента пути
   */ typedef ibmi::string<10> name_type;
 
 
 
-  // CONSTANTS ---------------------------------------------------------------------------------------------------------
-  /* Стандартные значения IBM i для определения имени библиотеки
+  /* Стандартные значения IBM i для определения имени библиотеки и имени мемебра
   */ static name_type::const_pointer const libl;
      static name_type::const_pointer const curlib;
+     static name_type::const_pointer const first_member;
 
 
 
-  // CONSTRUCTORS ------------------------------------------------------------------------------------------------------
   path() = default;
   path(const char* p)        { parse_path(p); }
   path(const std::string& p) { parse_path(p); }
@@ -53,18 +50,21 @@ struct path
 
 
 
-  // ELEMENT ACCESS ----------------------------------------------------------------------------------------------------
   /* Доступ к квалифицированному имени объекта (требуется в вызовах функций API IBM i)
-  */ name_type::const_pointer qname() const { return m_object.data(); }
-     name_type::pointer       qname()       { return m_object.data(); }
+  */
+  name_type::const_pointer qname() const {
+    return m_object.data(); // TODO Этот метод будет не нужен
+  }
+
+  name_type::pointer qname() { return m_object.data(); } // TODO Этот метод будет не нужен
 
 
 
-  // OPERATIONS --------------------------------------------------------------------------------------------------------
   /* Очистка
   */ void clear();
 
   /* Извлечение компонентов пути
+     TODO возвращать тип name_type
   */ std::string library() const { return m_library.stdstr(); }
      std::string object()  const { return m_object.stdstr(); }
      std::string member()  const { return m_member.stdstr(); }
@@ -75,7 +75,6 @@ struct path
 
 
 
-  // INTERNALS ---------------------------------------------------------------------------------------------------------
   private:
   /* Парсинг пути к объекту
      Формат пути должен соответствовать шаблону [LIBNAME/]OBJNAME[(MBRNAME)], где LIBNAME - имя библиотеки,
@@ -89,6 +88,7 @@ struct path
   */ std::string combine(std::string lib, const std::string& obj, const std::string& mbr) const;
 
   /* Компоненты пути к объекту по порядку: имя объекта, имя библиотеки, имя мембера файла
+     TODO Тип можно сделать и std::string, но тогда у нас появятся аллокации, а сейчас все на стеке
   */ name_type m_object;
      name_type m_library;
      name_type m_member;
@@ -98,6 +98,7 @@ struct path
 
 /* Данная проверка нужна чтобы убедится в отсутствии паддингов в классе path.
    При наличии паддинга между m_object и m_library нарушится инвариант №2.
+   TODO Не будет нужна после выполнения всех изменений, указанных выше
 */ static_assert(sizeof(path) == sizeof(path::name_type) * 3, "Violation of invariant #2");
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

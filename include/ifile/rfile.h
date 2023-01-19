@@ -20,35 +20,73 @@ FILE_NAMESPACE_BEGIN
 
 
 //***** ДЕСКРИПТОР ФАЙЛА СИСТЕМЫ IBM I *********************************************************************************
-class rfile
+struct rfile
 {
-  public:
-  rfile(fs::path path, const char* mode);
-  rfile(const rfile& src) = delete;
+  /**
+   *    Конструктор от пути к файлу (мемберу) и его режима открытия
+   */
+  rfile(const fs::path& path, const char* mode);
+
+  /**
+   */
+  rfile(const rfile& src, const char* mode)
+  : path_(src.path_), mode_(mode), handle_(nullptr) {}
+
+  /**
+   */
+  rfile(const rfile& src)
+  : rfile(src, src.mode_) {}
+
+  /**
+   */
   rfile(rfile&& src) = delete;
+
+  /**
+   */
   rfile& operator = (const rfile& src) = delete;
+
+  /**
+   */
   rfile& operator = (rfile&& src) = delete;
-  ~rfile();
 
-
-  operator _RFILE* () {
-    return handle_ ? handle_ : open();
+  /**
+   */
+  ~rfile() {
+    close();
   }
 
+  /**
+   */
+  void open() {
+    handle_ = _Ropen(path_.native().c_str(), mode_);
+    if (!handle_)
+      throw std::runtime_error(std::strerror(errno));
+  }
+
+  /**
+   */
+  void close() {
+    if (handle_)
+      _Rclose(handle_);
+    handle_ = nullptr;
+  }
+
+  /**
+   */
+  operator _RFILE* () const {
+    return handle_;
+  }
+
+  /**
+   */
   fs::path path() const {
     return path_;
   }
 
-
   private:
-  _RFILE* open();
-  void close();
-
-
-  private:
-  fs::path    path_;
-  const char* mode_;
-  _RFILE*     handle_;
+  fs::path    path_;    ///< Полный путь к мемберу файла
+  const char* mode_;    ///< Режим открытия файла
+  _RFILE*     handle_;  ///< "Сырой" дескриптор файла
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
