@@ -26,11 +26,12 @@ IBMI_NAMESPACE_BEGIN ///////////////////////////////////////////////////////////
 //***** КОНСТАНТАНАЯ БАЗА СТРОКИ ***************************************************************************************
 namespace string_detail {
 
-template <typename Heir, std::size_t N = 0>  // TODO убрать параметр по умолчанию. Емкость должна быть всегда известна в CT
-class string_base_const
+template <typename T>
+struct string_base_const;
+
+template <template<std::size_t> class H, std::size_t C>
+struct string_base_const<H<C>>
 {
-  // MEMBER TYPES ------------------------------------------------------------------------------------------------------
-  public:
   typedef char value_type;
   typedef std::char_traits<value_type> traits_type;
   typedef std::size_t size_type;
@@ -46,17 +47,14 @@ class string_base_const
 
 
 
-  // CONSTANTS ---------------------------------------------------------------------------------------------------------
   enum blank_type : value_type { blank = '\x40' };
+  enum : size_type { capacity = C };
 
 
-
-  // ITERATORS ---------------------------------------------------------------------------------------------------------
-  public:
-  const_iterator         begin()   const { return data(); }
+  const_iterator         begin()   const { return const_iterator(data()); }
   const_iterator         cbegin()  const { return begin(); }
-  const_iterator         end()     const { return stl::next(data(), capacity()); }
-  const_iterator         cend()    const { return end(); }
+  const_iterator         end()     const { return const_iterator(stl::next(data(), C)); }
+  const_iterator         cend()    const { return const_iterator(end()); }
   const_reverse_iterator rbegin()  const { return const_reverse_iterator(end()); }
   const_reverse_iterator crbegin() const { return rbegin(); }
   const_reverse_iterator rend()    const { return const_reverse_iterator(begin()); }
@@ -64,35 +62,16 @@ class string_base_const
 
 
 
-  // ELEMENT ACCESS ----------------------------------------------------------------------------------------------------
-  const_pointer data() const { return static_cast<const Heir*>(this)->m_data; }
+  const_pointer data() const { return static_cast<const H<C>*>(this)->data_; }
 
 
-
-  // CAPACITY ----------------------------------------------------------------------------------------------------------
-  /*
-     Емкость строки
-  */
-  template <std::size_t N2 = N, typename stl::enable_if<N2 != 0, int>::type = 0>                                        // Емкость строки для
-  size_type capacity() const {                                                                                          // string_base
-    static_assert(N2 == N, "");
-    return N2;
-  }
-
-  template <std::size_t N2 = N, typename stl::enable_if<N2 == 0, int>::type = 0>                                        // Емкость строки для
-  size_type capacity() const {                                                                                          // string_ref, _view
-    static_assert(N2 == N, "");
-    return static_cast<const Heir*>(this)->m_capacity;
-  }
 
   /*
      Длина строки
   */
-  template <std::size_t N2 = N, typename stl::enable_if<N2 != 0, int>::type = 0>
   size_type length() const {
-    static_assert(N2 == N, "");
-    std::tr1::array<value_type, N> empty;
-    std::memset(empty.begin(), blank, N);
+    std::tr1::array<value_type, C> empty;
+    std::memset(empty.begin(), blank, C);
 
     auto left = cbegin(), right = cend(), pos = cbegin();
 
@@ -107,25 +86,43 @@ class string_base_const
     return std::distance(begin(), pos);
   }
 
-  template <std::size_t N2 = N, typename stl::enable_if<N2 == 0, int>::type = 0>
-  size_type length() const {
-    static_assert(N2 == N, "");
-    auto cit = stl::prev(cend()), cend = stl::prev(cbegin());                                                           // Реверс-итераторы не используются, так как с ними медленнее
-    while (cit != cend && *cit == blank) --cit;
-    return std::distance(cend, cit);
+
+  /**
+   * Проверка содержимого строки на пустоту
+   * Пустая строка заполнена символом blank
+   */
+  bool empty() const {
+    std::tr1::array<value_type, C> empty;
+    std::memset(empty.begin(), blank, C);
+    return !std::memcmp(data(), empty.begin(), C);
   }
 
 
 
-  // OPERATIONS --------------------------------------------------------------------------------------------------------
   /* Получение стандартной строки
-  */ std::string stdstr() const {
-    return std::string(begin(), length());
-  }
+  */ std::string str() const { return std::string(begin(), length()); }
 
   /* Приведение к стандартной строке
-  */ operator std::string () {
-    return stdstr();
+  */ operator std::string () const { return str(); }
+
+
+  /**
+   *
+   */
+  int compare(const_pointer ptr, size_type size) const {
+    int result = traits_type::compare(data(), ptr, std::min(static_cast<size_type>(capacity), size));
+    if (result != 0)
+        return result;
+    if (capacity < size)
+        return -1;
+    if (capacity > size)
+        return 1;
+    return 0;
+  }
+
+  template <typename T>
+  int compare(const string_base_const<T>& str) const {
+    return compare(str.data(), str.capacity);
   }
 };
 } // namespace string_detail ///////////////////////////////////////////////////////////////////////////////////////////
@@ -137,58 +134,73 @@ class string_base_const
 //***** ИЗМЕНЯЕМАЯ БАЗА СТРОКИ *****************************************************************************************
 namespace string_detail {
 
-template <typename Heir, std::size_t N = 0>
-class string_base : public string_base_const<Heir, N>
+template <typename T>
+struct string_base;
+
+template <template<std::size_t> class H, std::size_t C>
+struct string_base<H<C>> : public string_base_const<H<C>>
 {
-  typedef string_base_const<Heir, N> base;
+  private:
+  typedef string_base_const<H<C>> base;
 
 
 
-  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
-  /*
-     Копирование в строку
-  */
-  Heir& assign(typename base::const_pointer start, typename base::size_type size) {                                     // Из указателя и длины
-    auto less = std::min(size, base::capacity());
-    std::memcpy(begin(), start, less);
-    fill_tail(stl::next(begin(), less));
-    return *static_cast<Heir*>(this);
-  }
-
-  Heir& assign(const char* src) {                                                                                       // Из C строки
-    return assign(src, src == nullptr ? 0 : std::strlen(src));
-  }
-
-  Heir& assign(const std::string& src) {                                                                                // Из стандартной строки
-    return assign(src.c_str(), src.length());
-  }
-
-
-
-  // ITERATORS ---------------------------------------------------------------------------------------------------------
   using    base::begin;
   using    base::end;
   using    base::rbegin;
   using    base::rend;
+  using    base::data;
+
   typename base::iterator         begin()  { return data(); }
-  typename base::iterator         end()    { return stl::next(data(), base::capacity()); }
+  typename base::iterator         end()    { return stl::next(data(), C); }
   typename base::reverse_iterator rbegin() { return base::reverse_iterator(end()); }
   typename base::reverse_iterator rend()   { return base::reverse_iterator(begin()); }
+  typename base::pointer          data()   { return static_cast<H<C>*>(this)->data_; }
 
-
-
-  // ELEMENT ACCESS ----------------------------------------------------------------------------------------------------
-  using    base::data;
-  typename base::pointer data() { return static_cast<Heir*>(this)->m_data; }
-
-
-
-  // OPERATIONS --------------------------------------------------------------------------------------------------------
   void clear() { fill_tail(begin()); }
 
 
-  // SERVICE -----------------------------------------------------------------------------------------------------------
+  /**
+   * Копирование в строку
+   * Это основной метод копирования в строку, все остальные вызывают его
+   */
+  H<C>& assign(typename base::const_pointer start, typename base::size_type size) {
+    if (start != data()) {
+      auto less = std::min(size, C);
+      std::memcpy(begin(), start, less);
+      fill_tail(stl::next(begin(), less));
+    }
+    return *static_cast<H<C>*>(this);
+  }
+
+  template <typename T>
+  H<C>& assign(const string_base_const<T>& src) {
+    return assign(src.data(), src.capacity);
+  }
+
+  H<C>& assign(typename base::const_pointer src) {
+    return assign(src, src == nullptr ? 0 : std::strlen(src));
+  }
+
+  H<C>& assign(const std::string& src) {
+    return assign(src.c_str(), src.length());
+  }
+
+  template <typename T>
+  H<C>& operator= (const string_base_const<T>& rhs) {
+    return assign(rhs);
+  }
+
+  H<C>& operator= (typename base::const_pointer rhs) {
+    return assign(rhs);
+  }
+
+  H<C>& operator= (const std::string& rhs) {
+    return assign(rhs);
+  }
+
+
   private:
   void fill_tail(typename base::iterator whence) {                                                                      // Заполнение хвоста
     std::memset(whence, base::blank, std::distance(whence, end()));
@@ -201,25 +213,64 @@ class string_base : public string_base_const<Heir, N>
 
 
 //***** СТАТИЧЕСКАЯ СТРОКА *********************************************************************************************
-template <std::size_t N>
-class string : public string_detail::string_base<string<N>, N>
+template <std::size_t C>
+struct string : public string_detail::string_base<string<C>>
 {
-  static_assert(N > 0, "String capacity cannot be 0");
-  friend class string_detail::string_base_const<string<N>, N>;
-  friend class string_detail::string_base<string<N>, N>;
-  typedef string_detail::string_base<string<N>, N> base;
-  typename base::value_type m_data[N];
+  private:
+  static_assert(C > 0, "String capacity cannot be 0");
+  friend class string_detail::string_base_const<string<C>>;
+  friend class string_detail::string_base<string<C>>;
+  typedef string_detail::string_base<string<C>> base;
 
 
-
-  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
-  /*
-     Конструкторы
-  */
-  string()                       { base::clear(); }                                                                     // По умолчанию
-  string(const char* src)        { base::assign(src); }                                                                 // Из С строки
-  string(const std::string& src) { base::assign(src); }                                                                 // Из стандартной строки
+  using base::operator=;
+
+
+  /**
+   * Конструктор по умолчанию
+   */
+  explicit string() {
+    base::clear();
+  }
+
+  /**
+   * Конструктор от любого наследника string_base_const
+   */
+  template <typename T>
+  explicit string(const string_detail::string_base_const<T>& src) {
+    base::assign(src);
+  }
+
+  /**
+   * Конструктор от С строки
+   */
+  explicit string(const char* src) {
+    base::assign(src);
+  }
+
+  /**
+   * Конструктор от стандартной строки
+   */
+  explicit string(const std::string& src) {
+    base::assign(src);
+  }
+
+  /**
+   * Конструктор копии
+   */
+  string(const string&) = default;
+
+  /**
+   *
+   */
+  string& operator= (const string& rhs) {
+    return base::assign(rhs);
+  }
+
+
+  private:
+  typename base::value_type data_[C];
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -228,34 +279,57 @@ class string : public string_detail::string_base<string<N>, N>
 
 
 //***** ССЫЛКА НА СТРОКУ ***********************************************************************************************
-class string_ref : public string_detail::string_base<string_ref>
+template <std::size_t C>
+struct string_ref : public string_detail::string_base<string_ref<C>>
 {
-  friend class string_detail::string_base_const<string_ref>;
-  friend class string_detail::string_base<string_ref>;
-  typedef string_detail::string_base<string_ref> base;
-  base::pointer m_data;
-  base::size_type m_capacity;
+  private:
+  static_assert(C > 0, "String capacity cannot be 0");
+  friend class string_detail::string_base_const<string_ref<C>>;
+  friend class string_detail::string_base<string_ref<C>>;
+  typedef string_detail::string_base<string_ref<C>> base;
 
 
 
-  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
-  /* Конструктор от указателя на начало памяти и доступного размера (емкость строки)
-     Параметр clear позволяет выполнить очистку памяти, передаваемую в управление
-  */ string_ref(base::pointer begin, base::size_type capacity, bool clear = false)
-     : m_data(begin), m_capacity(capacity) {
+  using base::operator=;
+
+
+  /**
+   * Конструктор от массива символов
+   */
+  template <typename base::size_type N>
+  explicit string_ref(typename base::value_type (&src)[N], bool clear = false)
+  : data_(src) {
+    static_assert(C <= N, "");
     if (clear)
       base::clear();
   }
 
-  /* Конструктор от массива
-     Параметр clear позволяет выполнить очистку памяти, передаваемую в управление
-  */ template <std::size_t N>
-     string_ref(base::value_type (&src)[N], bool clear = false)
-     : string_ref(src, N, clear) {}
+  /**
+   * Конструктор от любого наследника strign_base
+   */
+  template <typename T>
+  explicit string_ref(string_detail::string_base<T>& src)
+  : data_(src.data()) {
+    static_assert(C <= src.capacity, "");
+  }
 
-  string_ref(const string_ref&) = delete;
-  string_ref& operator=(const string_ref&) = delete;
+  /**
+   * Конструктор копии
+   */
+  string_ref(const string_ref&) = default;
+
+  /**
+   * string_ref ведет себя как ссылка, поэтому оператор присваивания из такого же типа должен копировать данные,
+   * а не изменять ссылку на управляемый контейнер
+   */
+  string_ref& operator= (const string_ref& rhs) {
+    return base::assign(rhs);
+  }
+
+
+  private:
+  typename base::pointer data_;
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -264,24 +338,79 @@ class string_ref : public string_detail::string_base<string_ref>
 
 
 //***** ПРЕДСТАВЛЕНИЕ НА СТРОКУ ****************************************************************************************
-class string_view : public string_detail::string_base_const<string_view>
+template <std::size_t C>
+struct string_view : public string_detail::string_base_const<string_view<C>>
 {
-  friend class string_detail::string_base_const<string_view>;
-  typedef string_detail::string_base_const<string_view> base;
-  base::const_pointer m_data;
-  base::size_type m_capacity;
+  private:
+  friend class string_detail::string_base_const<string_view<C>>;
+  typedef string_detail::string_base_const<string_view<C>> base;
 
 
-
-  // SPECIAL MEMBER FUNCTIONS ------------------------------------------------------------------------------------------
   public:
-  template <typename T, std::size_t N>                                                                                  // Конструктор из массива
-  string_view(T (&src)[N])
-  : m_data(src), m_capacity(N) {}
+  /**
+   * Конструктор от массива символов
+   */
+  template <typename base::size_type N>
+  explicit string_view(const typename base::value_type (&src)[N])
+  : data_(src) {
+    static_assert(C <= N, "");
+  }
 
-  string_view(const string_view&) = delete;
-  string_view& operator=(const string_view&) = delete;
+  /**
+   * Конструктор от любого наследника string_base_const
+   */
+  template <typename T>
+  explicit string_view(const string_detail::string_base_const<T>& src)
+  : data_(src.data()) {
+    static_assert(C <= src.capacity, "");
+  }
+
+  /**
+   * Конструктор копии
+   */
+  string_view(const string_view& src) = default;
+
+  /**
+   *
+   */
+  string_view& operator= (const string_view&) = delete;
+
+
+  private:
+  typename base::const_pointer data_;
 };
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+//**********************************************************************************************************************
+
+/**
+ * Сложение строк
+ */
+template <typename LT, typename RT>
+auto operator+ (const string_detail::string_base_const<LT>& lhs, const string_detail::string_base_const<RT>& rhs)
+  -> string<LT::capacity + RT::capacity>
+{
+  string<LT::capacity + RT::capacity> result(lhs);
+  std::memcpy(result.begin() + LT::capacity, rhs.begin(), RT::capacity);
+  return result;
+}
+
+
+/**
+ * Сравнение строк
+ */
+//template <typename LT, typename RT>
+//bool operator== (const string_detail::string_base_const<LT>& lhs, const string_detail::string_base_const<RT>& rhs)
+//{
+//  constexpr std::size_t tail_size = LT::capacity >= RT::capacity ?
+//                                   (LT::capacity - RT::capacity) : (RT::capacity - LT::capacity);
+//  std::tr1::array<LT::value_type, tail_size> empty;
+//  return true;
+//}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

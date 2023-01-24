@@ -52,12 +52,12 @@ options    = LANGLVL(*EXTENDED0X) PFROPT(*STRDONLY) OPTION($(showinc)) +
 all: $(dstlib)/OLITEST<PGM>
 
 $(dstlib)/OLITEST<PGM>: $(dstlib)/OLI<BNDDIR> $(dstlib)/DB_TEST<FILE> +
-  MAIN\$<MODULE> FORMAT\$<MODULE> STL\$<MODULE> STRING\$<MODULE> FS\$<MODULE> IFILE\$<MODULE>
+  MAIN\$<MODULE> FORMAT\$<MODULE> STL\$<MODULE> STRING\$<MODULE>                                    # FS\$<MODULE> IFILE\$<MODULE>
                         
 $(dstlib)/OLITEST<PGM>:
   -@DLTPGM     PGM($(@L)/$(@F))
     CRTPGM     PGM($(@L)/$(@F)) +
-               MODULE(MAIN\$ FORMAT\$ STL\$ STRING\$ FS\$ IFILE\$) +
+               MODULE(MAIN\$ FORMAT\$ STL\$ STRING\$) +
                BNDDIR($(dstlib)/OLI) +
                BNDSRVPGM(QSYS/QYPPRT370 QSYS/QYPPSL510)
 
@@ -84,15 +84,13 @@ $(dstlib)/DB_TEST<FILE>: DB_TEST.TEST
 #
 #
 $(dstlib)/OLI<BNDDIR>: +
-  $(dstlib)/GOOGLE<MODULE> $(dstlib)/FMT<MODULE> $(dstlib)/IOBJECT<MODULE> +
-  $(dstlib)/IFILE<MODULE>
+  $(dstlib)/GOOGLE<MODULE> $(dstlib)/FMT<MODULE>                                                    # $(dstlib)/IOBJECT<MODULE> $(dstlib)/IFILE<MODULE>
 
 $(dstlib)/OLI<BNDDIR>:
   -@DLTBNDDIR  BNDDIR($(@L)/OLI)
     CRTBNDDIR  BNDDIR($(@L)/OLI)
     ADDBNDDIRE BNDDIR($(@L)/OLI) +
-               OBJ(($(dstlib)/GOOGLE *MODULE) ($(dstlib)/FMT *MODULE) +
-                   ($(dstlib)/IOBJECT *MODULE) ($(dstlib)/IFILE *MODULE))
+               OBJ(($(dstlib)/GOOGLE *MODULE) ($(dstlib)/FMT *MODULE))                              # ($(dstlib)/IOBJECT *MODULE) ($(dstlib)/IFILE *MODULE))
 
 
 
