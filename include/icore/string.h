@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <array>
 #include <string>
+#include <ssostring>
 
 IBMI_NAMESPACE_BEGIN ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -45,11 +46,8 @@ struct string_base_const<H<C>>
   typedef std::reverse_iterator<iterator> reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-
-
   enum blank_type : value_type { blank = '\x40' };
   enum : size_type { capacity = C };
-
 
   const_iterator         begin()   const { return const_iterator(data()); }
   const_iterator         cbegin()  const { return begin(); }
@@ -60,15 +58,11 @@ struct string_base_const<H<C>>
   const_reverse_iterator rend()    const { return const_reverse_iterator(begin()); }
   const_reverse_iterator crend()   const { return rend(); }
 
-
-
   const_pointer data() const { return static_cast<const H<C>*>(this)->data_; }
 
-
-
-  /*
-     Длина строки
-  */
+  /**
+   * Длина строки
+   */
   size_type length() const {
     std::tr1::array<value_type, C> empty;
     std::memset(empty.begin(), blank, C);
@@ -86,10 +80,8 @@ struct string_base_const<H<C>>
     return std::distance(begin(), pos);
   }
 
-
   /**
    * Проверка содержимого строки на пустоту
-   * Пустая строка заполнена символом blank
    */
   bool empty() const {
     std::tr1::array<value_type, C> empty;
@@ -97,29 +89,44 @@ struct string_base_const<H<C>>
     return !std::memcmp(data(), empty.begin(), C);
   }
 
+  /**
+   * Получение стандартной строки
+   */
+  std::string str() const {
+    return std::string(begin(), length());
+  }
 
-
-  /* Получение стандартной строки
-  */ std::string str() const { return std::string(begin(), length()); }
-
-  /* Приведение к стандартной строке
-  */ operator std::string () const { return str(); }
+  /**
+   * Приведение к стандартной строке
+   */
+  operator std::string () const {
+    return str();
+  }
 
 
   /**
-   *
+   * Сравнение с последовательностью символов известной длины
    */
-  int compare(const_pointer ptr, size_type size) const {
-    int result = traits_type::compare(data(), ptr, std::min(static_cast<size_type>(capacity), size));
-    if (result != 0)
-        return result;
-    if (capacity < size)
-        return -1;
-    if (capacity > size)
-        return 1;
+  int compare(const_pointer other, size_type size) const {
+    int res = std::memcmp(data(), other, std::min(C, size));
+    if (res != 0)
+      return res;
+
+    if (C == size)
+      return 0;
+
+    auto end = C > size ? end() : (other + size);
+    auto it  = stl::prev(end, C > size ? C - size : size - C);
+    while (it != end)
+      if (*it++ != blank)
+        return C > size ? 1 : -1;
+
     return 0;
   }
 
+  /**
+   * Сравнение с любым наследником string_base_const
+   */
   template <typename T>
   int compare(const string_base_const<T>& str) const {
     return compare(str.data(), str.capacity);
@@ -143,8 +150,6 @@ struct string_base<H<C>> : public string_base_const<H<C>>
   private:
   typedef string_base_const<H<C>> base;
 
-
-
   public:
   using    base::begin;
   using    base::end;
@@ -158,12 +163,13 @@ struct string_base<H<C>> : public string_base_const<H<C>>
   typename base::reverse_iterator rend()   { return base::reverse_iterator(begin()); }
   typename base::pointer          data()   { return static_cast<H<C>*>(this)->data_; }
 
+  /**
+   * Очистка строки
+   */
   void clear() { fill_tail(begin()); }
 
-
   /**
-   * Копирование в строку
-   * Это основной метод копирования в строку, все остальные вызывают его
+   * Копирование из последовательности символов известной длины
    */
   H<C>& assign(typename base::const_pointer start, typename base::size_type size) {
     if (start != data()) {
@@ -174,35 +180,47 @@ struct string_base<H<C>> : public string_base_const<H<C>>
     return *static_cast<H<C>*>(this);
   }
 
+  /**
+   * Копирование из любого наследника string_base_const
+   */
   template <typename T>
   H<C>& assign(const string_base_const<T>& src) {
     return assign(src.data(), src.capacity);
   }
 
+  template <typename T>
+  H<C>& operator= (const string_base_const<T>& rhs) { return assign(rhs); }
+
+  /**
+   * Копирование из c-style строки
+   */
   H<C>& assign(typename base::const_pointer src) {
     return assign(src, src == nullptr ? 0 : std::strlen(src));
   }
 
+  H<C>& operator= (typename base::const_pointer rhs) { return assign(rhs); }
+
+  /**
+   * Копирование из стандартной строки
+   */
   H<C>& assign(const std::string& src) {
     return assign(src.c_str(), src.length());
   }
 
-  template <typename T>
-  H<C>& operator= (const string_base_const<T>& rhs) {
-    return assign(rhs);
+  H<C>& operator= (const std::string& rhs) { return assign(rhs); }
+
+  /**
+   * Копирование из ibm sso строки
+   */
+  H<C>& assign(const ibm::sso_string& src) {
+    return assign(src.c_str(), src.length());
   }
 
-  H<C>& operator= (typename base::const_pointer rhs) {
-    return assign(rhs);
-  }
-
-  H<C>& operator= (const std::string& rhs) {
-    return assign(rhs);
-  }
+  H<C>& operator= (const ibm::sso_string& rhs) { return assign(rhs); }
 
 
   private:
-  void fill_tail(typename base::iterator whence) {                                                                      // Заполнение хвоста
+  void fill_tail(typename base::iterator whence) {
     std::memset(whence, base::blank, std::distance(whence, end()));
   }
 };
@@ -222,10 +240,8 @@ struct string : public string_detail::string_base<string<C>>
   friend class string_detail::string_base<string<C>>;
   typedef string_detail::string_base<string<C>> base;
 
-
   public:
   using base::operator=;
-
 
   /**
    * Конструктор по умолчанию
@@ -262,7 +278,7 @@ struct string : public string_detail::string_base<string<C>>
   string(const string&) = default;
 
   /**
-   *
+   * Оператор присваивания
    */
   string& operator= (const string& rhs) {
     return base::assign(rhs);
@@ -288,11 +304,8 @@ struct string_ref : public string_detail::string_base<string_ref<C>>
   friend class string_detail::string_base<string_ref<C>>;
   typedef string_detail::string_base<string_ref<C>> base;
 
-
-
   public:
   using base::operator=;
-
 
   /**
    * Конструктор от массива символов
@@ -327,7 +340,6 @@ struct string_ref : public string_detail::string_base<string_ref<C>>
     return base::assign(rhs);
   }
 
-
   private:
   typename base::pointer data_;
 };
@@ -344,7 +356,6 @@ struct string_view : public string_detail::string_base_const<string_view<C>>
   private:
   friend class string_detail::string_base_const<string_view<C>>;
   typedef string_detail::string_base_const<string_view<C>> base;
-
 
   public:
   /**
@@ -371,10 +382,9 @@ struct string_view : public string_detail::string_base_const<string_view<C>>
   string_view(const string_view& src) = default;
 
   /**
-   *
+   * Оператор присваивания не может существовать
    */
   string_view& operator= (const string_view&) = delete;
-
 
   private:
   typename base::const_pointer data_;
@@ -403,14 +413,35 @@ auto operator+ (const string_detail::string_base_const<LT>& lhs, const string_de
 /**
  * Сравнение строк
  */
-//template <typename LT, typename RT>
-//bool operator== (const string_detail::string_base_const<LT>& lhs, const string_detail::string_base_const<RT>& rhs)
-//{
-//  constexpr std::size_t tail_size = LT::capacity >= RT::capacity ?
-//                                   (LT::capacity - RT::capacity) : (RT::capacity - LT::capacity);
-//  std::tr1::array<LT::value_type, tail_size> empty;
-//  return true;
-//}
+template <typename LT, typename RT>
+bool operator== (const string_detail::string_base_const<LT>& lhs, const string_detail::string_base_const<RT>& rhs) {
+  return lhs.compare(rhs) == 0;
+}
+
+template <typename LT, typename RT>
+bool operator!= (const string_detail::string_base_const<LT>& lhs, const string_detail::string_base_const<RT>& rhs) {
+  return lhs.compare(rhs) != 0;
+}
+
+template <typename LT, typename RT>
+bool operator< (const string_detail::string_base_const<LT>& lhs, const string_detail::string_base_const<RT>& rhs) {
+  return lhs.compare(rhs) < 0;
+}
+
+template <typename LT, typename RT>
+bool operator> (const string_detail::string_base_const<LT>& lhs, const string_detail::string_base_const<RT>& rhs) {
+  return lhs.compare(rhs) > 0;
+}
+
+template <typename LT, typename RT>
+bool operator<= (const string_detail::string_base_const<LT>& lhs, const string_detail::string_base_const<RT>& rhs) {
+  return lhs.compare(rhs) <= 0;
+}
+
+template <typename LT, typename RT>
+bool operator>= (const string_detail::string_base_const<LT>& lhs, const string_detail::string_base_const<RT>& rhs) {
+  return lhs.compare(rhs) >= 0;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -418,4 +449,3 @@ auto operator+ (const string_detail::string_base_const<LT>& lhs, const string_de
 IBMI_NAMESPACE_END /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif // OLI_ICORE_STRING_H
-

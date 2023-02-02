@@ -133,6 +133,12 @@ TEST(string, assign)
     ASSERT_TRUE(std::equal(str.begin(), str.end(), stdstr.begin()));
     ASSERT_EQ(std::count(str.begin(), str.end(), str.blank), 0);
   }
+
+  { // Копирование из ibm sso строки
+    ibm::sso_string ssostr = "sso string";
+    str.assign(ssostr);
+    ASSERT_TRUE(std::equal(str.begin(), str.end(), "sso s"));
+  }
 }
 
 
@@ -306,9 +312,31 @@ TEST(string, compare)
   }
 
   { // Исходная строка меньше
+    ibmi::string<5> str1("boo");
+    ibmi::string<5> str2("foo");
+    ibmi::string<3> str3("foo");
+    ibmi::string<9> str4("foo");
+    ASSERT_EQ(str1.compare(str2), -1);
+    ASSERT_EQ(str1.compare(str3), -1);
+    ASSERT_EQ(str1.compare(str4), -1);
   }
 
   { // Исходная строка больше
+    ibmi::string<5> str1("zoo");
+    ibmi::string<5> str2("foo");
+    ibmi::string<3> str3("foo");
+    ibmi::string<9> str4("foo");
+    ASSERT_EQ(str1.compare(str2), 1);
+    ASSERT_EQ(str1.compare(str3), 1);
+    ASSERT_EQ(str1.compare(str4), 1);
+  }
+
+  { // Разное
+    ASSERT_EQ(ibmi::string<5>("boo").compare(ibmi::string<5>("boo m")), -1);
+    ASSERT_EQ(ibmi::string<7>("boo").compare(ibmi::string<5>("boo m")), -1);
+    ASSERT_EQ(ibmi::string<5>("boo").compare(ibmi::string<7>("boo m")), -1);
+    ASSERT_EQ(ibmi::string<5>("boo m").compare(ibmi::string<7>("boo")), 1);
+    ASSERT_EQ(ibmi::string<7>("boo m").compare(ibmi::string<5>("boo m")), 0);
   }
 }
 } // namespace ibmi_string {
@@ -452,13 +480,15 @@ TEST(string, operator_plus)
 }
 
 
-//TEST(string, operator_equal)
-//{
-//  { // string == string
-//    ibmi::string<5> str1("foo");
-//    ibmi::string<4> str2("foo");
-//    ASSERT_TRUE(str1 == str2);
-//  }
-//}
+TEST(string, comparison_operators)
+{
+  ASSERT_TRUE(ibmi::string<5>("boo") == ibmi::string<5>("boo"));
+  ASSERT_TRUE(ibmi::string<5>("zoo") != ibmi::string<5>("boo"));
+  ASSERT_TRUE(ibmi::string<5>("boo") <  ibmi::string<5>("zoo"));
+  ASSERT_TRUE(ibmi::string<5>("zoo") >  ibmi::string<5>("boo"));
+  ASSERT_TRUE(ibmi::string<5>("boo") <= ibmi::string<5>("boo"));
+  ASSERT_TRUE(ibmi::string<5>("boo") <= ibmi::string<5>("zoo"));
+  ASSERT_TRUE(ibmi::string<5>("boo") >= ibmi::string<5>("boo"));
+  ASSERT_TRUE(ibmi::string<5>("zoo") >= ibmi::string<5>("boo"));
+}
 } // namespace ibmi_string_free_functions {
-
